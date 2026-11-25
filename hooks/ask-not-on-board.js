@@ -26,7 +26,7 @@
  *   · 不做 prompt 挂点「按回复关键词猜漏挂卡」(已撤)—— 98 次抽 30:3 真、19 误、8 被无视(出处:d28742ef 10-27,卡 ask-00ee6e10;review-1027/nudge-hooks/report.md 结论「撤」)
  *   · 不做 pretool 认不出卡就一律拦 —— 21 次 8 真 13 误,误的多是「卡已在、只差卡号」;改成认得出就代填卡号放行(出处:d28742ef 10-27)
  *   · 不做「群号识别只在正则前缀里补 do / then」(1117)—— `--chat-id $c`(for 循环、同命令里 C=oc_…)照样代不进去,heredoc 正文里写脚本的那串字
- *     照样误认(11-14 客户项目甲 线写 fde-sync.sh 那次,误报了 oc_a9451f…);改成按命令位置走一遍(shell-commands.js 的 shellCommands),7 天回放多认 3 条、少 1 条误认
+ *     照样误认(11-14 客户项目甲 线写 客户项目甲-sync.sh 那次,误报了 oc_a9451f…);改成按命令位置走一遍(shell-commands.js 的 shellCommands),7 天回放多认 3 条、少 1 条误认
  */
 const fs = require('fs'), os = require('os'), path = require('path');
 const HOME = os.homedir();
@@ -65,7 +65,7 @@ function zoneText(board) {
   const h = zoneHtml(board); return h === null ? null : h.replace(/<[^>]+>/g, ' ').replace(/&[a-z#0-9]+;/g, ' ');
 }
 // 「要你的」里有没有 mins 分钟内新挂的卡(data-since 是本机时间,精确到分)。
-//   1020 晚 Harness 扫:收尾框的 ask 常是英文,和中文的卡按字比永远对不上 ⇒ 卡 11 秒前刚挂好也照拦(投流 21:31)。
+//   1020 晚 Harness 扫:收尾框的 ask 常是英文,和中文的卡按字比永远对不上 ⇒ 卡 11 秒前刚挂好也照拦(示例-投流 21:31)。
 function recentCard(board, mins, now) {
   const h = zoneHtml(board); if (!h) return false;
   const t = now || Date.now();

@@ -24,7 +24,7 @@ ANS_EXCEPT_MAX = 2000   # 依据: 同上一行 —— 请求体 262144 字节上
 PORT = BP.port()
 
 
-# ⭐ 1029 负责人(经选品 v2.9,retro-1029.html):「方案板上我回答了一轮,然后你进行了第二轮以后,方案板没有任何动静……我记得原来已经出过这个问题了」
+# ⭐ 1029 负责人(经示例-选品 v2.9,retro-1029.html):「方案板上我回答了一轮,然后你进行了第二轮以后,方案板没有任何动静……我记得原来已经出过这个问题了」
 #   题号按题目文字算 ⇒ 页面重出、题目没改,题号不变;他上一轮的回答一直挂在那个题号下 ⇒ 新版一打开就按「已答」摆出旧回答、新内容被压住。
 #   ⇒ 回答时间早于这一页最后改动(/proposals/ 下的文件 mtime)的,算「上一版的回答」:/_answers 把它挪进 prev,不再当已答;
 #     页面上由 /_page-prev.js 顶上写「这一页 X 改过」、旧回答灰着放在原题下。板(不在 /proposals/ 下)不受影响。
@@ -349,7 +349,7 @@ class Handler(http.server.SimpleHTTPRequestHandler):
         "if(!ks.length){b.hidden=true;return;}b.hidden=false;var all=ks.every(function(k){var s=T(a[k].sub),t=T(a[k].ts);return (s!==null&&(t===null||s>=t))||t===null||Date.now()-t>=(String(a[k].note||'').trim()?" + str(BP.ANS_SUB_NOTE_S * 1000) + ":" + str(BP.ANS_SUB_CHOICE_S * 1000) + ");});"   # 1115 大扫除 C3:交题时限取 board_paths 那一份
         "b.textContent=all?'已发给 AI ✓ 约 1 分钟接手,不用再说':'全部发给 AI';b.setAttribute('style',all?'background:#e8eefc;color:#1d4ed8;box-shadow:none':'background:#1d4ed8;color:#fff');b.__ks=ks;}"
         "function load(){fetch('/_answers?page='+encodeURIComponent(page),{cache:'no-store'}).then(function(r){return r.json();}).then(function(j){show(j&&j.answers);}).catch(function(){});}"
-        # ⭐ 1027 晚(投流达人 v1.9 转,负责人 18:1x 答了 4 题、1 题交了 3 题没交,看不懂):离开这一页 / 收起「写回答」框 ⇒ 这页答过的全部发给 AI
+        # ⭐ 1027 晚(示例-投流达人 v1.9 转,负责人 18:1x 答了 4 题、1 题交了 3 题没交,看不懂):离开这一页 / 收起「写回答」框 ⇒ 这页答过的全部发给 AI
         #   (伺服只给已有的记录盖 sub;写到一半又回来改 ⇒ ts 比 sub 新,又算没发,下次离开再发)
         "function subAll(keep){var ks=ds.map(function(d){return d.id;}).concat(['_overall']);try{fetch('/_answer',{method:'POST',headers:{'Content-Type':'application/json'},keepalive:!!keep,body:JSON.stringify({page:page,submit:ks})}).catch(function(){});}catch(x){}}"
         "window.__qpsSubAll=subAll;addEventListener('pagehide',function(){if(!b.hidden&&b.textContent!=='已发给 AI ✓ 约 1 分钟接手,不用再说')subAll(true);});"
@@ -371,7 +371,7 @@ class Handler(http.server.SimpleHTTPRequestHandler):
         "document.addEventListener('click',function(e){var o=e.target&&e.target.closest?e.target.closest('.decision .opt'):null;if(!o)return;"
         "var r=o.querySelector('input[type=radio]');if(!r||!r.checked||!r.getAttribute('data-other'))return;var n=o.closest('.decision').querySelector('.note');"
         "if(n&&document.activeElement!==n)setTimeout(function(){try{n.focus();}catch(x){}},0);});"
-        # ⭐ 1029 负责人(经选品 v2.9):「在方案板里面我没有选任何事项,然后直接写回复……在方案板里它还是会默认选择第一个,这是一个bug」
+        # ⭐ 1029 负责人(经示例-选品 v2.9):「在方案板里面我没有选任何事项,然后直接写回复……在方案板里它还是会默认选择第一个,这是一个bug」
         #   plan.py 出页时把「建议」那项预先勾上(data-sug),他没点任何选项直接写补充 ⇒ 带着建议项交了。板上的卡同样操作记「其他(我自己写)」。
         #   ⇒ 这一题还没答过(没 .done)、他也没亲手点过选项、勾着的只是预勾的建议(或什么都没勾)时,一开写就改勾「其他」,与板上一致。
         #   在 document 捕获阶段先跑,plan.js 记答案时读到的就是「其他」;伺服注入 ⇒ 历史方案页(plan.js 内联)一起修。
@@ -389,8 +389,8 @@ class Handler(http.server.SimpleHTTPRequestHandler):
     # ⭐ 1028(内容助理转,负责人看图文审稿页:「六张图根本没有办法点开放大,有些小图根本看不清」):
     #   方案页(/proposals/ 下,plan.py 出的、各线手写的、老页都算)上点任一张图 ⇒ 全屏看原图;←/→ 翻同页别的图,Esc / 点一下关。
     #   ⛔ 只在 /proposals/ 下起作用:状态板自己的卡里有图、有点击(kit 管),别抢。链接里的图、按钮、右下浮框里的不接。
-    # ⭐ 1029 负责人(经选品 v2.9):「我没有办法在审图的方案板里面找到一个地方,我可以直接看着那些图,直接给你反馈。我必须得要退回原来的状态板上」
-    #   plan.py 出的页有题(.decision)和自己的答题框;别的方案页(选品 review.py 的审图页、各线手写页)什么都没有 ⇒
+    # ⭐ 1029 负责人(经示例-选品 v2.9):「我没有办法在审图的方案板里面找到一个地方,我可以直接看着那些图,直接给你反馈。我必须得要退回原来的状态板上」
+    #   plan.py 出的页有题(.decision)和自己的答题框;别的方案页(示例-选品 review.py 的审图页、各线手写页)什么都没有 ⇒
     #   /proposals/ 下没有 .decision 的页,右下角固定一个「回复这一页」:选项(页面 <meta name="reply-options" content="可以上|要改"> 可改,缺省 可以|要改)+ 补充 + 交。
     #   答案记成这一页的题 id「page」,点「交」才算答了(同 1026 晚「没交不算已答」);板上用 --deep 连着这一页的卡照原样认它。
     PAGE_REPLY_JS = r"""(function(){if(window.__qpr)return;window.__qpr=1;
