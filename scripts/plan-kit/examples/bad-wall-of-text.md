@@ -1,6 +1,6 @@
 ---
 title: 电商上新流程梳理
-line: 业务线 A
+line: 电商-基建
 date: 10月6号
 status: 等你定
 ---

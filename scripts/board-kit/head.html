@@ -1,0 +1,10 @@
+<meta charset="utf-8">
+<!-- ⚠ charset 必须显式写。2026-08-27 实测:在 `file://` 下 Chrome 会嗅探出 UTF-8,
+     所以缺了也看不出来;一旦这块板被 **http 伺服**(侧栏里唯一点得动的形态),
+     `python3 -m http.server` 不带 charset 头 → 浏览器退回 Latin-1 → **整块板中文全乱码**。
+     典型症状:标题变成「æ™ºèƒ½çœ¼é•œ」。这是「在 A 环境测过 ≠ 在真正消费它的 B 环境成立」。 -->
+<title>示例项目-IOS 状态板</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@500;600;700&family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@400;500;600&display=swap">
+

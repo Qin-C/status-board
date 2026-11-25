@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+  <key>Label</key><string>com.status-board.boards-web</string>
+  <!-- 状态板的 http 伺服。存在理由:Claude Desktop 的 in-app browser 把 file://
+       渲成 data: 静态快照 —— 点不动、JS 不跑(自动刷新/已看过/自算年龄全失效)。
+       只有 http:// 能让侧栏里的板真正是「最新且会自动更新」的。
+       只绑 127.0.0.1;只伺服 ~/.claude/boards-web/(里面是各板的硬链接,不是拷贝)。 -->
+  <key>ProgramArguments</key>
+  <array>
+    <string>/opt/homebrew/bin/python3</string>
+    <string>__HOME__/.claude/scripts/boards-server.py</string>
+  </array>
+  <key>RunAtLoad</key><true/>
+  <key>KeepAlive</key><true/>
+  <key>StandardOutPath</key><string>__HOME__/.claude/boards-web/.server.log</string>
+  <key>StandardErrorPath</key><string>__HOME__/.claude/boards-web/.server.log</string>
+</dict>
+</plist>

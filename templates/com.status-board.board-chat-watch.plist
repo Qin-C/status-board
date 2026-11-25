@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+  <key>Label</key><string>com.status-board.board-chat-watch</string>
+  <!-- 1023 晚:板上登记了对方群(board.py row --chat oc_…)的没做完的行,每 10 分钟拉一次群;
+       别人在这一行上次重判之后说了新的 ⇒ 行上亮红并 touch。没登记任何群时只读一遍板文件就退出。
+       用 lark-cli 的 user 身份只读群消息;拉不到就说出来、不改板。 -->
+  <key>ProgramArguments</key>
+  <array>
+    <string>/opt/homebrew/bin/python3</string>
+    <string>__HOME__/.claude/scripts/board.py</string>
+    <string>chat-watch</string>
+    <string>--all</string>
+  </array>
+  <key>StartInterval</key><integer>600</integer>
+  <key>RunAtLoad</key><true/>
+  <key>EnvironmentVariables</key><dict><key>PATH</key><string>/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin</string><key>HOME</key><string>__HOME__</string></dict>
+  <key>LimitLoadToSessionType</key><string>Aqua</string>
+  <key>StandardOutPath</key><string>__HOME__/.status-board/chat-watch.out</string>
+  <key>StandardErrorPath</key><string>__HOME__/.status-board/chat-watch.out</string>
+</dict>
+</plist>

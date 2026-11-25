@@ -1,0 +1,1112 @@
+/* ⭐⭐ 2026-08-31 · 零宽度地板 —— 这一行治的是「板撑爆」,和自动刷新那条闸是【两件事】。
+   面板在「从未 displayed 过」的子态里,标签页以 clientWidth=0 布局 ⇒ 每一行折成一个字宽,
+   于是整块板被撑成十几倍高。实测(记忆助手那块板,31 张卡):
+       零宽度        整块板 180,257px · 最高的一张卡 17,063px
+       min-width:360 整块板  24,589px · 最高的一张卡  2,344px      ← 7.3 倍差
+   ⇒ 撑爆**不是 reload 造成的**,所以「别在坏时机 reload」那道闸治不到它。
+     记忆助手 v2.4 报的这条,读法是对的:那一刻页面已经是撑爆的了。
+   ⚠ 360 挑得比任何真实视口都窄(最窄的手机 375),所以对真实浏览没有任何影响 —— 实测零横向溢出。 */
+html, body { min-width: 360px; }
+
+:root{
+  --ground:#F5F7F9;
+  --card:#FFFFFF;
+  --sunk:#EDF1F4;
+  --line:#D8DFE5;
+  --line-soft:#E7ECF0;
+  --ink:#161C24;
+  --ink-2:#4A5663;
+  --ink-3:#77848F;
+  --dim:#77848F;  /* #3641 已修:曾经 8 处在用、0 处定义,现已声明。改这里三处要一起改。 */
+  --signal:#0E8E9B;
+  --signal-soft:#DDF0F2;
+  --warn:#B4741A;
+  --warn-soft:#F8EEDC;
+  --crit:#AE4034;
+  --crit-soft:#F8E5E2;
+  --good:#3A805A;
+  --good-soft:#E1F0E7;
+  --shadow:0 1px 2px rgba(22,28,36,.05), 0 6px 20px -8px rgba(22,28,36,.10);
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --ground:#10141A;
+    --card:#171D25;
+    --sunk:#1F262F;
+    --line:#2E3742;
+    --line-soft:#242C35;
+    --ink:#E6EBF1;
+    --ink-2:#A9B5C1;
+    --ink-3:#7A8894;
+    --dim:#7A8894;  /* #3641 已修:曾经 8 处在用、0 处定义,现已声明。改这里三处要一起改。 */
+    --signal:#3FBFCC;
+    --signal-soft:#123138;
+    --warn:#D9A052;
+    --warn-soft:#33280F;
+    --crit:#E0766A;
+    --crit-soft:#3A1F1B;
+    --good:#63BC8D;
+    --good-soft:#14301F;
+    --shadow:0 1px 2px rgba(0,0,0,.3), 0 8px 24px -10px rgba(0,0,0,.5);
+  }
+}
+:root[data-theme="dark"]{
+  --ground:#10141A;
+  --card:#171D25;
+  --sunk:#1F262F;
+  --line:#2E3742;
+  --line-soft:#242C35;
+  --ink:#E6EBF1;
+  --ink-2:#A9B5C1;
+  --ink-3:#7A8894;
+  --dim:#7A8894;  /* #3641 已修:曾经 8 处在用、0 处定义,现已声明。改这里三处要一起改。 */
+  --signal:#3FBFCC;
+  --signal-soft:#123138;
+  --warn:#D9A052;
+  --warn-soft:#33280F;
+  --crit:#E0766A;
+  --crit-soft:#3A1F1B;
+  --good:#63BC8D;
+  --good-soft:#14301F;
+  --shadow:0 1px 2px rgba(0,0,0,.3), 0 8px 24px -10px rgba(0,0,0,.5);
+}
+
+*{box-sizing:border-box}
+body{
+  background:var(--ground);
+  color:var(--ink);
+  font-family:"IBM Plex Sans","PingFang SC","Hiragino Sans GB",system-ui,sans-serif;
+  font-size:15px; line-height:1.6;
+  margin:0; padding:32px 20px 72px;
+  -webkit-font-smoothing:antialiased;
+}
+.wrap{max-width:880px;margin:0 auto;display:flex;flex-direction:column;gap:26px}
+h1,h2,h3{font-family:Archivo,"PingFang SC",system-ui,sans-serif;text-wrap:balance;margin:0}
+
+/* ── header ── */
+.head{display:flex;flex-direction:column;gap:10px;padding-bottom:4px}
+.eyebrow{font-family:"IBM Plex Mono",monospace;font-size:11.5px;letter-spacing:.13em;text-transform:uppercase;color:var(--ink-3);display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+.eyebrow .dot{width:5px;height:5px;border-radius:50%;background:var(--signal)}
+h1{font-size:clamp(27px,4.6vw,36px);font-weight:700;letter-spacing:-.022em;line-height:1.15}
+.sub{color:var(--ink-2);font-size:15.5px;max-width:62ch}
+
+/* ── done strip ── */
+.done{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:16px 18px;box-shadow:var(--shadow)}
+.done h2{font-size:12px;letter-spacing:.11em;text-transform:uppercase;color:var(--ink-3);font-weight:600;margin-bottom:12px;font-family:"IBM Plex Mono",monospace}
+.done ul{list-style:none;margin:0;padding:0;display:grid;gap:9px}
+.done li{display:grid;grid-template-columns:18px 1fr;gap:10px;align-items:start;font-size:14.5px;color:var(--ink-2)}
+.done li b{color:var(--ink);font-weight:600}
+.tick{color:var(--good);font-weight:700;line-height:1.5}
+
+/* ── decision card ── */
+.card{background:var(--card);border:1px solid var(--line);border-radius:14px;box-shadow:var(--shadow);overflow:hidden;display:flex}
+/* ⭐ kit.js 给每张 .card[data-ack] 注入一个 .ack 按钮 ⇒ 卡片必须是定位上下文 */
+.card{position:relative}
+.stripe{width:5px;flex:none}
+.s-crit{background:var(--crit)} .s-warn{background:var(--warn)} .s-sig{background:var(--signal)} .s-good{background:var(--good)}
+.body{flex:1;min-width:0;padding:20px 22px 22px;display:flex;flex-direction:column;gap:16px}
+.top{display:flex;flex-direction:column;gap:7px}
+.chips{display:flex;gap:7px;flex-wrap:wrap;align-items:center}
+.chip{font-family:"IBM Plex Mono",monospace;font-size:11px;font-weight:500;letter-spacing:.05em;padding:3px 8px;border-radius:5px;background:var(--sunk);color:var(--ink-2);border:1px solid var(--line-soft)}
+.chip.crit{background:var(--crit-soft);color:var(--crit);border-color:transparent}
+.chip.warn{background:var(--warn-soft);color:var(--warn);border-color:transparent}
+.chip.sig{background:var(--signal-soft);color:var(--signal);border-color:transparent}
+.chip.good{background:var(--good-soft);color:var(--good);border-color:transparent}
+/* 卡号 = 负责人与我们之间的共同地址。写了≠看得见 —— 位置和对比度是规则的一部分。
+   ⇒ 永远是标题里的**第一个** chip,等宽高对比;没有对应卡的显式标「无卡号」。*/
+.chip.id{background:var(--ink);color:var(--ground);border-color:transparent;font-weight:600;letter-spacing:.03em}
+.chip.id.none{background:transparent;color:var(--ink-3);border:1px dashed var(--line)}
+.q{font-size:20.5px;font-weight:600;letter-spacing:-.014em;line-height:1.32}
+.lede{color:var(--ink-2);font-size:14.8px}
+.lede b{color:var(--ink);font-weight:600}
+
+/* ── evidence panel ── */
+.panel{background:var(--sunk);border-radius:10px;padding:15px 16px;display:flex;flex-direction:column;gap:13px}
+.panel-t{font-family:"IBM Plex Mono",monospace;font-size:10.5px;letter-spacing:.11em;text-transform:uppercase;color:var(--ink-3);font-weight:500}
+
+/* bar comparison */
+.bars{display:flex;flex-direction:column;gap:9px}
+.bar-row{display:grid;grid-template-columns:96px 1fr auto;gap:11px;align-items:center;font-size:13px}
+.bar-lab{color:var(--ink-2);text-align:right;font-size:12.5px}
+/* ⛔⛔ 2026-08-27 v3.9:这两行原来**没有 display**,于是「用 <span> 还是 <div> 写」
+   决定了条子看不看得见 —— span 是 inline,**inline 元素的 width 直接被忽略** ⇒ 宽度算出来是 0
+   ⇒ 只剩一条白色空轨。同一个 class、同一份 CSS、**相反的结果**。
+   实证:负责人 0827 报「等你拍那几个条全都是白色,很不明显」。实测 12 根 bar-fill **全部 width=0**,
+   而颜色是对的(rgb 值正确)—— 也就是说**它不是颜色问题,是根本没被画出来**。
+   ⭐ 这是**第三次**同一形状:`.ack` 没样式(4 块板坏)· `.card` 直接子元素塌成多列 · 这条。
+   共同点都是 **kit 不给兜底、靠每个写板的人记得** —— 而「记得」必腐。
+   ⇒ 判据:**kit 负责兜底,各线只挑语义。** display 写死、颜色给默认值、语义用修饰类。 */
+.bar-track{display:block;height:15px;background:var(--card);border-radius:4px;overflow:hidden;border:1px solid var(--line-soft)}
+.bar-fill{display:block;height:100%;border-radius:3px 0 0 3px;background:var(--signal)}
+/* 语义修饰类 —— 各线挑「什么意思」,不挑「什么颜色」。忘了写也有上面那个默认色兜着。 */
+.bar-fill.ok{background:var(--good)}
+.bar-fill.warn{background:var(--warn)}
+.bar-fill.crit{background:var(--crit)}
+.bar-fill.mute{background:var(--ink-3)}
+.bar-val{font-family:"IBM Plex Mono",monospace;font-size:12.5px;font-weight:500;color:var(--ink);min-width:62px;text-align:right;font-variant-numeric:tabular-nums}
+
+/* split bar */
+/* ⚠ .split 是「一根 100% 占比条」,不是两栏布局 —— 名字会骗人。
+   它 height:30px + overflow:hidden,子元素是有色分段、白字居中。
+   往里塞多行内容会被**静默裁掉**(2026-08-27 iOS 线实犯:lint 绿、渲图才看见)。
+   ⚠ 要两栏对比请用 `.ba`(本文件下方) —— **别自己写 `grid-template-columns:1fr 1fr`**。 */
+.split{display:flex;height:30px;border-radius:6px;overflow:hidden;border:1px solid var(--line-soft)}
+.split div{display:flex;align-items:center;justify-content:center;font-family:"IBM Plex Mono",monospace;font-size:11.5px;font-weight:600;color:#fff}
+.legend{display:flex;gap:16px;flex-wrap:wrap;font-size:12.5px;color:var(--ink-2)}
+.legend span{display:flex;align-items:center;gap:6px}
+.sw{width:10px;height:10px;border-radius:2px;flex:none}
+
+/* checklist grid */
+.checks{display:flex;flex-direction:column;gap:0}
+.crow{display:grid;grid-template-columns:20px 1fr auto;gap:11px;align-items:start;padding:9px 0;border-bottom:1px solid var(--line-soft);font-size:14px}
+.crow:last-child{border-bottom:none}
+.crow .mk{font-weight:700;line-height:1.45;text-align:center}
+.mk.yes{color:var(--good)} .mk.no{color:var(--crit)} .mk.half{color:var(--warn)}
+.crow .txt{color:var(--ink-2);min-width:0}
+.crow .txt b{color:var(--ink);font-weight:600}
+/* ⚠ 只有 .txt 的**直接子级、第一个** <b> 是行首标题,独占一行;其余加粗一律行内。
+   0826 v3.7:句中加粗吃到 block 会断成三行 ⇒ 当时补了 b:not(:first-child)。
+   0914 cc控制 #4794:但 :first-child 是相对**它自己的父元素**算的 ⇒ .res / li / a 里打头的 <b> 照样变 block,
+   「——」「→」后面硬断一行(全机约 480 处;记忆助手板样例被广播点名后被抄开)。⇒ 用子选择器,不再靠 :first-child 兜。*/
+.crow .txt > b:first-child,.crow .txt > .machine-note + b{display:block;margin-bottom:1px}
+.crow .txt > .machine-note{display:block;margin-bottom:3px;color:var(--warn);font-weight:600}
+/* ⚠ 标签列是 grid 的 auto 轨:内容一长就会被 1fr 挤扁,而中文没有词边界
+   ⇒ 被拆成**竖排单字**。cc控制线 0826 渲图抓到:「完/全/不/拦」、
+   `default` 被裁成 `defa` —— 而 lint 绿、孤儿类为零、标记完全合规。
+   **纯宽度问题,只有眼睛看得见** —— 静态检查补的是「类有没有样式」,
+   渲图补的是「有样式但装不下」,两条互相替代不了。
+   ⇒ 给它一个下限 + 允许换行(换两行 ≫ 竖排单字);标签本来就该短于 ~6 字。*/
+.crow .tag{font-family:"IBM Plex Mono",monospace;font-size:10.5px;padding:2px 7px;border-radius:4px;align-self:center;text-align:center;line-height:1.35;min-width:3.6em;max-width:8em;white-space:normal;overflow-wrap:anywhere}
+.tag.yes{background:var(--good-soft);color:var(--good)}
+.tag.no{background:var(--crit-soft);color:var(--crit)}
+.tag.half{background:var(--warn-soft);color:var(--warn)}
+
+/* recommendation */
+.rec{border-left:3px solid var(--signal);padding:2px 0 2px 14px;display:flex;flex-direction:column;gap:4px}
+.rec-t{font-family:"IBM Plex Mono",monospace;font-size:10.5px;letter-spacing:.11em;text-transform:uppercase;color:var(--signal);font-weight:600}
+.rec p{margin:0;font-size:15px;color:var(--ink)}
+.rec p b{font-weight:600}
+
+/* answer options */
+/* ⚠ .opt 曾在本文件里定义**两次**(179 行与 275 行,隔 96 行),已合并成这一份。
+   合并时**刻意保持渲染结果与合并前逐属性一致** —— cc控制线 2026-08-28 在负责人真正开着的
+   那个面板里用 getComputedStyle 量过当时的计算值,现状是对的,5 块板在用(其中 4 块带
+   <small>),不值得为「更好看」冒回归风险。所以下面每一条都标了它当时的赢家。
+
+   ⭐ 合并的理由不是渲染坏了,是**两份定义隔着 96 行**:下一个人去改 179 行那份会发现
+      「改了没效果」,而原因在 96 行之外。这类 landmine 静态检查看不见(两条都合法)。
+   ⚠ 判层叠**别靠读**:后一条只覆盖**它自己声明了的属性**。179 行的 display/flex-direction/
+      gap/min-width 当时全都活着,因为 275 行压根没声明它们 —— 肉眼扫最容易漏这一点。
+      (我自己先推错过一次,是 cc控制量出来纠正的。**量一次比推十次准。**) */
+.opts{display:flex;gap:8px;flex-wrap:wrap;margin-top:9px}            /* 275 行赢 */
+.opt{
+  display:flex;flex-direction:column;gap:1px;min-width:0;            /* 179 行:275 没声明,存活 */
+  border:1.5px solid var(--line);
+  border-radius:7px;padding:6px 13px;font-size:13.5px;               /* 275 行赢 */
+  font-weight:600;background:transparent;color:var(--ink,inherit);   /* 275 行赢 */
+}
+.opt.pick{border-color:var(--good);background:var(--good-soft);color:var(--good)}  /* 275 行赢(同特异度,后来居上) */
+.opt b{font-weight:600;color:var(--ink);font-size:14.5px}
+.opt small{font-size:11.5px;color:var(--ink-3);font-family:"IBM Plex Mono",monospace;font-weight:400}
+.opt.pick small{color:var(--good)}   /* ⚠ 唯一一处**有意改动**:原为 --signal(青),
+                                        而 .opt.pick 的边框/底色是 --good(绿) ⇒ 推荐项渲出来
+                                        是「绿边框 + 青小字」两截色。改成同族绿,只动这一个色。 */
+
+/* ── test list ── */
+.tests{background:var(--card);border:1px solid var(--line);border-radius:14px;box-shadow:var(--shadow);padding:22px;display:flex;flex-direction:column;gap:18px}
+.tests-h{display:flex;flex-direction:column;gap:6px}
+.tests-h h2{font-size:21px;font-weight:700;letter-spacing:-.015em}
+.build{display:inline-flex;align-items:center;gap:8px;background:var(--signal-soft);color:var(--signal);border-radius:7px;padding:7px 12px;font-family:"IBM Plex Mono",monospace;font-size:12.5px;font-weight:600;align-self:flex-start}
+/* 2026-08-31:grid→flex。原来是 `grid-template-columns:auto 1fr`,按「ico + 正文」两个子元素设计,
+   而多一个子元素就会继续填 auto|1fr|auto… ⇒ 内容落错列、列宽反转、卡片变高。
+   实测(936px 面板内,800px 容器):正确写法 44px;`<b>标题</b><br>裸文本<span>` = 102px(1.5x);
+   `<b>x</b><span>y</span>长文本` 列定义被挤成 `579px | 182px` = 80px(1.8x)。
+   ⚠⚠ **严重程度对容器宽度极其敏感 —— 我第一次说「复现不出竖条」是因为只在 800px 下试。**
+     拿报障方的真实 markup(10 个顶层子元素)逐宽度量:
+        900px → 列 304|558,高 230      700px → 列 304|358,高 230
+        500px → 列 304|158,高 252
+        380px → 列 304| 38,高 580      300px → 列 234| 28,高 646
+     ⇒ **窄容器下 1fr 列塌到 28–38px,那正是「一个字宽的竖条」**,高度也从 1.7x 涨到 13x。
+     🔑 **宽处只是「有点丑」,窄处才是灾难 —— 所以在宽视口下测会得出「问题不严重」的错误结论。**
+     (总控 v5.8 报的形态是对的;它自报的 7x 是估的、已撤回,而实测在 380px 下比 7x 还糟。)
+   改成 flex 后:正确写法 44→44(零回归);坏写法 800px 下 102→66 / 80→48,
+   380px 下 580→226、300px 下 646→357 —— **窄处仍不完美,但不再是竖条**。
+   ⇒ 与 .bar-fill / .card 同一类兜底:**kit 扛结构,各线只挑语义**。作者随手多塞一个元素不该毁版面。 */
+.warnbox{background:var(--warn-soft);border-radius:8px;padding:11px 14px;font-size:13.8px;color:var(--ink);display:flex;gap:10px;align-items:flex-start;flex-wrap:wrap}
+.warnbox>*{min-width:0}
+.warnbox .ico{color:var(--warn);font-weight:700;flex:none}
+.test{border:1px solid var(--line-soft);border-radius:11px;overflow:hidden}
+.test-h{background:var(--sunk);padding:11px 15px;display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+.num{width:23px;height:23px;border-radius:6px;background:var(--ink);color:var(--card);display:grid;place-items:center;font-family:"IBM Plex Mono",monospace;font-size:12px;font-weight:600;flex:none}
+.test-h b{font-size:15px;font-weight:600}
+.steps{display:grid;grid-template-columns:auto 1fr;gap:0}
+.steps dt{padding:8px 12px 8px 15px;font-family:"IBM Plex Mono",monospace;font-size:11px;letter-spacing:.06em;color:var(--ink-3);text-transform:uppercase;border-bottom:1px solid var(--line-soft);white-space:nowrap}
+.steps dd{margin:0;padding:8px 15px 8px 12px;font-size:14px;color:var(--ink-2);border-bottom:1px solid var(--line-soft);min-width:0}
+.steps dt:last-of-type,.steps dd:last-of-type{border-bottom:none}
+.steps dd b{color:var(--ink);font-weight:600}
+.pass{color:var(--good);font-weight:600}
+
+.foot{color:var(--ink-3);font-size:12.5px;text-align:center;font-family:"IBM Plex Mono",monospace;padding-top:6px}
+a{color:var(--signal)}
+:focus-visible{outline:2px solid var(--signal);outline-offset:2px;border-radius:4px}
+@media (max-width:600px){
+  .bar-row{grid-template-columns:74px 1fr auto}
+  .steps{grid-template-columns:1fr}
+  .steps dt{border-bottom:none;padding-bottom:0}
+  .opt{flex:1 1 100%}
+}
+
+
+/* ── 元素级兜底(总控线 2026-08-26 补) ─────────────────────────
+   kit 原本只覆盖自有类名词汇;下面这些是各线板子在用的标准 HTML 元素
+   与两个通用修饰类,kit 缺了它们会导致「lint PASS 但表格/折叠块裸奔」。
+   纯新增,不覆写任何既有选择器。 */
+.card table,.body table{width:100%;border-collapse:collapse;font-size:14px;margin:4px 0}
+.card td,.body td{padding:7px 10px;border-bottom:1px solid var(--line);vertical-align:top}
+.card td:first-child,.body td:first-child{white-space:nowrap;width:1%;font-variant-numeric:tabular-nums}
+details{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:12px 18px;margin-bottom:11px}
+details>summary{cursor:pointer;font-weight:650;font-size:15px;list-style:none}
+details>summary::-webkit-details-marker{display:none}
+details>summary::before{content:"▸ ";color:var(--dim)}
+details[open]>summary::before{content:"▾ "}
+details table{width:100%;border-collapse:collapse;font-size:14px}
+details td{padding:7px 10px;border-bottom:1px solid var(--line);vertical-align:top}
+details td:first-child{white-space:nowrap;width:1%;font-variant-numeric:tabular-nums}
+/* 0928(电商-基建转负责人「完全没有办法读」):第一列是「短标签」列才不换行;作者在第一列放了一整段话 ⇒ kit 给它加 td-wrap,
+   放开换行、占三分之一宽 —— 不然整行被撑出卡外、其余列被挤没。放在上面几条之后,同权重时它赢 */
+.card td.td-wrap,.body td.td-wrap,details td.td-wrap{white-space:normal;width:34%;min-width:8em}
+.grp{font-size:13px;font-weight:700;color:var(--dim);padding-top:14px!important;letter-spacing:.04em}
+.blk{color:var(--dim);font-size:13.5px}
+
+/* ── 板头与分节词汇(总控线 2026-08-26 补) ──────────────────────
+   kit 原本只有 .chip/.head/.panel/.crow 那一套词汇,但至少总控线与
+   CI/AI Review 线的板用的是 .age/.src/.north/.sec/.emo/.n/.tag 这一套
+   —— sync 之后它们全部裸奔,而 lint 只查标记在不在、查不出样式失效。
+   纯新增,不覆写既有选择器。 */
+.age{display:inline-block;font-size:13px;padding:4px 12px;border-radius:20px;background:var(--card);border:1px solid var(--line);color:var(--dim);margin:6px 0 2px}
+.age.stale{background:var(--warn-soft);border-color:var(--warn);color:var(--warn);font-weight:600}
+.age.dead{background:var(--crit-soft);border-color:var(--crit);color:var(--crit);font-weight:700}
+.src{font-size:12.5px;color:var(--dim);margin:2px 0 22px}
+/* ⛔ 2026-08-30 v4.5:这里原来引用两个【从来没有被定义过】的变量 —— sig 与 sig-soft
+   (是 signal / signal-soft 的笔误遗留),各自带着兜底色在用。
+   ⚠ 修法**不是**去补定义:三处 sig-soft 的兜底是【三种不同的颜色】、三处 sig 是两种,
+     一旦补上定义,它们会被同一个值取代 ⇒ **每块板的「大方向」横幅和两种标签同时换色**。
+   ⇒ 未定义的变量永远解析到兜底 ⇒ **直接展开成兜底值是等价变换**,外观零变化,而幽灵消失。
+     实证:同一份标记跑新旧两版 kit,五个元素的计算样式逐字节相同。
+   🔑 为什么值得动:kit 自己引用一个不存在的变量,下一个人会以为它存在,
+      然后**不带兜底地复制这个写法** —— 记忆助手线板上那个真缺陷大概率就是这么来的。
+   ⛔⛔ 这段注释**刻意不写出那两个变量的完整引用形式**(不写成 CSS 里那种 var(…) 调用)。
+      理由是实测:第一版注释照原样写了,而 sync 会把整段 kit 嵌进每一块板 ⇒
+      任何**不剥注释**的扫描都会在 10 块板上命中它 —— 包括别的线临时写的自查 grep。
+      🔑 讲这个 bug 的那段文字,自己就会制造这个 bug。写警告时要连它自己一起防。 */
+
+.north{background:linear-gradient(100deg,rgba(125,60,152,.09),rgba(40,116,166,.06));border:1px solid var(--line);border-left:4px solid #7d3c98;padding:14px 18px;border-radius:10px;font-size:15px;margin-bottom:8px}
+.sec{display:flex;align-items:baseline;gap:9px;margin:34px 0 12px;padding-bottom:7px;border-bottom:1px solid var(--line)}
+.sec h2{margin:0;border:0;padding:0}
+.sec .emo{font-size:15px;line-height:1}
+.sec .n{font-size:13px;font-weight:700;color:var(--crit);letter-spacing:0;margin-left:auto;font-variant-numeric:tabular-nums}
+h3>.tag,.card h3 .tag{font-size:11px;font-weight:600;padding:2px 8px;border-radius:5px;background:var(--line);color:var(--dim);letter-spacing:.03em;white-space:nowrap}
+h3>.tag.id,.card h3 .tag.id{font-family:"IBM Plex Mono",monospace;background:rgba(125,60,152,.13);color:#7d3c98;font-weight:700}
+h3>.tag.id a,.card h3 .tag.id a{color:inherit;text-decoration:none}
+h3>.tag.none,.card h3 .tag.none{background:transparent;border:1px dashed var(--line);color:var(--dim)}
+h3>.tag.hot,.card h3 .tag.hot{background:var(--crit-soft);color:var(--crit)}
+h3>.tag.ok,.card h3 .tag.ok{background:var(--good-soft);color:var(--good)}
+h3>.tag.wait,.card h3 .tag.wait{background:rgba(40,116,166,.13);color:#2874a6}
+/* ⛔ 这里原有第二份 .opts/.opt/.opt.pick(总控 0826「元素级兜底」时误加)。
+   已删,因为上面 179-184 行那份才是完整的(带 flex-direction:column 与 <small> 样式)。
+   删它的直接理由是一个**两截色**的 bug:后一份把 .opt.pick 覆盖成 --good(绿),
+   而 .opt.pick small 仍是 --signal(青) ⇒ 推荐项渲出来是「绿边框 + 青小字」。
+   ⚠ 5 块板在用 .opt(其中 4 块带 <small>),而 ios.html 用了 **0 次**
+      —— 又一次「我自己那块板恰好是唯一不发作的」。 */
+
+/* ── .ask —— 「要你点一个」那一行 ────────────────────────────────
+   ⛔ 2026-08-28 补(cc控制线报):`markup.html` 速查里印了 **2 次** `class="ask"`,
+      而 kit.css 里定义 **0 处**(对照 .rec = 4 处)。照速查抄的人会得到一行裸字。
+   ⭐ 这一族比「kit 不兜底」更毒:**指引主动把人引向一个不存在的类** ——
+      越守规矩照着抄的人,越会中招。全机 8 块板当时无一在用,是在它伤到任何板之前撞上的。
+   形态:比 .rec 轻(它不是建议,是「下面这些选项挑一个」的引导语),贴着 .opts 上方。 */
+.ask{background:var(--signal-soft);border-radius:9px;padding:12px 14px;font-size:14.2px;color:var(--ink)}
+.ask b{font-weight:600}
+
+
+/* ── 分区骨架 / 大方向 / 空态 / 折叠队列 ───────────────────────────────
+   ⚠ 0826 补:这几条**本来就该在 kit 里**,却一直只活在 iOS 板的补充层里。
+   根因是我抽 kit 时只取了那块板的**第一个样式块**,而它有 6 块,
+   `.zone` / `.northstar` / `.empty` / `.hint` 这些核心分区样式在后面几块。
+   ⇒ kit 从一开始就是残的,而 board.py new 的模板照旧发 class="zone"
+   ⇒ **凡是新建的板,分区标题和大方向横幅全部裸奔成无格式流水字**。
+   我自己看不见,是因为我那块板还留着后面那 5 块在补。
+   由 cc控制线 0826 用「正文用到的 class ∩ 样式表定义的 class」这条静态检查抓出。*/
+.empty{background:var(--good-soft);border:1px solid var(--good);border-radius:12px;padding:18px 20px;display:flex;flex-direction:column;gap:6px}
+.empty b{font-size:17px;color:var(--ink);font-family:Archivo,"PingFang SC",system-ui,sans-serif}
+.empty span{font-size:14px;color:var(--ink-2)}
+/* v5:大方向条 / 区块标题 */
+.northstar{background:linear-gradient(180deg,var(--signal-soft),var(--card));border:1px solid var(--signal);border-radius:12px;padding:15px 18px;display:flex;flex-direction:column;gap:6px}
+.northstar .lab{font-family:"IBM Plex Mono",monospace;font-size:10.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--signal);font-weight:600}
+.northstar p{margin:0;font-size:16px;color:var(--ink);line-height:1.5}
+.northstar p b{font-weight:600}
+.northstar .sub2{font-size:13.5px;color:var(--ink-2)}
+.zone{display:flex;align-items:baseline;gap:10px;padding:2px 0 0}
+/* ⭐ emoji 槽 —— 2026-08-28 总控线报的事故直接变来的,而事故的形状值得记在这里:
+   旧的 `.sec` 有 `.emo` 槽,`.zone` 没有 ⇒ 从 .sec 转到 .zone 的人会**很自然地**
+   把 emoji 并进 h2,写成 `<h2>🔴 区标题</h2>`(区名 + emoji 挤在一个 h2 里)。
+   后果不是排版难看,是 **`board.py lint` 的「板自相矛盾」闸按 h2 文字定位区标题,
+   emoji 一并进去就读不到 ⇒ 那块板静默地不再被守**。
+   ⚠ 而它发生在**那个人正在修另一个问题的时候**,当轮 lint 还是绿的 ——
+     「刚刚还在被守着、然后悄悄不被守了」,比从头没守更难发现。
+   ⇒ 闸那边已改成「读不到就明说本闸没运行」;这里补上槽,让人**不必**把 emoji 塞进 h2。
+
+   ⛔⛔ 读到这里的人/AI 注意:**上面那个 h2 是【示例】,不是板上的区。**
+   kit 会被原样嵌进每一块板 ⇒ 你 `grep '<h2>'` 数区、或用正则找区标题时,
+   **这一行会被你数进去**(它在每块板的第 ~21935 字符处)。
+   ⚠ 0908(#4495)起示例刻意写成「区标题」这种**不是任何真区名**的占位词,
+     就是为了让这一行不可能被当成真区;⛔ 别再把它改回真区名。
+   📌 2026-09-03 一天之内咬了两条线各一次,**两次都发生在刚读完这段之后**
+     (详情 → `~/.claude/reference/status-board-incidents-archive.md`)。
+   ⇒ **这不是粗心,是「扫 HTML 原文」这个动作自带的**。
+   ✅ 做法:**先把 script 块 / style 块 / HTML 注释三者都蒙掉再扫**
+     ⚠ 这一行本身刻意**不写**那三个标签的字面量 —— kit 整个被嵌进每块板的 style 块里,
+       写了字面量就会让 `board.py lint` 判定样式块被截断,**每块新建或 sync 过的板当场报错**
+       (2026-09-04 真发生过一次:写这条警告的那次提交 472f43d 自己踩了它)。
+     (要保住下标就替换成等长空白,别删)。`board.py` 里 `_zone_count` /
+     `.crow` 闸 / 首-chip 闸都是这么做的,照抄它们即可。 */
+.zone .emo{font-size:15px;line-height:1;flex:none}
+.zone h2{font-size:19px;font-weight:700;letter-spacing:-.015em;flex:none}
+.zone .n{font-family:"IBM Plex Mono",monospace;font-size:12px;color:var(--ink-3)}
+.zone .hint{font-size:13px;color:var(--ink-3);margin-left:auto}
+/* ── v3:已拍板折叠区 ── */
+details.settled{background:var(--card);border:1px solid var(--line);border-radius:12px;box-shadow:var(--shadow);overflow:hidden}
+details.settled > summary{list-style:none;cursor:pointer;padding:15px 18px;display:flex;align-items:center;gap:10px;font-family:Archivo,"PingFang SC",system-ui,sans-serif;font-size:15px;font-weight:600;color:var(--ink-2)}
+details.settled > summary::-webkit-details-marker{display:none}
+details.settled > summary::before{content:"▸";color:var(--ink-3);font-size:12px;transition:transform .15s}
+details.settled[open] > summary::before{transform:rotate(90deg)}
+details.settled > summary:hover{color:var(--ink)}
+details.settled .inner{padding:0 18px 18px;display:flex;flex-direction:column;gap:11px;border-top:1px solid var(--line-soft);margin-top:-1px;padding-top:15px}
+details.settled .row{display:grid;grid-template-columns:18px 1fr;gap:10px;align-items:start;font-size:14.3px;color:var(--ink-2)}
+details.settled .row b{color:var(--ink);font-weight:600}
+.count{margin-left:auto;font-family:"IBM Plex Mono",monospace;font-size:11.5px;color:var(--ink-3);font-weight:500}
+
+
+/* ══ 「标为已看过」 ══════════════════════════════════════════════
+   ⛔⛔ 2026-08-27 v3.9 补进共享层(记忆助手线报回,实测坐实)。
+   `kit.js` 一直在给每张 `.card[data-ack]` 注入 `btn.className='ack'`,
+   而 **kit.css 里一条 `.ack` 规则都没有** ⇒ 那个按钮在 `display:flex` 的
+   .card 里被拉成 **94px 宽 × 888px 高的竖条**,还从卡片抢走 94px 宽度。
+   实测 5 块板坏了 4 块 —— 唯一好的是 iOS 那块,**因为样式写在它自己的补充层里**。
+
+   ⭐ 这条最该记住的不是 bug,是它为什么躲过了所有检查:
+   `board.py lint` 的孤儿 class 检查**结构上抓不到它** —— `.ack` 是**运行时注入**的,
+   静态扫描只看得见写死在文件里的 class。规则里那句
+   「静态检查答『有没有样式』· 渲图答『有样式但装不下』」缺了第三种:
+   **「class 根本不在静态文件里,两种检查都不管」**。lint 已补上对 kit.js 的扫描。   */
+.ack{position:absolute;top:14px;right:14px;z-index:2;background:var(--card);border:1px solid var(--line);border-radius:999px;padding:5px 11px;font-family:"IBM Plex Mono",monospace;font-size:11px;color:var(--ink-3);cursor:pointer;display:flex;align-items:center;gap:6px;user-select:none}
+.ack:hover{border-color:var(--signal);color:var(--signal)}
+.card.acked{opacity:.62}
+.card.acked .ack{background:var(--good-soft);color:var(--good);border-color:transparent}
+.card.acked .q{font-size:16px}
+/* ⚠ 折叠规则要吃**两种**卡片结构。iOS 板每张卡都有 .body 包裹层,
+   但别的板并非如此(记忆助手板 10 张卡里 2 张没有)。只写 `.body` 那一条的话,
+   那些卡**看起来加了勾选、其实不折叠** —— 又是一个静默失效。*/
+.card.acked > .body > *:not(.top){display:none}
+.card.acked > .body > .top .lede{display:none}
+.card.acked > *:not(.top):not(.stripe):not(.ack):not(.body){display:none}
+.card.acked > .top .lede{display:none}
+
+/* ⭐ 同侪条 —— 每块板顶部回答「别的线要不要你」(#peers,由 kit.js 从 _peers.json 渲)。
+   ⚠ 刻意做得**比正文轻**:它是导航不是内容,抢了眼就会把「等你拍」挤下去。
+   ⚠ 颜色只挑语义(--warn/--crit/--dim),别在这里写死色值 —— 三套主题都要成立。 */
+#peers{margin:0 0 14px}
+.peers-t{font-size:12.5px;color:var(--dim);margin-bottom:7px;letter-spacing:.02em}
+.peers-t b{color:var(--warn)}
+.peers-row{display:flex;flex-wrap:wrap;gap:7px}
+.peer{display:inline-flex;align-items:center;gap:7px;padding:5px 11px;border-radius:999px;
+  border:1px solid var(--line);background:var(--card);text-decoration:none;
+  font-size:12.5px;color:var(--ink-2);line-height:1.4}
+.peer b{font-weight:600;color:var(--ink-2)}
+.peer:hover{border-color:var(--signal)}
+.peer-need{border-color:var(--warn)}
+.peer-need b{color:var(--warn)}
+.peer-n{font-family:'IBM Plex Mono',monospace;font-size:11px;font-weight:700;color:var(--warn)}
+.peer-age{font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--dim)}
+.peer-stale .peer-age{color:var(--crit);font-weight:700}
+
+
+/* ══ 方案板按钮 · .deep ═══════════════════════════════════════════
+   负责人 2026-08-28 拍的「按需加载」在 kit 里的落地。判据在
+   `status-board.md`「方案板按钮」节,**默认是不加**:
+
+     1. 这件事能不能在卡里直接讲清楚到他扫一眼就能反馈? 能 ⇒ **不加**。
+     2. 不能(复杂/重大的设计,一个小板块塞不下)⇒ 卡里放**大致内容**,
+        按钮切到方案板看**详细过程与方案**。
+
+   他的原话:「简单的功能就没有必要加按钮了……那这样每个东西都要点进去,
+   也太麻烦了。**只有核心事项要这样点。**」
+
+   ⭐ 自检(可机检,见 board.py lint):**把按钮盖住,他还能不能拍?**
+      盖住之后卡里若一个 .opt 都不剩 ⇒ 该放板上的东西被放进方案板了。
+
+   形态四条,全部来自设计系统线自己做过一版踩出来的:
+     ① `target="_blank" rel="noopener"` —— 他明确要「能随时切回状态板」;
+     ② **必须有 .deep-why 那一行**说清「点进去能看到什么」。⭐ 不是装饰:
+        **他要靠它决定这一次值不值得点**;没有它,按钮就是个盲跳;
+     ③ 位置放在「大致内容」之后、证据/选项之前 —— 放最底下等于没人看见,
+        放最上面等于逼他先点;
+     ④ **一张卡最多一个**。需要两个 ⇒ 该拆卡,不是加第二个按钮。
+
+   ⚠ 刻意做得**比 .opts 轻**:决定在板上做,按钮只是门。做成实心主按钮
+      会把眼睛从「等你拍」的选项上抢走,那正好反了。
+   ⚠ display 写死 —— kit 的已知坑族:不写 display 的类在 flex 容器里
+      会被拉成竖条(`.ack` 那次 5 块板坏 4 块)。 */
+.deep{
+  display:flex; flex-direction:column; gap:3px;
+  border:1px solid var(--line); border-left:3px solid var(--signal);
+  border-radius:9px; padding:11px 14px;
+  background:var(--card); text-decoration:none;
+  align-self:flex-start; max-width:100%;
+}
+.deep:hover{border-color:var(--signal); background:var(--signal-soft)}
+.deep-b{
+  font-size:14.5px; font-weight:600; color:var(--signal);
+  display:flex; align-items:center; gap:7px;
+}
+.deep-b::after{content:"↗"; font-size:12px; opacity:.75}
+.deep-why{font-size:12.5px; color:var(--ink-3); line-height:1.5}
+
+
+/* ══ 前后对比 · .ba (before/after) ═══════════════════════════════
+   ⭐ 总控 v5.4 2026-08-28 提案,iOS v4.1 采纳。立据是**同一个名字骗到了三条 session**:
+   大家想画「✕ 现在这样 → ✓ 改成这样」时,都伸手去拿 `.split` —— 而它是**一根占比条**
+   (`height:30px;overflow:hidden`),内容会被静默裁掉。
+   ⚠ `.split` 的注释里那条警告写得很清楚,**而它没能阻止任何一个人**。
+   ⇒ 这不是「读没读文档」的问题,是 **kit 缺一个原语**:
+     状态板规则点名「机制/判据取舍 → 前后对比」是五种标准表达之一,
+     **而它是唯一没有对应原语的那一个**,于是每个人都自己造,然后都造到 .split 上去。
+   ⭐ 注释是提醒(必腐);一个叫对名字的类是依赖(不腐)。 */
+.ba{display:grid;grid-template-columns:1fr 1fr;gap:12px;align-items:stretch}
+.ba>div{border:1px solid var(--line);border-radius:10px;padding:13px 15px;
+  display:flex;flex-direction:column;gap:6px;min-width:0;background:var(--card)}
+.ba-x{border-left:3px solid var(--crit)}
+.ba-y{border-left:3px solid var(--good)}
+.ba-t{font-family:"IBM Plex Mono",monospace;font-size:10.5px;letter-spacing:.11em;
+  text-transform:uppercase;font-weight:600}
+.ba-x .ba-t{color:var(--crit)}
+.ba-y .ba-t{color:var(--good)}
+.ba p{margin:0;font-size:14px;color:var(--ink-2);line-height:1.55}
+.ba p b{color:var(--ink);font-weight:600}
+@media (max-width:620px){ .ba{grid-template-columns:1fr} }
+
+/* 同侪条第三档:久没动的线(降级但不隐藏) —— 见 kit.js paintPeers 的注释 */
+.peers-dorm{font-size:12px;color:var(--dim);margin-top:6px;line-height:1.6}
+.peer-dorm-link{color:var(--warn);text-decoration:none;font-weight:600}
+.peer-dorm-link:hover{text-decoration:underline}
+.peers-dorm-hint{color:var(--ink-3)}
+
+
+/* ══════════════════════════════════════════════════════════════════════
+   画图原语(2026-08-29 负责人拍:状态板自己也必须能画,不是把图全塞进方案板)
+   他原话:「你状态板不可能全有,都是文字吧?你全是文字,我状态板我读的也很累啊,
+   那这跟我直接去读原消息有啥区别啊?」
+
+   ⚠ 这一组和「要不要加 .deep 按钮」是两件事,别合并:
+     · 两问判据问的是【信息量】—— 卡里讲得清吗?讲不清才加按钮。
+     · 这一组给的是【表达形式】—— 一张小样张放在卡里,本身就是「在卡里讲清楚」。
+     ⇒ 卡里放得下的图 → 直接进板;要并排看三版界面 / 逐屏走查 → 仍然走方案板 + 按钮。
+
+   ⚠ class 名刻意与 design-system/proposal-skeleton.html 保持一致(shots / shot-c /
+     phone / phone-status / phone-head / phone-body),两边同一套词汇,别长方言。
+
+   ⚠ 内部件一律限定在 .phone 之下 —— kit 里已有 .row / .dot,不限定会改掉现有板的样子。
+   ══════════════════════════════════════════════════════════════════════ */
+
+/* ── 并排手机样张:规则「界面选项 → 并排手机样张」在状态板这一侧终于有东西可用 ── */
+.shots{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;margin:2px 0 4px}
+.shots.two{grid-template-columns:repeat(2,minmax(0,1fr))}
+.shots.one{grid-template-columns:minmax(0,260px)}
+.shot-c{display:flex;flex-direction:column;gap:8px;min-width:0}
+.shot-t{display:block;font-size:12.5px;color:var(--ink-2);line-height:1.5}
+.shot-t b{color:var(--ink);font-weight:600}
+
+.phone{display:block;width:100%;min-width:0;border:1px solid var(--line);
+  border-radius:12px;background:var(--card);overflow:hidden;box-shadow:var(--shadow)}
+.phone.pick{border-color:var(--good);box-shadow:0 0 0 2px var(--good-soft)}
+.phone.crit{border-color:var(--crit)}
+.phone-status{display:flex;justify-content:space-between;align-items:center;
+  padding:5px 10px 3px;font-family:"IBM Plex Mono",monospace;font-size:9.5px;color:var(--ink-3)}
+.phone-head{display:flex;justify-content:space-between;align-items:baseline;gap:8px;
+  padding:6px 10px 8px;border-bottom:1px solid var(--line-soft);font-size:12.5px;color:var(--ink-2)}
+.phone-head strong{color:var(--ink);font-weight:600;font-size:13px}
+.phone-body{display:flex;flex-direction:column;gap:6px;padding:9px 10px 11px;min-height:64px}
+
+/* 手机屏里的一行 —— 全部限定在 .phone 之下,不碰板上已有的 .row / .dot */
+.phone .row{display:flex;align-items:center;gap:7px;min-width:0;font-size:12px;color:var(--ink-2)}
+.phone .dot{display:block;flex:0 0 auto;width:6px;height:6px;border-radius:50%;background:var(--signal)}
+.phone .row.ok .dot{background:var(--good)}
+.phone .row.warn .dot{background:var(--warn)}
+.phone .row.crit .dot{background:var(--crit)}
+.phone .t{flex:1 1 auto;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:var(--ink)}
+.phone .m{flex:0 0 auto;font-family:"IBM Plex Mono",monospace;font-size:10px;color:var(--ink-3)}
+.phone .bar{display:block;height:8px;border-radius:4px;background:var(--sunk)}
+.phone .gap{display:block;height:5px}
+
+/* ── 内联图槽:任何 svg 放进来都不会溢出、不会有基线缝 ── */
+.fig{display:block;margin:2px 0 4px;padding:12px;border:1px solid var(--line);
+  border-radius:10px;background:var(--card);overflow-x:auto}
+.fig>svg{display:block;max-width:100%;height:auto;margin:0 auto}
+.fig-cap{display:block;margin-top:8px;font-size:12.5px;color:var(--ink-3);line-height:1.55;text-align:center}
+.fig-cap b{color:var(--ink-2);font-weight:600}
+
+/* ── 带箭头的流程(.chain):一步一步,箭头由 CSS 画,不用手打字符 ── */
+/* ⛔ 2026-08-30 v4.5:间距**不许**用 margin-right 写死 —— 那是「方向相关」的,
+   而 .chain 的真实用法常常是嵌在窄容器里(卡内分栏 / .ba 的一栏 / .split),
+   这时**视口是宽的、容器是窄的** ⇒ 下面那条 max-width:620px 媒体查询根本不触发
+   ⇒ 作者内联一个竖排方向,却仍然吃着横排的 margin-right ⇒ 每一步被挤掉 20px。
+   实测(总控 v5.7 报,iOS v4.5 隔离复现):357px 容器里三步量出 335/335/355。
+   ⇒ 改用 column-gap/row-gap:浏览器按**实际主轴**自己挑,横排竖排都对,
+     而且对「作者内联写方向」这种 kit 管不到的写法**同样成立**。
+   ⚠ 箭头方向仍然管不了(CSS 选不中内联样式)⇒ 竖排请用语义类 col,见下。 */
+.chain{display:flex;flex-wrap:wrap;align-items:stretch;column-gap:20px;row-gap:18px;margin:2px 0 4px}
+.chain-s{display:flex;flex-direction:column;justify-content:center;gap:3px;flex:1 1 0;min-width:96px;
+  position:relative;
+  padding:9px 11px;border:1px solid var(--line);border-radius:9px;background:var(--card);font-size:12.5px}
+.chain-s b{color:var(--ink);font-weight:600;font-size:13px}
+.chain-s span{color:var(--ink-3);font-size:11.5px;line-height:1.45}
+.chain-s.ok{border-color:var(--good)}
+.chain-s.warn{border-color:var(--warn)}
+.chain-s.crit{border-color:var(--crit)}
+/* 箭头:绝对定位在每一步的右侧缝隙里。position:relative 已写在 .chain-s 本体上。 */
+.chain-s:not(:last-child)::after{content:"";display:block;position:absolute;
+  right:-15px;top:50%;width:10px;height:10px;
+  border-top:1.5px solid var(--ink-3);border-right:1.5px solid var(--ink-3);
+  transform:translateY(-50%) rotate(45deg)}
+
+/* 竖排 —— 作者挑「我要竖着排」这个语义,样式与箭头方向由 kit 兜底。
+   这条**不依赖视口宽度**,所以嵌在多窄的容器里都成立。 */
+.chain.col{flex-direction:column}
+.chain.col>.chain-s:not(:last-child)::after{right:auto;left:50%;top:auto;bottom:-14px;
+  transform:translateX(-50%) rotate(135deg)}
+
+@media (max-width:760px){
+  .shots{grid-template-columns:repeat(2,minmax(0,1fr))}
+}
+@media (max-width:620px){
+  .shots,.shots.two{grid-template-columns:1fr}
+  .chain{flex-direction:column}
+  .chain-s:not(:last-child)::after{right:auto;left:50%;top:auto;bottom:-14px;
+    transform:translateX(-50%) rotate(135deg)}
+}
+
+/* ── 行级状态(2026-09-07 负责人拍「一行一行点掉」「已办结默认折叠」;由 kit.js 按 .crow[data-status] 注入,
+   HTML 里不用写这些类 —— 行只要带 data-status 就自动长出来;没带的行什么都不发生) ── */
+.rstrip{display:flex;gap:6px;flex-wrap:wrap;padding:0 0 9px;border-bottom:1px solid var(--line-soft);margin-bottom:2px}
+.rchip{display:inline-flex;align-items:center;gap:5px;font-family:"IBM Plex Mono",monospace;font-size:11px;padding:3px 9px;border-radius:999px;border:1px solid var(--line);color:var(--ink-2);background:var(--card)}
+.rchip b{font-size:13px;font-weight:700}
+.rchip.rc-zero{opacity:.4}
+.rchip.rc-you{border-color:var(--crit);color:var(--crit);background:var(--crit-soft)}
+.rchip.rc-do{border-color:var(--signal);color:var(--signal)}
+.rchip.rc-done{border-color:var(--good);color:var(--good)}
+.rchip.rc-you.rc-zero{background:transparent}
+.rchip.rc-none{border-style:dashed;color:var(--ink-3)}
+.rchip.rc-new{border-color:var(--crit);color:var(--crit);font-weight:600}
+/* 0907 负责人拍(Harness 板 case,三条按建议):✓ 行没写结论亮红标;「做错过·已补」小标;长结论行内折叠 */
+.rchip.rc-slip{border-color:var(--warn);color:var(--warn)}
+.rchip.rc-miss{border-color:var(--crit);color:var(--crit);border-style:dashed}
+.rfind{margin-left:auto;font:12px "IBM Plex Mono",monospace;padding:3px 9px;border-radius:999px;border:1px solid var(--line);background:var(--card);color:var(--ink);min-width:170px}
+.rfind:focus{outline:none;border-color:var(--signal)}
+.rdrawer-old>summary{color:var(--ink-2)}
+.rackall{display:inline-block;margin-left:10px;padding:1px 9px;border-radius:999px;border:1px solid var(--line);background:var(--card);color:var(--ink-2);cursor:pointer;font-size:11.5px}
+.rackall:hover{border-color:var(--signal);color:var(--signal)}
+.rmiss,.rslip{display:inline-block;margin-left:6px;font-family:"IBM Plex Mono",monospace;font-size:10.5px;padding:1px 7px;border-radius:999px;vertical-align:middle;line-height:1.5}
+.rmiss{border:1px solid var(--crit);color:var(--crit);background:var(--crit-soft)}
+.rslip{border:1px solid var(--warn);color:var(--warn);background:var(--warn-soft)}
+.crow .txt .res{display:block;margin-top:2px;color:var(--ink-2)}
+.crow .txt .res::before{content:"→ ";color:var(--ink-3)}
+/* 1020 负责人:做完的行先写结论再写原话(kit.js doneResFirst):结论当大字,原话退成一行灰字 */
+.crow .txt.res-first > .res{margin:0 0 3px;color:var(--ink);font-weight:600}
+.crow .txt.res-first > .res::before{content:none}
+.crow .txt.res-first > b,.crow .txt.sum-first > b{font-weight:400;font-size:12.5px;color:var(--ink-3)}
+.crow .txt.res-first > b::before,.crow .txt.sum-first > b::before{content:"你当时说:"}
+.crow .txt.sum-first > .rsum{display:block;margin:0 0 3px;color:var(--ink);font-weight:600}
+.crow .txt details.more{margin-top:3px}
+.crow .txt details.more>summary{cursor:pointer;font-size:12px;color:var(--ink-3);list-style:none}
+.crow .txt details.more>summary::before{content:"▸ "}
+.crow .txt details.more[open]>summary::before{content:"▾ "}
+.crow .txt details.more>*:not(summary){margin-top:4px;font-size:13px;color:var(--ink-2)}
+.crow.has-rack{position:relative;padding-right:32px}
+.rack{position:absolute;right:0;top:8px;width:22px;height:22px;border-radius:50%;border:1px solid var(--line);display:grid;place-items:center;font-size:12px;color:var(--ink-3);cursor:pointer;user-select:none;background:var(--card)}
+.rack:hover{border-color:var(--signal);color:var(--signal)}
+.rnew{display:inline-block;margin-left:6px;font-family:"IBM Plex Mono",monospace;font-size:10.5px;padding:1px 6px;border-radius:4px;background:var(--crit-soft);color:var(--crit);vertical-align:middle}
+.rdrawer{margin-top:6px;border-top:1px dashed var(--line)}
+.rdrawer.rdrawer-empty{display:none}
+.rdrawer>summary{cursor:pointer;list-style:none;padding:8px 0 4px;font-size:12.5px;color:var(--ink-3);font-family:"IBM Plex Mono",monospace}
+.rdrawer>summary::-webkit-details-marker{display:none}
+.rdrawer>summary::before{content:"▸ "}
+.rdrawer[open]>summary::before{content:"▾ "}
+.rdrawer .crow{opacity:.72}
+/* 0907 四桶符号(由 kit.js 按 data-status 画,与汇总条同一套):✓ 做完 · ● 进行中 · ○ 还没开始 · ◎ 长期观察 · ❗ 等你 */
+.crow .mk.mk-done{color:var(--good)} .crow .mk.mk-doing{color:var(--signal)} .crow .mk.mk-todo{color:var(--ink-3)}
+.crow .mk.mk-watch{color:var(--warn)} .crow .mk.mk-you{color:var(--crit)}
+.rchip.rc-todo{color:var(--ink-3)} .rchip.rc-watch{border-color:var(--warn);color:var(--warn)}
+.rack{width:auto;padding:0 7px;border-radius:999px;font-size:10.5px}
+/* 0907 汇总条可点筛选 */
+.rchip[data-st]{cursor:pointer} .rchip[data-st]:hover{box-shadow:0 0 0 2px var(--line)}
+.rchip.rc-on{box-shadow:0 0 0 2px currentColor}
+.crow.r-hide{display:none}
+/* 0907 行内跳转 */
+.rjump{display:inline-block;margin-left:8px;font-family:"IBM Plex Mono",monospace;font-size:11px;color:var(--signal);text-decoration:none;border:1px solid var(--signal);border-radius:999px;padding:1px 8px;vertical-align:middle}
+.rjump:hover{background:var(--signal);color:#fff}
+/* 0907 三块目录条(kit 按区生成;.say 是作者那一句话) */
+#board-toc{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin:14px 0 6px;padding:11px 14px;border:1px solid var(--line);border-radius:12px;background:var(--sunk)}
+.toc-cell{display:inline-flex;align-items:baseline;gap:8px;padding:6px 12px;border:1px solid var(--line);border-radius:999px;background:var(--card);text-decoration:none;color:var(--ink)}
+.toc-cell b{font-size:14px;font-weight:700} .toc-cell span{font-family:"IBM Plex Mono",monospace;font-size:12px;color:var(--ink-3)}
+.toc-cell:hover{border-color:var(--signal)} .toc-cell.toc-urgent{border-color:var(--crit);background:var(--crit-soft)} .toc-cell.toc-urgent b{color:var(--crit)}
+.say{font-size:14px;color:var(--ink-2)}
+.rhoist{display:inline-block;margin-left:6px;padding:0 6px;border-radius:9px;font-size:11px;line-height:16px;background:#fde68a;color:#7c2d12;vertical-align:middle}
+.crow .txt .rprog{display:inline-block;margin-left:6px;padding:0 6px;border-radius:9px;font-size:11px;line-height:16px;font-variant-numeric:tabular-nums;background:var(--line-soft);color:var(--ink-2);vertical-align:middle;white-space:nowrap}
+/* 0914 #4789:折叠里必须分点 —— 普通 ul/ol 也给默认样式,别让各线自己写 */
+.crow details.more ul:not(.sub),.crow details.more ol{margin:4px 0 0;padding-left:1.2em}
+.crow details.more ul:not(.sub)>li,.crow details.more ol>li{padding:2px 0;font-size:13px;line-height:1.45}
+.crow details.more ul.sub{list-style:none;margin:4px 0 0;padding:0}
+.crow details.more ul.sub>li{display:flex;gap:6px;align-items:flex-start;padding:2px 0;font-size:13px;line-height:1.45}
+.crow details.more ul.sub>li .smk{flex:0 0 auto;width:16px;text-align:center;font-weight:700}
+.crow details.more ul.sub>li[data-st="done"]{color:var(--ink-3)}
+/* ⭐ 0914 负责人(状态板线 ㊴):每行一眼答两问 ——「我在什么状态」「我要干什么」;没做完的挂着写清为什么没做完、预计哪天、卡在哪、他要做什么。
+   作者只写 .why / data-eta(卡住或要他动手再加 data-you / .act),下面这些由 kit 画。 */
+.crow .txt .rnow{display:flex;flex-wrap:wrap;gap:4px 6px;margin:4px 0 2px}
+.crow .txt .rn{display:inline-block;font-size:11.5px;line-height:18px;padding:0 8px;border-radius:9px;white-space:nowrap;border:1px solid var(--line-soft);background:var(--line-soft);color:var(--ink-2)}
+.crow .txt .rn.ry-decide,.crow .txt .rn.ry-do,.crow .txt .rn.rn-late,.crow .txt .rn.rn-miss{background:var(--crit-soft);color:var(--crit);border-color:var(--crit)}
+.crow .txt .rn.ry-nudge,.crow .txt .rn.ry-stuck,.crow .txt .rn.rn-aged{background:var(--warn-soft);color:var(--warn);border-color:var(--warn)}
+.crow .txt .rn.ry-wait,.crow .txt .rn.rn-eta,.crow .txt .rn.rn-age{background:var(--line-soft);color:var(--ink-2)}
+.crow .txt .why,.crow .txt .act{display:block;margin-top:2px;line-height:1.5}
+.crow .txt .why::before{content:"卡在：";color:var(--ink-3)}
+.crow[data-you="wait"] .txt .why::before{content:"进度：";color:var(--ink-3)}
+.crow .txt .act{color:var(--ink);font-weight:600}
+.crow .txt .act::before{content:"你要做：";color:var(--ink-3);font-weight:400}
+.crow .txt .act.act-gen{font-weight:600}
+.crow .txt .act .rjump{margin-left:6px}
+/* ⭐ 0916 负责人在 cc控制板上点出:没做完的行点「已读」后「根本没有折叠起来…没有任何区别」。
+   根因:原先只写了 `.crow.r-seen .txt{color:ink-3}`,而标题 `.crow .txt b` 写死 ink、`.why` 又被拉回 ink-2
+   ⇒ 两处主要文字颜色都不变,行高也不变(实测 135px → 135px)。
+   ⇒ 仍守 0914「没做完的一定挂在那里」:**不移走、不进抽屉**,但收成一行 —— 只留标题 + 状态胶囊(等谁/预计/挂几天/进度),
+      why / res / 细节藏起来,整行变淡;点一下展开(.r-open)。
+   ⛔ 要他拍板 / 动手 / 去催的行(data-you = decide / do / nudge)点了已读也【不收】:看过 ≠ 做了。 */
+.crow.r-seen{opacity:.6}
+.crow.r-seen .txt b{color:var(--ink-2)}
+.crow.r-seen:not(.r-open):not([data-you="decide"]):not([data-you="do"]):not([data-you="nudge"]) .txt .why,
+.crow.r-seen:not(.r-open):not([data-you="decide"]):not([data-you="do"]):not([data-you="nudge"]) .txt .res,
+.crow.r-seen:not(.r-open):not([data-you="decide"]):not([data-you="do"]):not([data-you="nudge"]) .txt .act,
+.crow.r-seen:not(.r-open):not([data-you="decide"]):not([data-you="do"]):not([data-you="nudge"]) .txt details.more{display:none}
+.crow.r-seen:not(.r-open){cursor:pointer}
+.crow.r-seen:hover{opacity:.85}
+.crow.r-seen.r-open{opacity:.85}
+.crow .txt .res .rline{display:block}
+.crow .txt > b .rtl-more{font-weight:400;font-size:12px;color:var(--ink-3);text-decoration:none;white-space:nowrap}
+.crow .txt .ropen{margin-left:6px}
+.crow .txt ul{margin:3px 0 0;padding-left:1.2em}
+.crow .txt li{font-size:13px;line-height:1.5}
+.crow .txt li[data-st]{list-style:none;margin-left:-1.2em;display:flex;gap:6px;align-items:flex-start}
+.crow .txt li .smk{flex:0 0 auto;width:16px;text-align:center;font-weight:700}
+.crow .txt li[data-st="done"]{color:var(--ink-3)}
+/* #4794 第 4 条:收起的「细节」不再是一个带框的白盒子,只留一行灰字;展开再加框 */
+.crow .txt details.more:not([open]){border:0;background:none;padding:0;margin:3px 0 0;border-radius:0}
+.crow .txt details.more[open]{border:1px solid var(--line-soft);background:var(--card);padding:6px 10px;margin:4px 0 0;border-radius:8px}
+.crow .txt details.more>summary{font-weight:400;font-size:12.5px;color:var(--ink-3)}
+.rchip.rc-warn{border-color:var(--warn);color:var(--warn)}
+.crow .txt .rn.rn-date{background:none;border-color:transparent;padding:0 2px 0 0;color:var(--ink-3)}
+.crow .txt .rnow .rprog{margin-left:0}
+.crow .txt > b .rtl-rest{font-weight:inherit}
+/* 0915 状态板 v1.1 自查第 1 条:行号互指补上那一行标题的第一句(kit.js linkRowRefs) */
+.xref{color:inherit;text-decoration:none;border-bottom:1px dotted var(--ink-3);cursor:pointer}
+.xref:hover{border-bottom-style:solid}
+.xref-t{color:var(--ink-2);font-weight:500}
+.xref-in{display:inline}
+/* 0915:分项 li 符号之外的内容包成一栏(kit.js wrapFlexLi) */
+.sli{flex:1 1 auto;min-width:0}
+.crow.xref-hit{background:#fef3c7;transition:background .3s}
+
+/* ⭐⭐ 「卡着的」——板顶第一块(0918 负责人:「这件事一定要放最前面」)。
+   ⛔ 类名全部新起 `bk-` 前缀,**不复用现成的** —— 0918 刚栽过:方案板里复用了骨架的 `.rec`
+   (它是 position:absolute 角标)⇒ 三个推荐圆片全飘到右上角叠在一起,只有真渲图看得见。 */
+#blocked-first { margin: 14px 0 6px; display: flex; flex-direction: column; gap: 6px; }
+.bk-t { font-size: 13px; color: var(--ink-2); padding: 0 2px 2px; }
+.bk-t b { color: var(--crit); }
+.bk-row {
+  display: flex; align-items: baseline; gap: 10px; flex-wrap: wrap;
+  padding: 9px 12px; border-radius: 10px; text-decoration: none;
+  background: var(--card); border: 1px solid var(--line); border-left: 3px solid var(--line);
+  color: var(--ink); font-size: 13.5px; line-height: 1.5;
+}
+.bk-row:hover { border-color: var(--ink-3); }
+.bk-mine { border-left-color: var(--crit); background: var(--crit-soft); }
+.bk-who {
+  flex: none; font-family: 'IBM Plex Mono', monospace; font-size: 11px;
+  padding: 2px 7px; border-radius: 999px; background: var(--sunk); color: var(--ink-2);
+}
+.bk-mine .bk-who { background: var(--crit); color: var(--card); }
+.bk-text { flex: 1; min-width: 0; }
+.bk-age { flex: none; font-size: 11.5px; color: var(--ink-3); }
+.bk-act { flex-basis: 100%; font-size: 12.5px; color: var(--ink-2); padding-left: 2px; }
+.bk-flash { animation: bk-flash 1.6s ease-out; }
+@keyframes bk-flash { 0%, 100% { background: transparent; } 20% { background: var(--warn-soft); } }
+@media (max-width: 640px) { .bk-row { font-size: 13px; } .bk-age { display: none; } }
+/* ⭐⭐ 0921 显示层可读性:长文字块只露第一句,流水账只露最新一段(kit.js tameAll)。类名全部新起 tame- 前缀。 */
+.tame-more { color: var(--signal); font-size: 12.5px; text-decoration: none; white-space: nowrap; cursor: pointer; }
+.tame-more:hover { text-decoration: underline; }
+.tame-full { display: inline; }   /* 展开后接着第一句的位置读下去,不另起一段 */
+.tame-full[hidden] { display: none; }
+.tame-log { margin: 4px 0 0; padding-left: 0; list-style: none; display: flex; flex-direction: column; gap: 6px; }
+.tame-log li { padding: 6px 10px; border-left: 2px solid var(--line); background: var(--sunk); border-radius: 6px; font-size: 13px; line-height: 1.55; }
+.tame-log li:first-child { border-left-color: var(--signal); }
+/* 1020:①②③ 清单展开后一项一行;不是按时间排的,第一项不高亮 */
+.tame-num li:first-child { border-left-color: var(--line); }
+.tame-numhead { display: block; margin: 2px 0 0; }
+.lede[data-dup] { display: none; }
+.tame-date { display: inline-block; font-family: 'IBM Plex Mono', monospace; font-size: 11px; color: var(--ink-3); margin-right: 8px; }
+.tame-sum { display: inline; }
+/* ⛔ 0921 负责人截图:展开后第一句没藏住、全文又整段出一遍 —— 上面那条 display:inline 盖掉了浏览器对 [hidden] 的默认隐藏。
+   凡是给会被 hidden 的元素写了 display,必须同时写这一条。 */
+.tame-sum[hidden] { display: none; }
+.tame-loose { display: inline; }
+/* ⭐ 0922 负责人拍可视化①②:时间条 / 分项分段条 / 目录条的大数字与分段总览。颜色只用 kit 已有令牌 ⇒ 深浅色跟着走 */
+.crow .txt .rnow .rtime{display:inline-flex;align-items:center;gap:7px}
+.rt-track{position:relative;display:inline-block;width:120px;height:7px;border-radius:999px;background:var(--line-soft)}
+.rt-fill{position:absolute;left:0;top:0;bottom:0;border-radius:999px;background:var(--signal)}
+.rt-fill.late{background:var(--crit)} .rt-fill.due{background:var(--warn)}
+.rt-eta{position:absolute;top:-3px;bottom:-3px;width:2px;border-radius:1px;background:var(--ink-2)}
+.rt-l{font-size:12px;color:var(--ink-3)} .rt-l.late{color:var(--crit);font-weight:600} .rt-l.due{color:var(--warn);font-weight:600}
+.crow .txt .rprog{display:inline-flex;align-items:center;gap:6px;background:none;border:0;padding:0}
+.rp-seg{display:inline-flex;gap:2px;width:72px} .rp-seg i{flex:1;height:7px;border-radius:2px;background:var(--line-soft)}
+.rp-seg i.ok{background:var(--good)} .rp-seg i.go{background:var(--signal)}
+.rp-n{font-size:12px;color:var(--ink-3)}
+.toc-stack{flex:1 1 100%;margin-bottom:4px}
+.ts-cap{font-size:12px;font-weight:600;color:var(--ink-3)}
+.ts-bar{display:flex;height:12px;border-radius:999px;overflow:hidden;margin:5px 0;background:var(--line-soft)}
+.ts-lg{display:flex;flex-wrap:wrap;gap:3px 14px;font-size:12px;color:var(--ink-2)}
+.ts-lg i{display:inline-block;width:9px;height:9px;border-radius:2px;margin-right:5px;vertical-align:middle}
+.ts-you{background:var(--crit)} .ts-blk{background:var(--warn)} .ts-doing{background:var(--signal)} .ts-watch{background:var(--dim)} .ts-obs{background:var(--warn);opacity:.4} .ts-done{background:var(--good)}
+.toc-cell.toc-tile{flex-direction:column;align-items:flex-start;gap:0;border-radius:12px;padding:6px 14px 7px;min-width:110px}
+.toc-tile .toc-n{font-style:normal;font-size:24px;font-weight:700;line-height:1.15;color:var(--ink)}
+.toc-tile.toc-urgent .toc-n{color:var(--crit)}
+/* ⭐ 0922 可视化③:「要你的」动作放最前 */
+.vz-acts{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:10px;margin:4px 0 8px}
+.vz-act{border:1px solid var(--line);border-radius:10px;padding:10px 12px;background:var(--card)} .vz-act.parked{opacity:.78}
+.vz-act-h{display:flex;flex-wrap:wrap;gap:4px 8px;align-items:center;font-size:12.5px} .vz-act-h > a{flex:1 1 100%;min-width:0}   /* 1119:标题一长,链接被「要你动手」挤成窄竖条 */
+.vz-kind{font-weight:700;padding:1px 8px;border-radius:999px;white-space:nowrap;flex:none}   /* 0928:标题一长就被挤成竖排「要你/拍」 */ .k-decide{background:var(--crit-soft);color:var(--crit)} .k-do{background:var(--warn-soft);color:var(--warn)}
+.vz-act-t{font-size:14px;margin:6px 0;line-height:1.5}
+.vz-meta{display:flex;flex-wrap:wrap;gap:6px;margin:4px 0}
+.vz-chip{font-size:12px;font-weight:400;padding:1px 8px;border-radius:999px;border:1px solid var(--line);background:var(--sunk)}
+.vz-chip.warn{border-color:var(--warn);background:var(--warn-soft)} .vz-chip.grey{color:var(--ink-3)}
+.vz-action{background:var(--crit-soft);border-radius:10px;padding:10px 12px;margin:4px 0 10px}
+.vz-a-h{font-weight:700;font-size:14.5px;margin-bottom:4px}
+.vz-action .opts{margin-top:6px}
+.vz-steps{display:flex;gap:6px;flex-wrap:wrap;margin:6px 0}
+.vz-step{flex:1 1 150px;border:1px solid var(--line);border-radius:8px;padding:6px 9px;font-size:13px;background:var(--card)}
+.vz-step em{font-style:normal;display:inline-block;width:18px;height:18px;border-radius:50%;background:var(--signal);color:#fff;text-align:center;line-height:18px;font-size:11px;margin-right:6px}
+/* ⭐ 0923 可视化④前一半:大卡问题放最前、其余一行一段(不放回复框) */
+.vz-big{background:var(--sunk);border:1px solid var(--line);border-radius:10px;padding:10px 12px;margin:4px 0 10px}
+.vz-q{background:var(--crit-soft);border-radius:8px;padding:6px 10px;margin:5px 0;font-size:14px;line-height:1.5}
+.vz-q b{color:var(--crit)}
+.vz-rest-h{font-size:12px;color:var(--ink-3);font-weight:600;margin:10px 0 4px}
+.vz-line{padding:4px 0;border-top:1px solid var(--line-soft);font-size:13.5px;line-height:1.55}
+.vz-lines .vz-line:first-child{border-top:0}
+.vz-no{display:inline-block;min-width:1.4em;color:var(--ink-3)}
+.vz-full{margin:4px 0 8px;padding:8px 10px;background:var(--card);border-radius:8px;font-size:13px}
+.vz-line > span{white-space:pre-line}
+/* 1001(负责人:「没有办法点进方案板去看」):写成文字的网址由 kit 变成可点(linkifyBare);长网址(一串百分号编码)允许在任意处折行,别撑出卡外 */
+a.autolink{color:inherit;text-decoration:underline;text-underline-offset:2px;overflow-wrap:anywhere;word-break:break-all}
+/* ⭐⭐ 1006(负责人:「点了当场记到板上,这个我觉得是 OK 的」):「要你的」卡上直接答 —— 选项可点、补充框、已答标记、板顶「你已答 N 件」那一条。
+   类全部由 kit.js 的 initAnswers 那一块运行时加上;⚠ 加类必须在这里有样式(lint 孤儿类),他的面板只有 700–900px 宽 ⇒ 一律不设定宽、不加侧栏。 */
+.opt.ans-opt{cursor:pointer;user-select:none;-webkit-user-select:none;transition:border-color .12s,background .12s}
+.opt.ans-opt:hover{border-color:var(--signal)}
+.opt.ans-opt:focus-visible{outline:2px solid var(--signal);outline-offset:2px}
+.opt.ans-other{border-style:dashed}
+.opt.ans-other b{font-weight:500;color:var(--ink-2)}
+/* 选中 = 实心深底 + ✓:和「建议项」的浅绿底分得开(建议 ≠ 他选的) */
+/* 1006 负责人第一次用就说:「绿色那一个是它推荐的…我以为我是已经默认已经选了」「点了以后变成黑的有点奇怪」
+   ⇒ 能点的选项里:推荐 = 不上色,只挂一个「建议」小标;已选 = 绿底绿边 + 实心「✓ 已选」标。两种状态不再共用绿色。
+   ⚠ 只改 .ans-opt(能点的);不能点的展示用 .opt.pick 照旧是绿的(那里没有「选没选」这回事)。 */
+.opt.ans-opt.pick{border-color:var(--line);background:var(--card);color:inherit}
+.opt.ans-opt.pick small{color:var(--ink-3)}
+.opt.ans-opt.pick b::after{content:"建议";display:inline-block;margin-left:8px;padding:0 7px;border:1px solid var(--good);border-radius:999px;
+  font-size:11px;line-height:17px;font-weight:500;color:var(--good);vertical-align:2px;white-space:nowrap}
+.opt.ans-opt.ans-on{border-style:solid;border-color:var(--good);background:var(--good-soft);box-shadow:inset 0 0 0 1px var(--good)}
+.opt.ans-opt.ans-on b{color:var(--ink)}
+.opt.ans-opt.ans-on small{color:var(--good)}
+.opt.ans-opt.ans-on b::after{content:"✓ 已选";display:inline-block;margin-left:8px;padding:0 8px;border:1px solid var(--good);border-radius:999px;
+  font-size:11px;line-height:17px;font-weight:600;color:var(--card);background:var(--good);vertical-align:2px;white-space:nowrap}
+.ans-box{display:flex;flex-direction:column;gap:7px;margin-top:10px;min-width:0}
+.card > .ans-box{flex:1 1 0;padding:14px 18px}
+.ans-note{display:block;width:100%;box-sizing:border-box;min-height:56px;resize:vertical;border:1.5px solid var(--line);border-radius:8px;background:var(--card);color:var(--ink);font:inherit;font-size:14px;font-weight:400;line-height:1.5;padding:8px 11px}
+.ans-note:focus{outline:none;border-color:var(--signal)}
+.ans-note::placeholder{color:var(--ink-3)}
+/* 1113 夜负责人(语音转文字时往上拖被拽回框):框的原位滚出屏外时钉在屏幕底部,见 kit.js ansDockWire */
+.ans-box.ans-dock{position:fixed;bottom:0;z-index:90;margin:0;box-sizing:border-box;background:var(--card);border:1px solid var(--line);border-bottom:0;border-radius:12px 12px 0 0;box-shadow:0 -8px 24px rgba(15,18,24,.14);padding:10px 12px 12px}
+.ans-box.ans-dock .ans-note{max-height:35vh;overflow:auto}
+.accept-brief details.more{margin-top:3px}
+.accept-brief details.more>summary{cursor:pointer;font-size:12.5px;color:var(--ink-3);list-style:none}
+.accept-brief details.more>summary::before{content:"▸ "}
+.accept-brief details.more[open]>summary::before{content:"▾ "}
+.accept-brief details.more>ul{margin-top:2px}
+.accept-pts{margin:2px 0 0;padding-left:18px}
+.accept-pts>li{margin:2px 0}
+.ans-dock-ph{display:block;min-height:1px}   /* 钉底时框原位留的空位,高度由 kit.js 按框高写 */
+.ans-foot{display:flex;gap:10px;align-items:center;flex-wrap:wrap;min-width:0}
+.ans-save{font:inherit;font-size:13px;font-weight:600;line-height:1.3;padding:5px 14px;border-radius:999px;border:1.5px solid var(--ink);background:var(--ink);color:var(--card);cursor:pointer;flex:none}
+.ans-save{background:var(--card);color:var(--ink);border-color:var(--line)}
+.ans-save:hover{border-color:var(--signal);color:var(--signal)}
+.ans-subfab{position:fixed;right:14px;bottom:58px;z-index:100;font:inherit;font-size:15px;font-weight:700;line-height:1.3;padding:11px 20px;border-radius:999px;border:0;background:var(--ink);color:var(--card);cursor:pointer;box-shadow:0 4px 14px rgba(0,0,0,.22)}
+.ans-subfab:hover{background:var(--signal)}
+.ans-subfab[hidden]{display:none}
+.ans-hint{flex:1 1 160px;min-width:0;font-size:12.5px;font-weight:400;color:var(--ink-3)}
+.ans-hint.ans-fail{color:var(--crit);font-weight:600}
+.ans-orphans{margin:8px 0 12px;padding:10px 12px;border:1.5px solid var(--warn);border-radius:10px;background:var(--warn-soft);display:flex;flex-direction:column;gap:10px;min-width:0}
+.ans-orphan-h{font-size:13.5px;font-weight:600;color:var(--ink)}
+.ans-orphan{display:flex;flex-direction:column;gap:6px;min-width:0}
+.ans-orphan-q{font-size:12.5px;color:var(--ink-2);overflow-wrap:anywhere}
+.ans-orphan-t{display:block;width:100%;box-sizing:border-box;resize:vertical;border:1px solid var(--line);border-radius:8px;background:var(--card);color:var(--ink);font:inherit;font-size:13.5px;line-height:1.5;padding:7px 10px}
+.ans-head{display:flex;gap:9px;align-items:center;flex-wrap:wrap;min-width:0}
+.ans-head[hidden],.ans-copied[hidden]{display:none}
+.ans-mark{font-size:12.5px;font-weight:600;padding:3px 10px;border-radius:999px;background:var(--good-soft);color:var(--good);min-width:0;overflow-wrap:anywhere}
+.ans-copied{font-size:12px;color:var(--ink-3)}
+.ans-undo{font:inherit;font-size:12px;color:var(--ink-3);background:none;border:0;padding:2px 0;text-decoration:underline;text-underline-offset:2px;cursor:pointer}
+.ans-undo:hover{color:var(--crit)}
+/* 已答的卡淡一档(比「已看过」的 .62 浅),鼠标 / 焦点进卡就回满 —— 仍可改 */
+.card.ans-done{opacity:.74}
+.ans-qlist{margin:6px 0 10px;padding:6px 10px;border-left:3px solid #1d4ed8;background:rgba(29,78,216,.06);border-radius:0 6px 6px 0;font-size:13px;line-height:1.6}
+.ans-qlist-h{font-weight:600;color:#1d2433}
+.ans-qlist-go{margin-left:10px;font-weight:600;color:#1d4ed8;text-decoration:none}
+.card.ans-multi .opts,.card.ans-multi .ans-box{display:none}
+.ans-q-no{color:#B42318}
+.ans-q-pend{color:#9a6700}
+.ans-q-sub{color:#1a7f37}
+.card.ans-done:hover,.card.ans-done:focus-within{opacity:1}
+/* 1014:方案页上答过(kit.js ansPaintCard)⇒ 选项和补充框收起,卡头那句说清楚已答、等这条线处理 */
+.card.ans-viaprop .opts,.card.ans-viaprop .ans-box,.card.ans-viaprop .vz-action{display:none}
+#ans-bar{display:flex;gap:8px 12px;align-items:center;flex-wrap:wrap;margin:14px 0 6px;padding:9px 14px;border:1.5px solid var(--signal);border-radius:12px;background:var(--signal-soft);color:var(--ink);font-size:14px}
+#ans-bar[hidden]{display:none}
+.ans-clip{position:fixed;left:-9999px;top:0;width:1px;height:1px;opacity:0}
+/* ── 1006 负责人两句:「你交代的」今天哪几行动过 · 换棒之后哪几行这一棒还没核过(数全是 touch 记在行上的,作者不填) */
+/* 区头下面那一条:今天动过 N 行,一项一个可点的小片(点了滚到那一行并闪一下);一行都没有时 kit 不建它 */
+.rtoday{display:flex;flex-wrap:wrap;align-items:center;gap:6px 7px;margin:8px 0 2px;min-width:0;font-size:12.5px;color:var(--ink-2)}
+.rtoday-h{font-weight:600;color:var(--ink);flex:none}
+.rtoday-i,.rtoday-more{display:inline-block;max-width:100%;padding:2px 9px;border-radius:999px;border:1px solid var(--line);background:var(--card);color:var(--ink-2);text-decoration:none;cursor:pointer;line-height:1.5;overflow-wrap:anywhere}
+.rtoday-i:hover,.rtoday-more:hover{border-color:var(--signal);color:var(--signal)}
+.rtoday-i[hidden]{display:none}
+.rtoday-more{border-style:dashed;color:var(--ink-3)}
+/* 行尾那枚「这一棒还没核过」:灰字、虚线框,不抢红 / 橙标的位置 */
+/* 1008 行尾那枚「排在「…」后面」(data-after):可点,跳到前面那一行;前面那行不在板上了 ⇒ 虚线、不可点。长标题不许把行撑出去 */
+.rafter{display:inline-block;max-width:100%;margin-left:6px;font-size:11.5px;padding:1px 8px;border-radius:999px;border:1px solid var(--line);background:var(--line-soft);color:var(--ink-2);text-decoration:none;vertical-align:middle;line-height:1.5;overflow-wrap:anywhere;cursor:pointer}
+a.rafter:hover{border-color:var(--signal);color:var(--signal)}
+.rchat{display:inline-block;max-width:100%;margin-left:6px;font-size:11.5px;padding:1px 8px;border-radius:999px;border:1px solid var(--crit);color:var(--crit);font-weight:600;vertical-align:middle;line-height:1.5;overflow-wrap:anywhere}
+.rafter-gone{border-style:dashed;background:transparent;color:var(--ink-3);cursor:default}
+.rbaton{display:inline-block;margin-left:6px;font-family:"IBM Plex Mono",monospace;font-size:10.5px;padding:1px 7px;border-radius:999px;border:1px dashed var(--line);color:var(--ink-3);vertical-align:middle;line-height:1.5;white-space:nowrap}
+/* ask --text:要他过目的原文。换行在源码里是 <br>,pre-wrap 只为留住原文里的连续空格;长网址 / 长串不许把卡撑出去 */
+.otext{margin-top:10px;min-width:0}
+.otext-h{font-size:12px;font-weight:600;color:var(--ink-3);letter-spacing:.04em;margin-bottom:5px}
+.otext-b{border-left:3px solid var(--ink-3);background:var(--line-soft);border-radius:0 8px 8px 0;padding:9px 13px;font-size:14.5px;line-height:1.65;color:var(--ink);white-space:pre-wrap;overflow-wrap:anywhere;min-width:0}
+.otext-b + .otext-b{margin-top:8px}
+/* 1020:原文块的「复制」(wireOtextCopy) */
+.otext-b{position:relative}
+.otext-copy{float:right;margin:-2px -4px 4px 10px;font-size:12px;padding:3px 10px;border:1px solid var(--ink-3);border-radius:6px;background:var(--card);color:var(--ink-2);cursor:pointer}
+.otext-manual{width:100%;margin-top:6px;font:13px/1.5 ui-monospace,monospace}
+/* 1021 负责人:要他复制粘贴的命令单独一块、等宽(--copy) */
+.ocode{font:13px/1.6 ui-monospace,SFMono-Regular,Menlo,monospace;border-left-color:var(--signal);background:var(--sunk)}
+.ocopy{min-width:0}
+.ocopy .otext-copy{font-family:-apple-system,BlinkMacSystemFont,sans-serif}
+/* 1113 负责人「你就不能在这个卡上给我放张图片吗?」:卡上的图(ask --img / row --review --img)几张并排、宽度适中,点开新标签页看原图 */
+.cimgs{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px;min-width:0}
+.cimg{display:block;flex:0 1 220px;max-width:220px;border:1px solid var(--line);border-radius:8px;overflow:hidden;background:var(--sunk);cursor:zoom-in;line-height:0}
+.cimg:hover{border-color:var(--signal)}
+.cimg-i{display:block;width:100%;height:150px;object-fit:cover}
+
+/* ⭐⭐ 1009 首屏「在做的」(#doing-top,kit.js paintDoingTop)—— 「卡着的」索引正下方,一行一件:标题 · 上次动 · 预计。
+   超过一天没动的整行琥珀(--warn);⛔ 不用红,红留给「等你」。类名全部新起 `dgt-` 前缀,不复用现成的(同 bk- 那条教训)。
+   颜色只用语义变量,三套主题都成立。 */
+#doing-top{margin:10px 0 6px;display:flex;flex-direction:column;gap:3px;min-width:0}
+.dgt-t{font-size:13px;color:var(--ink-2);padding:0 2px 3px;display:flex;flex-wrap:wrap;align-items:baseline;gap:4px 10px}
+.dgt-t b{color:var(--ink)}
+.dgt-sub{font-size:11.5px;color:var(--ink-3)}
+.dgt-row{display:flex;align-items:baseline;gap:9px;min-width:0;padding:5px 11px;border-radius:8px;text-decoration:none;
+  background:var(--card);border:1px solid var(--line);border-left:3px solid var(--signal);color:var(--ink);font-size:13px;line-height:1.5}
+.dgt-row[hidden]{display:none}
+.dgt-row:hover{border-color:var(--ink-3)}
+.dgt-text{flex:1 1 0;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.dgt-when,.dgt-eta{flex:none;font-size:11.5px;color:var(--ink-3);white-space:nowrap}
+.dgt-eta.dgt-late{color:var(--crit);font-weight:600}
+.dgt-flag{flex:none;font-size:11px;font-weight:700;padding:1px 7px;border-radius:999px;background:var(--warn);color:var(--card);white-space:nowrap}
+.dgt-row.dgt-stale{background:var(--warn-soft);border-color:var(--warn);border-left-color:var(--warn)}
+.dgt-row.dgt-stale .dgt-when{color:var(--warn);font-weight:600}
+.dgt-more{align-self:flex-start;font-size:12px;padding:2px 10px;border-radius:999px;border:1px dashed var(--line);color:var(--ink-3);text-decoration:none;cursor:pointer}
+.dgt-more:hover{border-color:var(--signal);color:var(--signal)}
+@media (max-width:640px){.dgt-eta{display:none}}
+
+/* ⭐⭐⭐ 1013 首屏四块(kit.js paintFirstScreen;负责人 10-13 定全部板直接换上)—— 顶上四格数字 + 三块清单 + 收起来的台账。
+   红(--crit)只给「等你」和「没在等谁、却还没开工」;在等别处的用琥珀;在推进的用 --signal。类名全部新起 fsx- 前缀。
+   原来板顶的三块(卡着的索引 / 在做的 / 目录条)在新首屏出来后藏起来,函数照跑(目录条那个还管着区头件数)。 */
+body.fsx-on #blocked-first,body.fsx-on #doing-top,body.fsx-on #board-toc{display:none !important}
+/* 1020 重设计(负责人:「四个颜色板块做的也太难看了…小功能可用性你有没有做」):四块白底卡,颜色只上顶边、数字和每件那行小字;
+   0 件的块变灰不抢眼;卡在你身上 / 没写在等谁的块,块头铺一层浅底。每块露 3 件,「再看 N 件」就地展开。 */
+.fsx-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;align-items:start;margin:16px 0 22px;min-width:0}
+.fsx-col{display:flex;flex-direction:column;gap:12px;min-width:0}
+.fsx-blk{--tone:var(--good);--tone-soft:var(--good-soft);display:flex;flex-direction:column;min-width:0;overflow:hidden;background:var(--card);border:1px solid var(--line);border-top:3px solid var(--tone);border-radius:12px;box-shadow:var(--shadow)}
+.fsx-red{--tone:var(--crit);--tone-soft:var(--crit-soft)}
+.fsx-amber{--tone:var(--warn);--tone-soft:var(--warn-soft)}
+.fsx-teal{--tone:var(--signal);--tone-soft:var(--signal-soft)}
+.fsx-green{--tone:var(--good);--tone-soft:var(--good-soft)}
+.fsx-accept-btn{display:inline-flex;align-items:center;gap:4px;cursor:pointer;font:inherit;font-size:13px;font-weight:600;line-height:1;
+  padding:7px 14px;border-radius:7px;border:1.5px solid var(--line);background:transparent;color:var(--ink);text-decoration:none;
+  transition:background .12s,border-color .12s,color .12s}
+.fsx-accept-btn:hover{border-color:#7a5ad8;color:#7a5ad8}
+a.fsx-accept-btn{color:#7a5ad8;border-color:#d9cff7;background:#f6f3ff;margin-right:auto}
+a.fsx-accept-btn:hover{background:#ece6ff}
+.accept-badge{display:inline-block;color:#7a5ad8;font-size:12px;font-weight:700}
+.fsx-zero{border-top-color:var(--line);box-shadow:none}
+.fsx-h{display:flex;align-items:center;gap:12px;padding:12px 14px 10px}
+.fsx-hot .fsx-h{background:var(--tone-soft)}
+.fsx-num{flex:none;min-width:1.3em;font-size:30px;line-height:1;font-weight:700;color:var(--tone);font-variant-numeric:tabular-nums;text-align:center}
+.fsx-zero .fsx-num{color:var(--ink-3)}
+.fsx-ht{display:flex;flex-direction:column;gap:2px;min-width:0}
+.fsx-ht strong{font-size:15px;color:var(--ink)}
+.fsx-ht small{font-size:12px;line-height:1.4;color:var(--ink-3)}
+.fsx-zero .fsx-ht strong{color:var(--ink-2)}
+.fsx-list{display:flex;flex-direction:column;min-width:0}
+.fsx-row{display:grid;grid-template-columns:minmax(0,1fr) auto;column-gap:10px;row-gap:2px;padding:9px 14px;border-top:1px solid var(--line-soft);color:var(--ink);text-decoration:none;cursor:pointer;min-width:0}
+.fsx-row:hover{background:var(--sunk)}
+.fsx-row:focus-visible{outline:2px solid var(--tone);outline-offset:-2px}
+.fsx-t{grid-column:1;font-size:13.5px;line-height:1.45;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;overflow-wrap:anywhere}
+.fsx-meta{grid-column:1;font-size:12px;line-height:1.4;color:var(--ink-3);overflow-wrap:anywhere}
+.fsx-meta.fsx-m-red{color:var(--crit);font-weight:600}
+.fsx-meta.fsx-m-amber{color:var(--warn)}
+.fsx-meta.fsx-m-teal{color:var(--signal)}
+.fsx-meta.fsx-m-green{color:var(--good)}
+/* 1110 「在推进的」块底:定了日子、到时再看的收成一行,点开才列 */
+.fsx-wfold{border-top:1px solid var(--line-soft)}
+.fsx-wfold-h{display:block;width:100%;text-align:left;font:inherit;font-size:13px;line-height:1.4;color:var(--ink-2);background:none;border:0;padding:10px 14px;cursor:pointer}
+.fsx-wfold-h:hover{background:var(--sunk);color:var(--ink)}
+.fsx-wfold-h:focus-visible{outline:2px solid var(--tone);outline-offset:-2px}
+.fsx-wfold-l{display:none}
+.fsx-wfold-open .fsx-wfold-l{display:block}
+/* 1120 卡着按在等谁合成一行(kit.js stuckGroupLine):组头同一般行,点开在下面缩进列每一件 */
+.fsx-grp{display:block;min-width:0}
+.fsx-grp-h{cursor:pointer}
+.fsx-grp-l{display:none;margin-left:14px;border-left:2px solid var(--line-soft)}
+.fsx-grp-open>.fsx-grp-l{display:block}
+/* 1105 负责人(经 AI平台 v2.0):原来只露一行、半宽列里约 30 字,第一句写了结论也看不全 ⇒ 露到 4 行(fsFirst 上限 96 字,半宽列每行约 30 字,要 4 行才放得下;短句不占多余高度) */
+.fsx-sub{grid-column:1;font-size:12px;line-height:1.45;color:var(--ink-2);display:-webkit-box;-webkit-line-clamp:4;-webkit-box-orient:vertical;overflow:hidden;overflow-wrap:anywhere}
+.fsx-sub.fsx-child-stall{color:var(--crit)}
+.fsx-sub.fsx-wrap{display:block;overflow:visible;color:var(--ink-3)}
+.fsx-blk:not(.fsx-open) .fsx-over{display:none}
+.fsx-empty{padding:2px 14px 14px;font-size:13px;color:var(--ink-3)}
+.fsx-more{margin-top:auto;padding:9px 14px;border:0;border-top:1px solid var(--line-soft);background:none;text-align:left;font:inherit;font-size:12.5px;font-weight:600;color:var(--tone);cursor:pointer}
+.fsx-more:hover{background:var(--sunk)}
+.fsx-open .fsx-more{color:var(--ink-3)}
+.card.fsx-flash{box-shadow:0 0 0 3px var(--crit);transition:box-shadow .3s}
+@media (max-width:640px){.fsx-grid{grid-template-columns:minmax(0,1fr)}}
+.fsx-ledger{margin:18px 0;min-width:0}
+.fsx-ledger .fsx-trim,.fsx-ledger > .zone,.fsx-ledger > .rtoday{display:none !important}
+/* 1020:主线 / 排队各收成一行(foldMainQueue) */
+.fold1{margin:10px 0;min-width:0}
+/* 1110:「② 做完的」收成一行,点区头才展开(每件的「知道了」已撤) */
+.fsx-fold:not(.fsx-open) .fsx-list{display:none}
+.fsx-fold .fsx-h[role=button]{cursor:pointer}
+.fsx-fold .fsx-h[role=button]:hover{background:var(--sunk)}
+.fsx-fold .fsx-h:focus-visible{outline:2px solid var(--tone);outline-offset:-2px}
+.fold1>summary{cursor:pointer;padding:10px 14px;border:1px dashed var(--ink-3);border-radius:10px;font-size:13.5px;color:var(--ink-2);background:var(--card)}
+.fold1[open]>summary{margin-bottom:8px}
+.fsx-ledger>summary{cursor:pointer;padding:12px 14px;border:1px dashed var(--ink-3);border-radius:10px;font-weight:600;background:var(--card);color:var(--ink)}
+
+/* 1020 晚:大卡的背景一键全部展开(kit.js vzBig);没写要他答什么的卡先说一句 */
+button.vz-rest-h{display:block;margin:8px 0 2px;padding:5px 12px;border:1px solid var(--line);border-radius:999px;background:var(--card);font:inherit;font-size:12.5px;font-weight:600;color:var(--signal);cursor:pointer}
+button.vz-rest-h:hover{border-color:var(--signal)}
+.vz-noq{margin:4px 0 6px;font-size:13px;font-weight:600;color:var(--warn)}
+.vz-line .vz-full{white-space:pre-line;display:block}   /* 1119:行内 span 带内边距 + 白底,折行时白块盖住上下行的字 */
+/* 1105 暂停的线:首屏收成一句(paintFirstScreen) */
+.fsx-paused{padding:12px 14px;border:1px solid #d9d9d6;border-radius:10px;background:#f6f6f4;color:#55554f;font-size:14px;line-height:1.6}
+.fsx-paused-off{display:none !important}
+/* 1110 子线投影:投影卡 chips 最前「来自 子线·X」、首屏「要你做的」那一件后面的同色小药丸 */
+.chip.proj-from{background:var(--good-soft);color:var(--good);border-color:transparent}
+.fsx-proj{display:inline-block;margin-left:8px;padding:1px 8px;border-radius:999px;background:var(--good-soft);color:var(--good);font-size:11px;font-weight:500}
+
+/* 1113 「打开看」指向本板自己时的说明条与首屏闪一下(不然像没反应) */
+.open-self-toast{position:fixed;left:50%;top:18px;transform:translateX(-50%);z-index:9999;background:#2b2440;color:#fff;font-size:13px;padding:9px 16px;border-radius:8px;box-shadow:0 6px 20px rgba(0,0,0,.18)}
+@keyframes openSelfFlash{0%{box-shadow:0 0 0 0 rgba(122,90,216,.55)}100%{box-shadow:0 0 0 14px rgba(122,90,216,0)}}
+.open-self-flash{animation:openSelfFlash 1.2s ease-out 2;border-radius:10px}
+
+.fsx-accept-line{cursor:pointer}
+.fsx-tag-accept{display:inline-block;margin-right:6px;padding:0 6px;border:1px solid #e4dcfa;border-radius:4px;background:#f3efff;color:#7a5ad8;font-size:11.5px;font-weight:700;line-height:18px;vertical-align:1px;white-space:nowrap}   /* 1114 第 3 步:首屏「要你做的」里验收件行首的「待验收」 */   /* 1113 晚:首屏待你验收一行,点了跳到下面那张验收卡(同「要你做的」) */
+.accept-open-link{margin:8px 0 4px;align-self:flex-start;width:max-content}   /* 1113 晚:验收卡上的入口按钮(样式同 fsx-accept-btn 浅紫) */
+a.accept-open-link{color:#7a5ad8;border-color:#d9cff7;background:#f6f3ff}
+.accept-brief{display:flex;flex-direction:column;gap:8px;margin:6px 0 10px;padding:10px 14px;border-radius:8px;background:#f6f3ff;border:1px solid #e4dcfa;font-size:13.5px;line-height:1.6}   /* 1113 晚:验收卡的做到哪 / 看什么 */
+.accept-brief-sec b{display:block;color:#7a5ad8;font-weight:600;font-size:12px;margin-bottom:2px}
+/* 1114 验收卡新写法(data-accept-fmt="2"):「你交代的 → 现在」一件一行不折叠;入口按钮旁一句看什么 */
+.accept-got{display:flex;flex-direction:column;gap:4px;margin:6px 0 8px;padding:10px 14px;border-radius:8px;background:#f6f3ff;border:1px solid #e4dcfa;font-size:14px;line-height:1.55}
+.accept-got-i{display:block}
+.accept-small{margin-top:8px}   /* 1116 小修卡整块(电商-基建 #a5b9、AI Harness #5e21:漏定义,挂卡即 lint 红)*/
+.accept-small-tip{margin:4px 0 0;color:#6b6b80;font-size:13px}   /* 1116 小修卡 */
+.accept-small-i{position:relative;padding:4px 64px 4px 0;border-bottom:1px dashed #e4dcfa}
+.accept-small-i:last-child{border-bottom:none}
+.accept-small-see{display:block;color:#6b6b80;font-size:13px}
+.accept-small-see b{font-weight:600;margin-right:2px}
+.small-back{position:absolute;right:0;top:4px;padding:2px 10px;border:1px solid #d9cff5;border-radius:6px;background:#fff;color:#5b4bb7;font-size:13px;cursor:pointer}
+.small-back.on{background:#fdecec;border-color:#f3b4b4;color:#b42318}
+.small-back-box{margin-top:4px}
+.small-back-note{width:100%;box-sizing:border-box;min-height:32px;padding:6px 8px;border:1px solid #f3b4b4;border-radius:6px;font:inherit;font-size:13px;resize:vertical}
+.accept-got-t{color:var(--ink-2)}
+a.accept-got-t{color:var(--ink-2);text-decoration:none}
+a.accept-got-t:hover{text-decoration:underline}
+.accept-got-a{margin:0 6px;color:#7a5ad8;font-weight:600}
+.accept-got-v{color:var(--ink);font-weight:600}
+.accept-entry{display:flex;align-items:center;flex-wrap:wrap;gap:4px 10px;margin:4px 0 8px}
+.accept-entry .accept-open-link{margin:0}
+.accept-entry .deep{margin:0}
+.accept-check{font-size:13px;color:var(--ink-2)}
+/* 1115 FDE #c41e:单行验收的第 2–4 条结果 · 「还要你做」一块;sw-drop:「为什么不做」一块 */
+.accept-got-more .accept-got-a{margin-left:0}
+.accept-todo{margin:0 0 8px;padding:8px 14px;border-radius:8px;background:#fff8e8;border:1px solid #f1dfb2;font-size:13.5px;line-height:1.55}
+.accept-todo b{display:block;color:#9a6a00;font-weight:600;font-size:12px;margin-bottom:2px}
+.accept-todo ul{margin:0;padding-left:18px}
+.accept-drop{margin:0 0 8px;padding:8px 14px;border-radius:8px;background:#f7f7f5;border:1px solid #e3e3df;font-size:13.5px;line-height:1.55}
+.accept-drop b{display:block;color:var(--ink-2);font-weight:600;font-size:12px;margin-bottom:2px}
+.accept-drop-v{color:var(--ink);font-weight:600}
+/* 1116 讲人话:验收卡标题下第一行「去哪看:…」 */
+.accept-see{margin:4px 0 6px;font-size:14px;line-height:1.55;color:var(--ink)}
+.accept-see b{color:#7a5ad8;font-weight:600;margin-right:2px}
+.accept-see-v{color:var(--ink)}
+/* 1117 你问的 → 回答 / 怎么来的 / 挂了多久(负责人 11-17 批) */
+.accept-badge-asked{color:#1f7a6d}
+/* 1120 做完没有的牌子(board.py _done_state_label / kit doneStateMark):标题正上方,照 .chip 的样子放大一号;绿 = 做完了,橙 = 没做完 · 还差 … */
+.done-state{align-self:flex-start;display:inline-block;max-width:100%;font-size:13px;font-weight:700;line-height:1.35;letter-spacing:.02em;padding:3px 10px;border-radius:5px;border:1px solid transparent}
+.done-state.ds-done{background:var(--good-soft);color:var(--good)}
+.done-state.ds-partial{background:var(--warn-soft);color:var(--warn)}
+.accept-got-h{font-size:12px;font-weight:700;color:#7a5ad8;letter-spacing:.04em}
+a.accept-got-v{color:var(--ink);text-decoration:none}
+a.accept-got-v:hover{text-decoration:underline}
+/* 1117 晚 E–H(负责人 14:40 打回回答卡):回答一段话(第一句加粗)+ 可选的表(素边,窄屏横着滑,不挤坏)/ 标题已带「你问」不重复小标 / 无卡号不出 */
+.accept-ans{margin:2px 0 10px}
+.accept-parts{margin:4px 0 8px;color:var(--ink);font-size:15px;line-height:1.65;overflow-wrap:anywhere}
+.accept-parts b{margin-right:4px;font-weight:700}
+.accept-parts a{color:inherit;text-decoration:none}
+.accept-parts a:hover{text-decoration:underline}
+.accept-ans-p{margin:2px 0 0;font-size:15px;line-height:1.75;color:var(--ink)}
+a.accept-ans-v{color:var(--ink);text-decoration:none}
+a.accept-ans-v:hover{text-decoration:underline}
+a.accept-ans-v b{font-weight:700}
+.accept-ans-tbl{overflow-x:auto;-webkit-overflow-scrolling:touch;margin:10px 0 2px}
+.top > .accept-ans-tbl{margin-bottom:10px}
+.accept-ans-t{width:100%;border-collapse:collapse;font-size:14px;margin:0}
+.accept-ans-t th{text-align:left;font-size:12.5px;font-weight:600;color:var(--ink-2);padding:6px 10px;border-bottom:1px solid var(--line);white-space:nowrap}
+.accept-ans-t td{padding:7px 10px;border-bottom:1px solid var(--line);vertical-align:top;min-width:4.5em}
+.accept-ans-t td:first-child{white-space:normal;width:auto;font-weight:600}
+.accept-badge.accept-badge-dup{display:none}
+.chip.id.noid{display:none}
+.accept-how{margin:0 0 6px;font-size:13px;line-height:1.55;color:var(--ink-2)}
+.accept-how b{color:#7a5ad8;font-weight:600;margin-right:2px}
+.accept-how-v{color:var(--ink)}
+.accept-how-why{color:var(--warn)}
+.chip.card-age{background:transparent;color:var(--ink-3)}
+.fsx-age{margin-left:6px;color:var(--ink-3);font-weight:400}
+.fsx-age::before{content:"· "}
+.accept-brief-sec ol{margin:0;padding-left:20px}
+.accept-brief-sec li{margin:2px 0}
+.card[data-accept="1"] .cimgs{flex-direction:column}   /* 1113 晚负责人:验收卡上的截图要能直接看清 ⇒ 大图、整张显示不裁 */
+.card[data-accept="1"] .cimg{flex:none;max-width:100%;width:max-content;cursor:zoom-in}
+.card[data-accept="1"] .cimg-i{width:auto;max-width:100%;height:auto;max-height:520px;max-height:min(520px,calc(100vh - 300px));object-fit:contain}   /* 1113 晚:图 + 选项 + 答题框要放得进一屏(打字时浏览器把框拉回眼前,图顶不能被挤出屏);依据: 选项 + 框 + 间距实测约 230px */

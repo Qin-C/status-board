@@ -84,6 +84,35 @@ details.fold .fig,details.fold table{background:var(--soft)}
 .opt b{display:block}
 .opt small{color:var(--ink2);font-size:13px}
 .sug{font:600 10px ui-monospace,monospace;color:var(--green);border:1px solid var(--green);border-radius:4px;padding:1px 5px;margin-left:6px;vertical-align:1px}
+/* 1113 按组批量定(```batch):点一个选项定整组;清单收起,个别勾「例外」 */
+.decision .batch-n{font-size:12.5px;color:var(--blue);background:var(--bluebg);border-radius:6px;padding:3px 8px;margin:0 0 8px;display:inline-block}
+details.batch-list{margin-top:8px;border:1px solid var(--line);border-radius:10px;background:var(--soft);padding:6px 12px}
+details.batch-list>summary{cursor:pointer;color:var(--ink2);font-weight:600;font-size:13.5px}
+.batch-exc-n{margin-left:8px;color:var(--amber);font-weight:600}
+.batch-items{list-style:none;margin:6px 0 2px;padding:0;max-height:60vh;overflow:auto}
+.batch-item{display:flex;gap:10px;align-items:flex-start;padding:5px 0;border-top:1px solid var(--line);font-size:13.5px;line-height:1.5}
+.batch-item:first-child{border-top:0}
+.batch-item.exc{background:#fff6e5}
+.batch-exc{flex:none;display:inline-flex;align-items:center;gap:4px;cursor:pointer;color:var(--ink3);font-size:12px;white-space:nowrap}
+.batch-exc-c{accent-color:var(--amber);margin:0}
+.batch-exc-l{line-height:1.2;user-select:none}
+.batch-item.exc .batch-exc{color:var(--amber);font-weight:600}
+.batch-it{min-width:0}
+.batch-it b{font-weight:600}
+.batch-it small{display:block;color:var(--ink2);font-size:12.5px}
+.batch-rows{margin:16px 0}
+.batch-rows>h3,.batch-rows .decision h4{margin:0 0 4px}
+.batch-rows>.cost,.batch-rows>.batch-n{margin:0 0 8px;font-size:13px;color:var(--ink2)}
+.batch-rows .decision{margin:8px 0}
+.batch-rows .opts{display:flex;flex-wrap:wrap;align-items:center}
+.batch-rows .opt{gap:6px;align-items:center;padding:5px 10px}
+.batch-rows .opt input{margin:0}
+.row-clear{border:0;background:transparent;color:var(--ink2);font:inherit;font-size:13px;text-decoration:underline;cursor:pointer}
+[id="pick.summary"] li a{display:block;padding:3px 0}
+.float:has(#row-submit){flex-wrap:wrap;justify-content:flex-end;left:22px}
+.float:has(#row-submit) .q-plan-sub{display:none}
+#row-submit{background:var(--blue);color:#fff}
+#row-submit:disabled{cursor:wait}
 .note{display:block;width:100%;margin-top:8px;border:1px solid var(--line);border-radius:8px;padding:8px 10px;font:inherit;font-size:13.5px;line-height:1.55;background:#fff;color:var(--ink);resize:vertical;min-height:58px}
 .note:focus{outline:2px solid var(--ink);outline-offset:-1px}
 /* 1020:输入时停靠在屏幕底部(plan.js dock),页面随便滚 */
@@ -112,3 +141,25 @@ dialog #copy{background:var(--ink);color:#fff;border-color:var(--ink)}
 .draft p{font-size:15.5px;line-height:1.8}
 .draft p:has(> img){display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:10px;align-items:start}
 .draft p:has(> img) img{width:100%}
+.bar-g{font-size:12.5px;font-weight:600;color:var(--ink2);margin-top:6px;padding-bottom:2px;border-bottom:1px solid var(--line)}
+.bar-g:first-child{margin-top:0}
+.quota{display:grid;gap:12px}
+.q-card{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:12px 14px}
+.q-name{font-size:12.5px;font-weight:600;color:var(--ink2)}
+.q-big{font-size:20px;font-weight:700;line-height:1.4;margin:2px 0 10px}
+.q-day{font-size:14px;font-weight:600;color:var(--ink2);margin-left:4px}
+.q-bar{position:relative;height:16px;background:#efece4;border-radius:8px;margin:0 0 8px}
+.q-bar i{position:absolute;top:0;height:100%}
+.q-bar .q-u:first-child{border-radius:8px 0 0 8px}
+.q-u{background:#5b6b82}
+.q-u.q-r{background:repeating-linear-gradient(45deg,#5b6b82 0 4px,#a3adbd 4px 8px)}
+.q-n{background:#d99a2b}
+.q-l{position:absolute;top:-5px;bottom:-5px;width:3px;margin-left:-1px;background:var(--ink);border-radius:2px}
+.q-key{display:flex;flex-wrap:wrap;gap:4px 14px;font-size:12.5px;color:var(--ink2)}
+.q-key i{display:inline-block;width:10px;height:10px;border-radius:2px;margin-right:5px;vertical-align:-1px}
+.q-key .q-lk{width:3px;background:var(--ink)}
+.q-say{margin-top:8px;font-size:14px;font-weight:600;line-height:1.55}
+.q-say.ok{color:var(--green)}
+.q-say.bad{color:var(--red)}
+.q-say.maybe{color:var(--amber)}
+.q-where{font-size:13.5px;color:var(--ink2);margin-top:4px}

@@ -1,41 +1,33 @@
-# status-board
+# 状态板
 
-> 同时让好几条 AI 工作线替你干活时，打开一个网址就能答出两件事：我派的活怎么样了？现在还要我做什么？
->
-> A local HTML status board and decision pages for people who run many AI coding sessions in parallel. Docs are in Chinese.
+用本地 HTML 状态板汇总进展、排队事项和待负责人决定的问题。
 
-## 这是什么
+截图占位（待补）。
 
-- **状态板**：每条 AI 工作线维护一块本地网页，只有三块：
-  - **大方向**：一句话；
-  - **你交代的**：你派的每件事一行，写着进展和预计哪天好；
-  - **要你的**：要你拍板或动手的，一件一张卡，带建议。
-  你不用翻聊天记录，看板就够。
-- **方案页**:AI 需要你拍板时，先写一份 Markdown 草稿，`plan.py` 检查过再出成一页网页。检查的是：字数是否超限、有没有图、每道题有没有建议。你在页上点选项、写补充，答案回到 AI 那边。
-- **规则**:AI 怎么维护板，见 [docs/rules.md](docs/rules.md)。
-- **设计说明**：为什么这样设计，见 [docs/design.md](docs/design.md)。
+## Claude Code
 
-## 现在开了哪些(第一步)
-
-| 路径 | 内容 |
-|---|---|
-| `plan/plan.py` + `plan/plan-kit/` | 方案页生成器，只用 Python 标准库 |
-| `docs/rules.md` | AI 维护状态板的规则全文 |
-| `docs/design.md` | 设计说明 |
-
-第二步会开 `board.py` 和本地服务。`board.py` 负责建板、写行、挂卡、收卡和检查。这部分还在清理内部内容。
-
-## 试一下
-
-```bash
-python3 plan/plan.py selftest
-python3 plan/plan.py render plan/plan-kit/examples/board-proposal-redesign.md -o demo.html
+```sh
+npx skills add Qin-C/status-board -g -a claude-code -s status-board -y
 ```
 
-直接用浏览器打开 `demo.html` 就能看，也能点选项。右下角「生成回复」会把你的选择整理成一段文字，复制后粘回给 AI。要把答案自动存回给 AI,需要本地服务(第二步开源)。
+## Codex
 
-草稿格式和全部检查项见 [plan/plan-kit/README.md](plan/plan-kit/README.md)。
+```sh
+npx skills add Qin-C/status-board -g -a codex -s status-board -y
+```
 
-## 许可证
+## 首次使用
 
-MIT
+1. 按 [SKILL.md](SKILL.md) 把脚本和配套目录拷到 `~/.claude/scripts/`。
+2. 启动本地 HTTP 伺服，用 `http://127.0.0.1:8777` 打开板。
+3. 在项目仓运行 `python3 ~/.claude/scripts/board.py new "<项目>-<线名>"`。
+4. 填好新板占位内容，每次改完运行 `board.py touch <板路径>`。没有 GitHub 卡时把板顶设为 `workline:none`。
+5. 运行 `python3 ~/.claude/scripts/board.py selftest` 验证安装。
+
+## 配置
+
+配置文件是 `~/.status-board/board-config.json`，也可用 `BOARD_CONFIG` 指定 JSON 文件。
+
+- `owner_names` 是判据识别的负责人称呼，默认 `["负责人"]`。
+- `other_names` 是可选的姓名列表，默认为空。
+- `default_repo` 是渲染卡链接时可用的 `owner/repo` 缺省值，默认为空。排队查询仍以当前板的仓为准。

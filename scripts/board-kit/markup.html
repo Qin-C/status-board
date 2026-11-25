@@ -1,0 +1,280 @@
+<div class="wrap">
+  <header class="head">
+    <div class="eyebrow"><span class="dot"></span>board-kit · 标记速查<span>·</span>照抄即可</div>
+    <h1>状态板可视化原语速查</h1>
+    <p class="sub">左边是渲染效果，右边是<b>逐字可抄</b>的写法。<b>lint 查不出「标记写错」——孤儿类为零也可能整块塌掉，只有渲图看得见。</b>照这里抄能省掉那一轮。</p>
+  </header>
+
+  <div class="northstar"><span class="lab">先记一条通则 + 三条最容易踩的</span>
+    <p><b>⭐ 通则:kit 里凡是用 grid/flex 布局的容器,正文都要包一个块级元素</b> —— 直接塞裸文本 + <code>&lt;b&gt;</code> 会被拆成<b>多个 grid/flex item</b>,加粗那段被甩进下一格。仍需注意两个:<code>.panel</code>(flex 纵向,每个子元素各占一行)· <code>.split</code>(见①)。<b>lint 查不出这个,只有渲图看得见。</b><br>✅ <b><code>.warnbox</code> 已于 2026-08-31 兜底,不再脆</b> —— 从 <code>grid:auto 1fr</code> 换成 <code>flex + min-width:0</code>,多塞子元素不会再让内容落错列。实测:正确写法高度 <b>44→44(零回归)</b>,两种坏写法 <b>102→66 / 80→48</b>。⇒ 推荐写法仍是 <code>.ico</code> + 一个 <code>&lt;div&gt;</code>,但**写错不再毁版面**。<br>⭐ 这条值得记的不是修法,是**它是怎么被发现的**:总控 v5.8 在自己板上撞到并报过来,而<b>正确写法当时就写在你正在读的这一行里</b> —— 说明「文档写了」挡不住「没人打开过文档」。⇒ <b>能兜底就别只写文档</b>(与 <code>.bar-fill</code> / <code>.card</code> 同一类)。</p>
+    <p><b>① <code>.split</code> 是「一根 100% 占比条」，不是两栏布局</b> —— 它 <code>height:30px;overflow:hidden</code>，往里塞多行内容会被<b>静默裁掉</b>。要两栏自己写 <code>grid-template-columns:1fr 1fr</code>。</p>
+    <p class="sub2"><b>② <code>.bar-fill</code> 只写宽度,颜色挑语义</b>（<code>class="bar-fill crit"</code>，可选 <code>ok/warn/crit/mute</code>）—— <b>kit 自带默认色兜底</b>，写死色值会在三套主题里其中一套翻车。<b>③ <code>.card</code> 必须恰好两个子元素</b>：<code>.stripe</code> + <code>.body</code>，塞第三个会塌成多列。</p>
+    <p class="sub2">⛔ <b>要往 <code>kit.css</code> 里加新类名之前:查的是「有没有人<u>定义</u>过它」,不是「有没有人<u>用</u>过它」。</b><br>
+      各板的补充层<b>在 kit 之后加载 ⇒ 它覆盖 kit</b>,所以「全机没人用这个类」完全不能证明安全。
+      <b>实例</b>:2026-08-29 新增的「带箭头的流程」原名 <code>.flow</code>,事前查过 <code>class=</code> 全机 0 命中就动了手 —— 而 iOS 板补充层<b>早就定义了 <code>.flow</code></b>(竖排流程),被 <code>board.py lint</code> 当场拦下,已改名 <code>.chain</code>。
+      🔑 <code>class=</code> 查的是<b>消费者</b>,CSS 定义查的是<b>竞争者</b>;共享层的风险全在竞争者那一侧,<b>而消费者数为 0 时最容易让人放心</b>。(设计系统 v2.5 补的这句)</p>
+  </div>
+
+  <article class="card"><div class="stripe s-crit"></div><div class="body">
+    <div class="top"><div class="chips"><span class="chip crit">用脚本验板的人先看这条</span></div>
+      <h2 class="q">后台标签里，板的自动刷新<b>永远不触发</b></h2>
+      <p class="lede">kit 的两条刷新路径都要求 <code>!document.hidden</code>。用 <code>preview_start</code> / <code>tabs_create</code> 开出来又从没 front 过的标签页 ⇒ <b>一直 hidden ⇒ 一次都不刷</b>。</p></div>
+    <div class="checks">
+      <div class="crow"><span class="mk no">✕</span><span class="txt"><b>症状和「file:// 被渲成静态快照」一模一样</b>都是「我刚写完，它显示的还是半小时前的」。<b>根因完全不同，极易误判成「http 没生效」。</b></span><span class="tag no">会骗人</span></div>
+      <div class="crow"><span class="mk yes">✓</span><span class="txt"><b>后台标签能验渲染，不能验新鲜度</b>每次验证前<b>显式 <code>navigate</code> 重新加载</b>，别指望它自己刷。</span><span class="tag yes">做法</span></div>
+      <div class="crow"><span class="mk no">·</span><span class="txt"><b>这不是 bug</b>你打开那个标签时 <code>visibilitychange</code> 会触发。<b>它只坑用脚本验板的人。</b></span></div>
+    </div>
+  </div></article>
+
+  <div class="zone"><h2>清单 · checks</h2><span class="hint">最常用</span></div>
+  <article class="card"><div class="stripe s-good"></div><div class="body">
+    <div class="checks">
+      <div class="crow"><span class="mk yes">✓</span><span class="txt"><b>加粗那句是标题</b>后面接说明，不要另起标签。</span><span class="tag yes">右侧徽章</span></div>
+      <div class="crow"><span class="mk no">✕</span><span class="txt"><b>否定用 mk no</b>徽章有 <code>tag yes / tag no / tag half</code> 三种。</span><span class="tag no">否定</span></div>
+      <div class="crow"><span class="mk no">?</span><span class="txt"><b>未知用问号</b>徽章可以省略。</span></div>
+    </div>
+    <div class="panel"><div class="panel-t">写法</div><pre style="margin:0;overflow-x:auto;font:12px/1.6 'IBM Plex Mono',monospace">&lt;div class="checks"&gt;
+  &lt;div class="crow"&gt;
+    &lt;span class="mk yes"&gt;✓&lt;/span&gt;
+    &lt;span class="txt"&gt;&lt;b&gt;标题&lt;/b&gt;说明文字&lt;/span&gt;
+    &lt;span class="tag yes"&gt;徽章&lt;/span&gt;
+  &lt;/div&gt;
+&lt;/div&gt;</pre></div>
+  </div></article>
+
+  <div class="zone"><h2>比例条 · bars</h2><span class="hint">数量 / 进度</span></div>
+  <article class="card"><div class="stripe s-crit"></div><div class="body">
+    <div class="bars">
+      <div class="bar-row"><span class="bar-lab">纯浪费</span><span class="bar-track"><span class="bar-fill" style="width:63%;background:var(--crit)"></span></span><span class="bar-val">279 分 · 63%</span></div>
+      <div class="bar-row"><span class="bar-lab">该活着</span><span class="bar-track"><span class="bar-fill" style="width:20%;background:var(--good)"></span></span><span class="bar-val">86 分 · 20%</span></div>
+    </div>
+    <div class="panel"><div class="panel-t">写法 —— ⚠ 颜色<b>挑语义类</b>，别内联色值</div><pre style="margin:0;overflow-x:auto;font:12px/1.6 'IBM Plex Mono',monospace">&lt;div class="bars"&gt;
+  &lt;div class="bar-row"&gt;
+    &lt;span class="bar-lab"&gt;标签&lt;/span&gt;
+    &lt;span class="bar-track"&gt;&lt;span class="bar-fill crit"
+        style="width:63%"&gt;&lt;/span&gt;&lt;/span&gt;
+    &lt;span class="bar-val"&gt;279 分 · 63%&lt;/span&gt;
+  &lt;/div&gt;
+&lt;/div&gt;</pre></div>
+  </div></article>
+
+  <div class="zone"><h2>可点选项 · opts</h2><span class="hint">要他选</span></div>
+  <article class="card"><div class="stripe s-warn"></div><div class="body">
+    <div class="opts">
+      <div class="opt pick"><b>挂着</b><small>我推荐这个</small></div>
+      <div class="opt"><b>关掉</b><small>将来要时重开</small></div>
+    </div>
+    <div class="panel"><div class="panel-t">写法 —— 推荐项加 <code>pick</code>；说明用 <code>&lt;small&gt;</code></div><pre style="margin:0;overflow-x:auto;font:12px/1.6 'IBM Plex Mono',monospace">&lt;div class="opts"&gt;
+  &lt;div class="opt pick"&gt;&lt;b&gt;挂着&lt;/b&gt;&lt;small&gt;我推荐这个&lt;/small&gt;&lt;/div&gt;
+  &lt;div class="opt"&gt;&lt;b&gt;关掉&lt;/b&gt;&lt;small&gt;说明&lt;/small&gt;&lt;/div&gt;
+&lt;/div&gt;</pre></div>
+  </div></article>
+
+  <div class="zone"><h2>方案板按钮 · deep</h2><span class="hint">⚠ 默认是<b>不加</b></span></div>
+  <article class="card"><div class="stripe s-warn"></div><div class="body">
+    <div class="top"><div class="chips"><span class="chip warn">先过这两问,顺序不能反</span></div>
+      <h2 class="q">这件事能不能在卡里讲清楚到他扫一眼就能反馈?</h2>
+      <p class="lede"><b>能 ⇒ 不加按钮</b>,讲完即可。<b>不能</b>(复杂/重大的设计,一个小板块塞不下)⇒ 卡里放<b>大致内容</b>,按钮切到方案板看详细过程与方案。</p></div>
+    <div class="checks">
+      <div class="crow"><span class="mk no">✕</span><span class="txt"><b>「反正加个按钮也不亏」是错的</b>每个都要点进去 = 每个都多一次跳转,那正好毁掉板「扫一眼就能拍」的价值。</span><span class="tag no">默认不加</span></div>
+      <div class="crow"><span class="mk yes">✓</span><span class="txt"><b>自检:把按钮盖住,他还能不能拍?</b>不能 ⇒ 该放板上的东西被放进方案板了。<code>board.py lint</code> 已机检这条。</span><span class="tag yes">可机检</span></div>
+      <div class="crow"><span class="mk no">·</span><span class="txt"><b>一张卡最多一个</b>需要两个 ⇒ 说明这张卡承载了两件事,该拆卡,不是加第二个按钮。</span></div>
+    </div>
+    <a class="deep" href="#" target="_blank" rel="noopener">
+      <span class="deep-b">看完整方案</span>
+      <span class="deep-why">一张图讲完为什么不能焊成一个 · 新标签页打开,不会挤掉这块板</span>
+    </a>
+    <div class="panel"><div class="panel-t">写法 —— ⚠ <code>.deep-why</code> 那行<b>不是装饰</b>,他靠它决定值不值得点</div><pre style="margin:0;overflow-x:auto;font:12px/1.6 'IBM Plex Mono',monospace">&lt;a class="deep" href="…" target="_blank" rel="noopener"&gt;
+  &lt;span class="deep-b"&gt;看完整方案&lt;/span&gt;
+  &lt;span class="deep-why"&gt;点进去能看到什么 · 新标签页&lt;/span&gt;
+&lt;/a&gt;
+
+&lt;!-- 位置:放在「大致内容」之后、证据/选项之前。
+     放最底下等于没人看见,放最上面等于逼他先点。 --&gt;</pre></div>
+  </div></article>
+
+  <div class="zone"><h2>前后对比 · ba</h2><span class="hint">机制/判据取舍</span></div>
+  <article class="card"><div class="stripe s-good"></div><div class="body">
+    <div class="ba">
+      <div class="ba-x"><div class="ba-t">✕ 以前</div><p>提醒写进<b>终端</b> —— AI 收不到,他收到也没法执行。</p></div>
+      <div class="ba-y"><div class="ba-t">✓ 现在</div><p>提醒进<b>AI 的上下文</b>,板不更新就收不了工。</p></div>
+    </div>
+    <p class="sub2">⭐ <b><code>.ba</code> 容器本身是中性的</b> —— <code>.ba&gt;div</code> 自带边框/圆角/内距,红绿<b>只在 <code>.ba-x</code>/<code>.ba-y</code> 上</b>。<br>⇒ 两边都是好的东西(如「判据 ✓ / 闸 ✓」)时,<b>用 <code>.ba</code> 但不套 x/y</b>,别去手写 <code>grid-template-columns</code>。(设计系统 v2.3 实测并提出)</p>
+    <div class="panel"><div class="panel-t">写法 —— ⚠ 要两栏对比用这个,<b>别用 <code>.split</code></b>(它是一根占比条,会静默裁掉内容)</div><pre style="margin:0;overflow-x:auto;font:12px/1.6 'IBM Plex Mono',monospace">&lt;div class="ba"&gt;
+  &lt;div class="ba-x"&gt;&lt;div class="ba-t"&gt;✕ 以前&lt;/div&gt;&lt;p&gt;…&lt;/p&gt;&lt;/div&gt;
+  &lt;div class="ba-y"&gt;&lt;div class="ba-t"&gt;✓ 现在&lt;/div&gt;&lt;p&gt;…&lt;/p&gt;&lt;/div&gt;
+&lt;/div&gt;</pre></div>
+  </div></article>
+
+  <div class="zone"><h2>图例 · legend</h2><span class="hint">配色说明</span></div>
+  <article class="card"><div class="stripe s-sig"></div><div class="body">
+    <div class="legend">
+      <span><i class="sw" style="background:var(--good)"></i>正常</span>
+      <span><i class="sw" style="background:var(--warn)"></i>注意</span>
+      <span><i class="sw" style="background:var(--crit)"></i>严重</span>
+    </div>
+    <div class="panel"><div class="panel-t">写法 —— ⚠ 色块是 <code>&lt;i class="sw"&gt;</code>，颜色也要内联</div><pre style="margin:0;overflow-x:auto;font:12px/1.6 'IBM Plex Mono',monospace">&lt;div class="legend"&gt;
+  &lt;span&gt;&lt;i class="sw" style="background:var(--good)"&gt;&lt;/i&gt;正常&lt;/span&gt;
+&lt;/div&gt;</pre></div>
+  </div></article>
+
+  <div class="zone"><h2>占比条 · split</h2><span class="hint">⚠ 不是两栏布局</span></div>
+  <article class="card"><div class="stripe s-warn"></div><div class="body">
+    <div class="split">
+      <div style="background:var(--crit);flex:63">63%</div>
+      <div style="background:var(--good);flex:37">37%</div>
+    </div>
+    <div class="panel"><div class="panel-t">写法 —— 子元素必须是 <code>div</code>，颜色与 <code>flex</code> 内联；<b>只能放一行短字</b></div><pre style="margin:0;overflow-x:auto;font:12px/1.6 'IBM Plex Mono',monospace">&lt;div class="split"&gt;
+  &lt;div style="background:var(--crit);flex:63"&gt;63%&lt;/div&gt;
+  &lt;div style="background:var(--good);flex:37"&gt;37%&lt;/div&gt;
+&lt;/div&gt;
+
+&lt;!-- 要真正的两栏？别用 split： --&gt;
+&lt;div style="display:grid;grid-template-columns:1fr 1fr;gap:14px"&gt;
+  &lt;div class="panel" style="margin:0"&gt;…&lt;/div&gt;
+  &lt;div class="panel" style="margin:0"&gt;…&lt;/div&gt;
+&lt;/div&gt;</pre></div>
+  </div></article>
+
+  <div class="zone"><h2>测试步骤 · tests</h2><span class="hint">要他的手</span></div>
+  <section class="tests">
+    <div class="tests-h"><div class="build">📱 build 1234</div></div>
+    <div class="warnbox"><span class="ico">🕘</span><div><b>顶部提示条用 warnbox。</b></div></div>
+    <div class="test">
+      <div class="test-h"><span class="num">1</span><span class="chip id">#0000</span><b>标题</b><span class="chip warn">徽章</span></div>
+      <dl class="steps">
+        <dt>起始界面</dt><dd>写清从哪开始</dd>
+        <dt>怎么做</dt><dd>一步一步</dd>
+        <dt>什么算过</dt><dd><span class="pass">过的判据</span></dd>
+      </dl>
+    </div>
+  </section>
+  <article class="card"><div class="stripe s-sig"></div><div class="body">
+    <div class="panel"><div class="panel-t">写法 —— ⚠ <code>.steps</code> 是 <code>dl/dt/dd</code>，不是 ul/li</div><pre style="margin:0;overflow-x:auto;font:12px/1.6 'IBM Plex Mono',monospace">&lt;section class="tests"&gt;
+  &lt;div class="tests-h"&gt;&lt;div class="build"&gt;📱 build 1234&lt;/div&gt;&lt;/div&gt;
+  &lt;div class="warnbox"&gt;&lt;span class="ico"&gt;🕘&lt;/span&gt;&lt;div&gt;提示&lt;/div&gt;&lt;/div&gt;
+  &lt;div class="test"&gt;
+    &lt;div class="test-h"&gt;&lt;span class="num"&gt;1&lt;/span&gt;
+      &lt;span class="chip id"&gt;#0000&lt;/span&gt;&lt;b&gt;标题&lt;/b&gt;&lt;/div&gt;
+    &lt;dl class="steps"&gt;
+      &lt;dt&gt;起始界面&lt;/dt&gt;&lt;dd&gt;…&lt;/dd&gt;
+      &lt;dt&gt;什么算过&lt;/dt&gt;&lt;dd&gt;&lt;span class="pass"&gt;判据&lt;/span&gt;&lt;/dd&gt;
+    &lt;/dl&gt;
+  &lt;/div&gt;
+&lt;/section&gt;</pre></div>
+  </div></article>
+
+  <div class="zone"><h2>并排手机样张 · shots / phone</h2><span class="hint">界面选项 —— 2026-08-29 新增</span></div>
+  <article class="card"><div class="stripe s-good"></div><div class="body">
+    <div class="shots two">
+      <div class="shot-c">
+        <div class="phone">
+          <div class="phone-status"><span>9:41</span><span>&#9646;&#9646;&#9646;</span></div>
+          <div class="phone-head"><strong>甲案</strong><span>列表</span></div>
+          <div class="phone-body">
+            <div class="row ok"><i class="dot"></i><span class="t">今天的三件事</span><span class="m">2m</span></div>
+            <div class="row"><i class="dot"></i><span class="t">昨天没做完的</span><span class="m">1h</span></div>
+            <span class="bar" style="width:70%"></span>
+          </div>
+        </div>
+        <span class="shot-t"><b>甲案</b><br>一句话说清它跟乙案差在哪</span>
+      </div>
+      <div class="shot-c">
+        <div class="phone pick">
+          <div class="phone-status"><span>9:41</span><span>&#9646;&#9646;&#9646;</span></div>
+          <div class="phone-head"><strong>乙案</strong><span>卡片</span></div>
+          <div class="phone-body">
+            <div class="row warn"><i class="dot"></i><span class="t">今天的三件事</span><span class="m">2m</span></div>
+            <span class="bar" style="width:45%"></span>
+          </div>
+        </div>
+        <span class="shot-t"><b>乙案(推荐)</b><br><code>.phone pick</code> 给它描一圈绿边</span>
+      </div>
+    </div>
+    <p class="sub2">⛔ <b>子结构不能省,裸 <code>&lt;b&gt;</code>/<code>&lt;span&gt;</code> 塞进 <code>.phone</code> 会量出「框高 26px」而看起来像坏了</b> —— Handoff 线 0829 第一次用就这么踩的,差点报三个不存在的 bug。<br>⚠ <code>.dot</code> 是<b>真实元素</b>(<code>&lt;i class="dot"&gt;</code>),不是伪元素;<b>栏数</b>用 <code>.shots</code>(3 栏,默认)/ <code>.shots two</code> / <code>.shots one</code>,别去手写 <code>grid-template-columns</code>。</p>
+    <div class="panel"><div class="panel-t">写法 —— 最小可用结构,照抄改字即可</div><pre style="margin:0;overflow-x:auto;font:12px/1.6 'IBM Plex Mono',monospace">&lt;div class="shots two"&gt;              &lt;!-- 3 栏用 class="shots";1 栏用 "shots one" --&gt;
+  &lt;div class="shot-c"&gt;
+    &lt;div class="phone"&gt;             &lt;!-- 推荐项加 pick;要标红加 crit --&gt;
+      &lt;div class="phone-status"&gt;&lt;span&gt;9:41&lt;/span&gt;&lt;span&gt;▮▮▮&lt;/span&gt;&lt;/div&gt;
+      &lt;div class="phone-head"&gt;&lt;strong&gt;甲案&lt;/strong&gt;&lt;span&gt;列表&lt;/span&gt;&lt;/div&gt;
+      &lt;div class="phone-body"&gt;
+        &lt;div class="row ok"&gt;         &lt;!-- ok / warn / crit 只改小圆点颜色 --&gt;
+          &lt;i class="dot"&gt;&lt;/i&gt;&lt;span class="t"&gt;标题&lt;/span&gt;&lt;span class="m"&gt;2m&lt;/span&gt;
+        &lt;/div&gt;
+        &lt;span class="bar" style="width:70%"&gt;&lt;/span&gt;   &lt;!-- 屏里的灰条 --&gt;
+        &lt;span class="gap"&gt;&lt;/span&gt;                     &lt;!-- 想留白用它 --&gt;
+      &lt;/div&gt;
+    &lt;/div&gt;
+    &lt;span class="shot-t"&gt;&lt;b&gt;甲案&lt;/b&gt;&lt;br&gt;一句话说清差在哪&lt;/span&gt;
+  &lt;/div&gt;
+&lt;/div&gt;</pre></div>
+  </div></article>
+
+  <div class="zone"><h2>带箭头的流程 · chain</h2><span class="hint">一件事走到哪了 —— 2026-08-29 新增</span></div>
+  <article class="card"><div class="stripe s-good"></div><div class="body">
+    <div class="chain">
+      <div class="chain-s ok"><b>他拍了</b><span>21:15</span></div>
+      <div class="chain-s ok"><b>规则改完</b><span>我做的</span></div>
+      <div class="chain-s warn"><b>骨架在改</b><span>设计系统线</span></div>
+      <div class="chain-s"><b>渲图给他看</b><span>还没到</span></div>
+    </div>
+    <p class="sub2">⚠ <b>箭头是 CSS 用 border + rotate 画的,所以 <code>::after</code> 的 <code>content</code> 就是空串 —— 那是设计如此,不是没生效。</b><br>判断箭头在不在,看它的<b>宽高(应为 10×10)和边框色</b>,别看 <code>content</code>。</p>
+    <div class="ba">
+      <div class="ba-x"><div class="ba-t">✕ 别这么写</div><p>要竖排时给 <code>.chain</code> <b>内联一个方向</b>。<b>箭头会继续指向右边的空白里</b> —— CSS 选不中内联样式,kit 兜不住。</p></div>
+      <div class="ba-y"><div class="ba-t">✓ 这么写</div><p>加语义类 <code>col</code>。<b>不看视口宽度</b>,所以嵌在多窄的容器里都成立,箭头自动转向下。</p></div>
+    </div>
+    <p class="sub2">⭐ <b>为什么专门讲这个:<code>.chain</code> 最常见的用法就是嵌在窄容器里</b>(卡内分栏 / <code>.ba</code> 的一栏)。而「窄屏转竖排」那条是<b>按视口宽度</b>判的 —— 视口 936px、容器只有 357px 时<b>它根本不触发</b>。<br>⚠ <b>而且 <code>lint</code> 不会响、整页缩略图上也看不出来</b> —— 总控 v5.7 实测三步量出 <b>335/335/355</b>(前两步各被挤掉 20px),iOS v4.5 隔离复现后已修:间距改成 <code>column-gap</code>/<code>row-gap</code>,<b>方向由浏览器自己挑</b>,所以现在<b>就算内联写方向,间距也是对的</b>,只有箭头方向还需要 <code>col</code>。</p>
+    <div class="panel"><div class="panel-t">写法</div><pre style="margin:0;overflow-x:auto;font:12px/1.6 'IBM Plex Mono',monospace">&lt;div class="chain"&gt;
+  &lt;div class="chain-s ok"&gt;&lt;b&gt;这一步&lt;/b&gt;&lt;span&gt;一句话补充&lt;/span&gt;&lt;/div&gt;
+  &lt;div class="chain-s warn"&gt;&lt;b&gt;卡在这&lt;/b&gt;&lt;span&gt;等谁&lt;/span&gt;&lt;/div&gt;
+  &lt;div class="chain-s"&gt;&lt;b&gt;还没到&lt;/b&gt;&lt;span&gt;&lt;/span&gt;&lt;/div&gt;   &lt;!-- 不加类 = 中性 --&gt;
+&lt;/div&gt;
+
+&lt;!-- 竖排(窄容器里用这个,别内联 flex-direction) --&gt;
+&lt;div class="chain col"&gt; … &lt;/div&gt;</pre></div>
+  </div></article>
+
+  <div class="zone"><h2>内联图槽 · fig</h2><span class="hint">要自己画一张时 —— 2026-08-29 新增</span></div>
+  <article class="card"><div class="stripe s-good"></div><div class="body">
+    <div class="fig">
+      <svg viewBox="0 0 320 90" width="320" height="90" role="img" aria-label="示例:两个方框加一个箭头">
+        <rect x="6" y="24" width="120" height="42" rx="8" fill="none" stroke="currentColor" stroke-opacity=".35"/>
+        <text x="66" y="50" text-anchor="middle" font-size="13" fill="currentColor">现在</text>
+        <path d="M136 45 h40" stroke="currentColor" stroke-opacity=".5" stroke-width="1.5"/>
+        <path d="M170 39 l8 6 l-8 6" fill="none" stroke="currentColor" stroke-opacity=".5" stroke-width="1.5"/>
+        <rect x="188" y="24" width="120" height="42" rx="8" fill="none" stroke="currentColor" stroke-opacity=".35"/>
+        <text x="248" y="50" text-anchor="middle" font-size="13" fill="currentColor">改成</text>
+      </svg>
+      <span class="fig-cap">用 <b>currentColor</b> 画线条,深浅色主题都能看</span>
+    </div>
+    <p class="sub2">⚠ <b>svg 一律用 <code>currentColor</code> / <code>var(--…)</code> 取色,别写死 <code>#fff</code> 或 <code>#000</code></b> —— 板会跟着他的系统主题切深浅,写死的颜色会在其中一种下消失。<br><code>.fig</code> 已经帮你处理了溢出和基线缝,svg 直接放进去即可。</p>
+    <div class="panel"><div class="panel-t">写法</div><pre style="margin:0;overflow-x:auto;font:12px/1.6 'IBM Plex Mono',monospace">&lt;div class="fig"&gt;
+  &lt;svg viewBox="0 0 320 90" width="320" height="90" role="img" aria-label="这张图在说什么"&gt;
+    …  &lt;!-- 取色一律 currentColor / var(--good) 之类 --&gt;
+  &lt;/svg&gt;
+  &lt;span class="fig-cap"&gt;一句话说明这张图要你看什么&lt;/span&gt;
+&lt;/div&gt;</pre></div>
+  </div></article>
+
+  <div class="zone"><h2>卡片外框 · card</h2><span class="hint">所有内容的容器</span></div>
+  <article class="card"><div class="stripe s-good"></div><div class="body">
+    <div class="top"><div class="chips"><span class="chip id">#0000</span><span class="chip good">状态</span></div>
+      <h2 class="q">标题：第一个 chip 必须是卡号或「无卡号」</h2>
+      <p class="lede">导语一句话。</p></div>
+    <div class="rec"><div class="rec-t">我的建议</div><p>建议正文。</p></div>
+    <div class="ask"><b>要你点一个：</b>选项说明。</div>
+    <div class="panel"><div class="panel-t">写法 —— ⚠ <code>.card</code> 必须恰好 <code>.stripe</code>+<code>.body</code> 两个子元素</div><pre style="margin:0;overflow-x:auto;font:12px/1.6 'IBM Plex Mono',monospace">&lt;article class="card" data-ack="唯一id"&gt;
+  &lt;div class="stripe s-good"&gt;&lt;/div&gt;   &lt;!-- s-good/s-warn/s-crit/s-sig --&gt;
+  &lt;div class="body"&gt;
+    &lt;div class="top"&gt;&lt;div class="chips"&gt;
+        &lt;span class="chip id"&gt;#0000&lt;/span&gt;&lt;/div&gt;
+      &lt;h2 class="q"&gt;标题&lt;/h2&gt;&lt;p class="lede"&gt;导语&lt;/p&gt;&lt;/div&gt;
+    &lt;div class="rec"&gt;&lt;div class="rec-t"&gt;我的建议&lt;/div&gt;&lt;p&gt;…&lt;/p&gt;&lt;/div&gt;
+    &lt;div class="ask"&gt;&lt;b&gt;要你点一个：&lt;/b&gt;…&lt;/div&gt;
+  &lt;/div&gt;
+&lt;/article&gt;</pre></div>
+  </div></article>
+
+  <p class="foot">来源 <code>~/.claude/scripts/board-kit/markup.html</code> · 由 <code>boards-index.py</code> 落进 http 版<br>
+  ⚠ 加了新原语请同步更新这一页 —— 否则下一条线还得靠 grep 别人的板去猜（2026-08-27 Harness 线实际付过这个成本）</p>
+</div>
