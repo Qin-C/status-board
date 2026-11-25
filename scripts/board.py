@@ -18687,8 +18687,10 @@ def _skill_public_sync(sd):
         print("  ✗ 公开同步需要配置 public_board", file=sys.stderr)
         return 2
     pack = os.path.join(os.path.dirname(os.path.abspath(__file__)), "board-public-pack.py")
+    # 依据: 11-26 00:14 负责人在卡 ask-9a6ea679 点「推」并要以后每次更新自动同步;放行卡号记在配置 public_card,没配就照旧拒推。
+    card = str(BP._load().get("public_card") or "").strip()
     return subprocess.run([sys.executable, pack, "--publish", work, "--repo", repo,
-                           "--source", sd, "--board", board]).returncode
+                           "--source", sd, "--board", board] + (["--card", card] if card else [])).returncode
 
 
 # ── 1020(负责人):团队仓的 skill 自动跟上 ──────────────────────────────────

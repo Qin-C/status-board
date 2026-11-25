@@ -43,6 +43,7 @@ DEFAULTS = {
     "public_repo": "",
     "public_board": "",
     "public_work_dir": "",
+    "public_card": "",   # 依据: 公开同步的放行卡号(他点过的那张),空 = 自动同步拒推
     "launch_service": "com.status-board.boards-web",
     "windows_task": "StatusBoardWeb",
     "skill_agent": "",
