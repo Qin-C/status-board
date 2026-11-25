@@ -1410,7 +1410,7 @@ def _row_title_preview(src, ack):
 
 
 def _other_half_prose(src, other_half):
-    """1123 晚(电商-基建 #e4a7,负责人 20:55 打回「什么叫对方那半?」):--other-half 的 row:/done:/none: 是写给机器的,卡面只放人话。
+    """1123 晚(示例-基建 #e4a7,负责人 20:55 打回「什么叫对方那半?」):--other-half 的 row:/done:/none: 是写给机器的,卡面只放人话。
     none: / row: ⇒ 不显示(None);done: ⇒「另一部分已做完:<证据>」。"""
     kind, _, raw = str(other_half or "").strip().partition(":")
     kind, val = kind.strip().lower(), re.sub(r"\s+", " ", raw).strip()
@@ -1425,7 +1425,7 @@ def _other_half_prose(src, other_half):
         problem = _review_other_half_ref_problem(val)
         if problem:
             raise ValueError(problem)
-        # 1124 电商-基建 #b7e1(负责人 12:35 卡 ask-9c98f65f:「什么叫做另一部分在另一行跟?……根本就看不懂」):
+        # 1124 示例-基建 #b7e1(负责人 12:35 卡 ask-9c98f65f:「什么叫做另一部分在另一行跟?……根本就看不懂」):
         # row: 只给机器校验 / 记日志,卡面不写 —— 没做完的那部分本来就是板上单独一行,卡上再指一次路只会让他看不懂。
         # 否过:把那一行标题 + 现状搬上卡(还是指路,且卡面变长,他这张卡要判的是「这一半成没成」)。
         return None
@@ -1535,7 +1535,7 @@ def _yours_zone_rows(src, today=None):
 
 
 # ──────────────── 1007 上一棒留下的过期行 · 没做完的行清单(answer / head 的提示)
-#   负责人 10-07(电商-投流 v1.4):接班两天,「你交代的」里 4 行是上一棒留下的旧现状,十几次 ask / answer / touch 全程 PASS ——
+#   负责人 10-07(示例-投流 v1.4):接班两天,「你交代的」里 4 行是上一棒留下的旧现状,十几次 ask / answer / touch 全程 PASS ——
 #   lint 每次都印「3 行过了预计日期还没做完」,但那是 ⚠、印在 PASS 之后,它就继续走了;用 answer 结了两张卡,
 #   而「你交代的」里同一件事的那一行没有任何命令带到。四处一起补:
 #     D 没做完 + 过了预计 + 行上记的棒次 ≠ 板顶现在的棒次 ⇒ lint 报错(只读板上的属性,不用知道本会话是谁,所以能进 lint);
@@ -1556,7 +1556,7 @@ def _prev_baton_rows(src, today=None, y=None):
     if not y:
         return board, [], []
     unchecked = [f for f in y["facts"] if f["open"] and f.get("baton") and f["baton"] != board] if board else []
-    # 1008(负责人,电商-基建 v1.6:7 行写着「明天核完更新这里」挂了三天没人回头;过期提醒卡把球抛给了他,AI 这侧 touch 照样绿)
+    # 1008(负责人,示例-基建 v1.6:7 行写着「明天核完更新这里」挂了三天没人回头;过期提醒卡把球抛给了他,AI 这侧 touch 照样绿)
     #   ⇒ 球在 AI 这边的过期行一律报错,不再要求「是上一棒留下的」。球在他那边的(data-you = decide / do / nudge / stuck)
     #   照旧只是 ⚠ + 「要你的」里的提醒卡 —— 那是他的动作,不该用 AI 这侧的闸逼出一个改日期。
     late = [f for f in y["facts"] if f["open"] and f["late"] > 0
@@ -1585,7 +1585,7 @@ def _prev_baton_late_error(path, src, today=None, y=None):
 # ──────────────── 1009 「在做」超过一天没动 ⇒ 报错 · 首屏「在做的」· `doing` 只读命令共用的一份口径
 #   负责人 10-09:「这个标志在做,其实一天没动的活……现在只有我盯着的事情会有进展,我不盯的事情,哪怕他们只做了一半,
 #   第一不会跟我汇报,第二我都不知道,我如果不想起来的话,这个事情就当做没有。这是我当时状态板最需要解决的问题」。
-#   现场(电商-基建):13 行标着在做,一天里真动过的 5 行,其余 8 行其实在排队 —— 板上全是「在做」、全是绿的,没有任何东西核对。
+#   现场(示例-基建):13 行标着在做,一天里真动过的 5 行,其余 8 行其实在排队 —— 板上全是「在做」、全是绿的,没有任何东西核对。
 #   ⇒ 「上次动」= 这一行【文字或状态】上次变的时间:data-txt-at → 没有就 data-upd → 再没有就 data-fp0(首次记账的时间)。
 #      ⛔ 只把预计日往后挪不算动过(data-upd 会变,data-txt-at 不变)。三个都没有 = 没记过账 ⇒ 不知道就不说话。
 #   ⇒ 「你交代的」里 data-status="doing"、球在 AI 这边、上次动距现在超过 DOING_STALE_HOURS 小时 ⇒ lint 报错(touch 因此也拦)。
@@ -1669,7 +1669,7 @@ def _doing_stale_error(path, src, now=None, y=None):
     if len(rows) > 15:
         lines.append("      · …还有 %d 行" % (len(rows) - 15))
     x = rows[0]["f"].get("ack") or "<这一行的编号>"
-    # ⭐ 1110 往后拖(AI Harness #7e4b / 电商-基建 #7e31):原来第 ② 条出路里「等某个日子 → blocked + --eta」,两条线说它把 AI 推向
+    # ⭐ 1110 往后拖(AI Harness #7e4b / 示例-基建 #7e31):原来第 ② 条出路里「等某个日子 → blocked + --eta」,两条线说它把 AI 推向
     #   「改成等日期 / 挂 watch」而不是去做。只改话术、不改什么时候报:第一条是现在去做,第二条是写明在等谁或挂卡问他,
     #   只等一个日子的标 watch 排最后、必须写明在等什么。⛔ 别再加「改预计日」「改成 watch」这种把事往后推的出路(自检 1110 往后拖 ⑤ 守着)。
     return ("「你交代的」有 **%d 行标着在做,但超过 %d 小时没动过**(文字和状态都没变)—— 他在板的首屏看得到每一行上次动的时间:"
@@ -1688,8 +1688,8 @@ def _doing_stale_error(path, src, now=None, y=None):
             % (len(rows), DOING_STALE_HOURS, "\n".join(lines), q, x, q, x, q, x))
 
 
-# ── 1026(电商-基建 v2.1 转负责人 10-26 17:3x):「有些事情已经完结了,但它在板上好像还是会卡,显示放在那里卡着」
-#   现场(电商-基建板):某店甲 侵权两次申诉都失败了,行还写「第二次申诉还没结果」;某店丙 达人订单权限实际开不了,行还在「等同事甲」;
+# ── 1026(示例-基建 v2.1 转负责人 10-26 17:3x):「有些事情已经完结了,但它在板上好像还是会卡,显示放在那里卡着」
+#   现场(示例-基建板):某店甲 侵权两次申诉都失败了,行还写「第二次申诉还没结果」;某店丙 达人订单权限实际开不了,行还在「等同事甲」;
 #   同事甲 10-21~23 已逐条回完,行还挂在「等同事甲逐条回」—— 三行文字都 3 天以上没变。等的是外面(平台结果、同事回话),
 #   外面变了,没有任何东西逼 AI 回头现查;kit 按 3 天把它们冒到他眼前(10-20 他定的 3 天),他看到的就是一堆「卡着」。
 #   ⇒ 「等外部」的行文字 3 天没变 ⇒ lint 警告(只提醒负责的 AI 去现查,touch 当天第一次全文、之后合成一句)。
@@ -1698,14 +1698,14 @@ def _doing_stale_error(path, src, now=None, y=None):
 #   等的是一个日子 / 定时任务(等到 10-29 …)⇒ 不报:到点之前现查也查不出新东西。
 # 依据: e43ba6c55 处理等外部结果却长期未现查的旧行，文字3天未变即提醒负责线核查。
 WAIT_STALE_DAYS = 3
-# ⭐ 1028(电商-基建 v2.2 转):原来等的话里出现任何日期就跳过 ⇒ 「等选品补齐对标(10-30)+ 取价模块」这种日期只是预计的行永远不报,
+# ⭐ 1028(示例-基建 v2.2 转):原来等的话里出现任何日期就跳过 ⇒ 「等选品补齐对标(10-30)+ 取价模块」这种日期只是预计的行永远不报,
 #   10-28 现查全机 6 行因此被跳过,真在等日子的只有 1 行(等到 10-29 定时关全店),另 5 行等的是别线 / 供应商 / 平台,其中基建那行早已了结。
 #   ⇒ 只认「等到 MM-DD」「MM-DD 再 / 之后 / 到期」「开头就是日期」和定时 / 到点;「自动」不再算(平台自动建计划是能现查的事)。
 _WAIT_ON_DATE_RE = re.compile(r"等到\s*\d{1,2}(?:-| ?月 ?)\d{1,2}|^\s*(?:等\s*)?\d{1,2}(?:-| ?月 ?)\d{1,2}"
                               r"|\d{1,2}(?:-| ?月 ?)\d{1,2}\s*(?:日\s*)?(?:\d{1,2}:\d{2}\s*)?(?:再|之?后|以后|到期|那天|起跑|复查)|定时|到点")
-# ⭐ 1028(电商-选品 v2.8 转,负责人 10-28 17:1x「你这个是个很严重的bad case啊」):选品两行写着「等基建回执」,某商品甲 / 某商品乙 / 某商品丙 其实当天就过审在售,
+# ⭐ 1028(示例-选品 v2.8 转,负责人 10-28 17:1x「你这个是个很严重的bad case啊」):选品两行写着「等基建回执」,某商品甲 / 某商品乙 / 某商品丙 其实当天就过审在售,
 #   负责人骂了才去店里现查。等的是【本机另一条线】:它的板就在本机,现查一次很便宜 ⇒ 不用等 3 天,文字一天没变就提醒,并指到去查它的板。
-# 实测: 10-28 全机 82 行在等外面,写明等别的线的 8 行;24 小时会多报的只有电商-基建 3 行(42–43 小时没动)。
+# 实测: 10-28 全机 82 行在等外面,写明等别的线的 8 行;24 小时会多报的只有示例-基建 3 行(42–43 小时没动)。
 WAIT_LINE_STALE_DAYS = 1
 # 依据: 本机真板写真名,对外包由 pack 脚本豁免。
 _WAIT_ON_LINE_RE = re.compile(r"基建|选品|投流|AI ?平台|Harness|运维|状态板|总控|iOS|IOS|会议线|cc控制|设计系统|内容助理|个人助理|别的线|那条线|回执|Codex" + "".join("|" + re.escape(name) for name in BP.wait_line_aliases()))
@@ -1742,7 +1742,7 @@ def _wait_stale_rows(facts, now=None):
 #      ① 预计日就是今天(今天到期)② 预计日过了(过期)③ 卡着 / 没开工 RECHECK_DAYS 天没核;在做的 RECHECK_DOING_DAYS 天没核(长期盯着的 watch 只看 ①②)
 #      ④ 收了链着这一行的卡(--no-row)、现状没动。
 #      球在他那边、又不是在做的 ⇒ 不列(另有「要你的」卡)。
-#   ⭐ 1105(电商-选品 v3.2 转,负责人 21:3x「很多事项好像没有更新」):r1103-6b90 标 doing + you=decide,现状写「子代理在出 某商品甲 / 某商品乙…」,子代理 11-04 就交回了,
+#   ⭐ 1105(示例-选品 v3.2 转,负责人 21:3x「很多事项好像没有更新」):r1103-6b90 标 doing + you=decide,现状写「子代理在出 某商品甲 / 某商品乙…」,子代理 11-04 就交回了,
 #      这句烂了一天多,清单不报 —— 因为按球在他那边整行跳过了。标着在做 = AI 这边还有活,球在谁都该核;24 小时与「在做一天没动」同一条线。
 #      ⚠ 首屏不跟:首屏只给他看,球在他的行本来就只在「要你的」(1020 他定的);这张名单是给 AI 的,多列不花他的注意力。
 #   ⚠ 11-02 量的「26 行卡着的没有 data-txt-at」其实都有 data-upd 或 data-fp0,只是「等外面 3 天没变」那条只读 txt-at / fp0
@@ -1785,7 +1785,7 @@ def _card_moved_warn(facts):
             % (len(rows), "、".join(f.get("ack") or "没 data-ack" for f in rows[:8]) + ("…" if len(rows) > 8 else "")))
 
 
-# ⭐⭐ 1117 J6 rt-split(负责人 11-16 20:48 在复盘页选「拆成『真卡着 N · 观察中 M』,只有真卡着标红」;复盘:电商-基建首屏十几件卡着,约一半是到点机器会自己核的)。
+# ⭐⭐ 1117 J6 rt-split(负责人 11-16 20:48 在复盘页选「拆成『真卡着 N · 观察中 M』,只有真卡着标红」;复盘:示例-基建首屏十几件卡着,约一半是到点机器会自己核的)。
 #   观察中 = 没做完、不用他做、卡着 / 没开工(blocked / todo)、--wait-for 写成「日子:…」、日子还没过(今天或以后)、群里没有新回复
 #     (修完了等定时跑一轮 / 试跑满一周这类,到点机器会叫醒去核)。日子过了 ⇒ 不再算观察中,回到真卡着(藏不住)。
 #   真卡着 = 原来「卡着的」里除掉观察中的:等同事 / 等别的线 / 等外部 / 等他 / 没开工。
@@ -1802,10 +1802,10 @@ def _obs_row(f, today=None):
     return bool(f.get("eta")) and f["eta"] >= today
 
 
-# ⭐⭐ 1120 卡着按在等谁合成一行(负责人 11-20 19:23 在方案页 stuck-and-done-state-plan-1120 选「按在等谁合成一行」;电商-基建 21 件真卡着里 9 件在等同事甲)。
+# ⭐⭐ 1120 卡着按在等谁合成一行(负责人 11-20 19:23 在方案页 stuck-and-done-state-plan-1120 选「按在等谁合成一行」;示例-基建 21 件真卡着里 9 件在等同事甲)。
 #   他首屏「卡着的」里等同一个人 / 同一条线的 ≥2 件合成一行,块头按组算;这里给 AI 看的 `_stuck_red_lines` 同样按组印,便于对照他看到的。
 #   ⚠ 与 kit.js `stuckWho` / `stuckWhoOf` 同一规则,逐字一致(selftest 拿真板样例两端对答,并钉 _WHO_STOP / _WHO_PUNCT 两串在 kit 里逐字出现);规则与否过什么见 kit 那段注释。
-# 实测: 11-20 全机真板 data-wait-for 去重 70 条里,人名 / 线名最长是「电商-基建」5 字;8 字起都是没断开的一句话 ⇒ 上限 7(与 kit WHO_MAX 同)
+# 实测: 11-20 全机真板 data-wait-for 去重 70 条里,人名 / 线名最长是「示例-基建」5 字;8 字起都是没断开的一句话 ⇒ 上限 7(与 kit WHO_MAX 同)
 _WHO_MAX = 7
 _WHO_STOP = '回补改做给的在签发下上查答看把说定跑交收拿填传审测修换对核写问开登和跟再先还已要会能确处后'
 _WHO_PUNCT = ':：,，。.、;；()（）「」『』【】[]"\'“”‘’·/—!！?？<>《》#&+=|~'
@@ -2219,7 +2219,7 @@ def cmd_recheck(a):
     return 0
 
 
-# ⭐ 1028(电商-投流达人 v1.9 转):主线那句停在 10-26 接班时的判断(「视频组4 跑着、佣金等你定、两个达人没回」),10-27 前就都不成立,首屏挂了两天 ——
+# ⭐ 1028(示例-投流达人 v1.9 转):主线那句停在 10-26 接班时的判断(「视频组4 跑着、佣金等你定、两个达人没回」),10-27 前就都不成立,首屏挂了两天 ——
 #   3 天的线没到。主线那句是他每次开板第一眼看的现在时,线在干活就该天天对得上 ⇒ 一天没变就提醒(只警告)。
 # 实测: 10-28 全机 12 块板有主线块,已记上次改动时间的 5 块,隔天没改的 2 块(选品、状态板自己)
 MAIN_STALE_DAYS = 1
@@ -2305,7 +2305,7 @@ def _doing_stale_summary(src, now=None, y=None):
 
 
 # ──────────────── 1008 行可以写「排在哪一行后面」(data-after)· 前面那件做完了就把后面这件推回来
-#   负责人 10-08(电商-基建线):「我做了一个事情以后,另一个事情……你也不会提醒我,或者我发现慢慢就会忘掉……
+#   负责人 10-08(示例-基建线):「我做了一个事情以后,另一个事情……你也不会提醒我,或者我发现慢慢就会忘掉……
 #   反正如果我自己不想起来的话,这个事情就忘了……状态板好像也没有做到它应该有的责任」。
 #   现场:线上问他「Y 怎么做」,他答「先把 X 全做完再说」,线用 answer 收了卡 ——「Y 排在 X 后面」从此不在板上任何地方,
 #   X 快做完时也没有东西把 Y 推回来。⇒ 三处:
@@ -2414,7 +2414,7 @@ def _decide_no_card_rows(src, today=None, y=None):
 
 def _decide_no_card_error(path, src, today=None, y=None):
     """要他拍板的行没有展开卡 ⇒ 一条 lint 报错(没有 ⇒ None)。
-    ⭐ 1012(负责人对电商-选品):「这种只占1/3行的这种卡,每次都需要我去专门去问…你每次都讲不清楚。这种情况放这有什么意义呢?为什么不单独放张卡呢?」
+    ⭐ 1012(负责人对示例-选品):「这种只占1/3行的这种卡,每次都需要我去专门去问…你每次都讲不清楚。这种情况放这有什么意义呢?为什么不单独放张卡呢?」
       那一行是 `row --you decide --act "…"` 写的:机器把它摆成小卡里的一行(标题一个分句 + 一句话),哪几个品、各是什么问题、建议什么都没有。
       规则 R2.9 早写了「要他判断的,另写一张展开卡」,但没有东西在动手那一刻拦。要他动手 / 去催(do / nudge)且一句话讲得清的不归这条管。"""
     rows = _decide_no_card_rows(src, today=today, y=y)
@@ -2743,7 +2743,7 @@ def _contradiction_scope(s):
       ② 它列着的原行(块里链到的 `#row-<ack>`;标着要他的行超过 ROWYOU_MAX 件、卡上只写「还有 N 件」时,= 全部标着要他的行)。
     文件里没有这张卡(还没被 touch 写进去)⇒ 原样返回 —— 闸只认文件里真有的卡,那时照报,lint 另有一条提示跑 touch。
 
-    ⭐ 1001 电商-选品 v1.2 报:`board.py row … --status blocked --you decide` 之后「要你的」里只有这张机器卡(区头 1 件),
+    ⭐ 1001 示例-选品 v1.2 报:`board.py row … --status blocked --you decide` 之后「要你的」里只有这张机器卡(区头 1 件),
       lint 却报「计数是 0,但卡里还写着在等你」,命中的正是机器卡自己的标题。两次改动撞在一起:0914 让这道闸在
       「只有机器卡」时照跑(提醒卡把件数抬到 1,「等你测完」漏过);0928 加的这张机器卡,标题里带「在等你」。
       ⇒ 0930 那条「一行命令标上要你」的路(#5516)走完必红,只能再手补一张卡 —— 正是 0928 要免掉的那一步。
@@ -2820,7 +2820,7 @@ def _contradiction_row_claims(sc):
     return out
 
 
-# ⭐ 1028(电商-基建 v2.2 + AI Harness v3.0 转,负责人 10-28 17:2x「你这个状态板腐烂的很严重啊」):
+# ⭐ 1028(示例-基建 v2.2 + AI Harness v3.0 转,负责人 10-28 17:2x「你这个状态板腐烂的很严重啊」):
 #   基建板「那句现状」停在 10-14:「「要你的」只剩:跟进 同事子 那笔 1418.45 美元违规费的话等你审」—— 「要你的」0 件,两句都没撞上上面那道闸
 #   (它只认「在等你 / 等你看…」);Harness 板顶大方向写着「等你拍 X」,X 当轮做完、卡收了也没跟。
 #   0908 试过把「等你拍」加进上面那道全板扫:12 命中 0 真(引原话、区名、做完的行讲历史)。⇒ 这里只扫板顶(大方向 + 那句现状)和没做完的行,
@@ -2859,7 +2859,7 @@ def _contradiction_head_claims(sc):
 
 
 def _contradiction_msg(hits, kind):
-    """那道闸的报错。两种说法:计数真是 0 / 件数不是 0 但只有机器提醒卡(1001 电商-选品:区头明明 1 件,报错却说「计数是 0」)。"""
+    """那道闸的报错。两种说法:计数真是 0 / 件数不是 0 但只有机器提醒卡(1001 示例-选品:区头明明 1 件,报错却说「计数是 0」)。"""
     if kind == "zero":
         head = ("「要你的」计数**是 0**,但卡里还写着「在等你」——"
                 "他会先信那个数,然后发现你说有事等他(负责人 0828 亲自撞到,定性「有点严重」)。")
@@ -4006,7 +4006,7 @@ def lint(path):
         errors.append("板自相矛盾:「要你的」区头写着 **%d 件**,区里真卡 **%d 张**(占位卡不算)—— 目录条与板顶红圆片读的就是这个手写数,"
                       "他会被叫过来看一个不存在的待办(CI/AI Review 0911 #4737,负责人亲手点出)。改数字或改卡,两边必须一致。" % (_nw, _nr))
     # ⚠ 0914 cc控制:机器卡(去催卡 / 提醒卡)把区头 N 抬到 1,这道闸就不跑了,「等你测完」漏过去 ⇒ 按**作者卡**数判。
-    # ⚠ 1001 电商-选品:只有「等你的行」那张机器卡时,命中的是机器卡自己的标题 ⇒ 判定抽成 `_contradiction_gate`
+    # ⚠ 1001 示例-选品:只有「等你的行」那张机器卡时,命中的是机器卡自己的标题 ⇒ 判定抽成 `_contradiction_gate`
     #   (跑不跑 + 扫哪些字都在里面,selftest 直接走它),报错文案在 `_contradiction_msg`。
     _hits, _ckind = _contradiction_gate(s, _pend)
     if _hits:
@@ -4317,7 +4317,7 @@ def lint(path):
     #   只警告不报错:「他拍过了但卡没关」和「卡关早了」机器仍分不开,交给人判。
     try:
         _y = _yours_zone_rows(s)
-        # ⭐ 1023 晚(电商-基建转负责人:「这事情怎么就直接被淹没掉了?也没放在状态板上」):登记的对方群里别人说了新的,这一行还没重判 ⇒ 报错
+        # ⭐ 1023 晚(示例-基建转负责人:「这事情怎么就直接被淹没掉了?也没放在状态板上」):登记的对方群里别人说了新的,这一行还没重判 ⇒ 报错
         for _cf in ((_y or {}).get("facts") or []):
             if _cf["open"] and _cf.get("chat_new"):
                 errors.append("行 %s「%s」登记的对方群里,%s %s 说了新的(共 %s 条):「%s」—— 这一行还停在之前的判断。\n"
@@ -4765,7 +4765,7 @@ def _record_write_skip(path, sess):
 
     ⭐ 1110(查 AI Harness #4c9e 时量到):子线往派它的线的板上写进度行是允许的,但登记了它就成了「最近写过这块板的会话」——
       `_wake_pick_sid` 按这个选人 ⇒ 他在那块板上答的卡会叫到子线头上、派它的线收不到;收尾钩子和面板钩子也会把那块板算成子线的。
-      实例:11-10 12:24 子线·采购实付核账写了 电商-基建.html,到电商-基建下一次写板之前,那块板的回答都会转给它。
+      实例:11-10 12:24 子线·采购实付核账写了 示例-基建.html,到示例-基建下一次写板之前,那块板的回答都会转给它。
     ⛔ 只按「板名是不是子线 / 单开板」判,不比名字对不对得上:子线自己的板名和标题差几个字时照登记(漏登记 = 它自己的卡叫不醒它,更糟)。"""
     title = str((sess or {}).get("title") or "").strip()
     return bool(_ONEOFF_TITLE_RE.match(title)) and not _ONEOFF_BOARD_RE.match(os.path.basename(str(path)))
@@ -5235,7 +5235,7 @@ def _derived_hist_add(canon):
 
 def _derived_pristine(canon, other):
     """.queue.json 副本是不是纯旧版本:内容是正本出现过的某一版,或者它不比正本新。
-    ⭐ 1020 晚 Harness 扫(电商-投流 19:45 手动 adopt --discard 了 4 次):.queue.json 没有盖戳指纹,
+    ⭐ 1020 晚 Harness 扫(示例-投流 19:45 手动 adopt --discard 了 4 次):.queue.json 没有盖戳指纹,
       `_pristine_snapshot` 对它永远答「不是」⇒ 桌面端新建工作目录时拷过去的旧副本一律被当成「改过」⇒ touch 卡住。"""
     try:
         h = hashlib.sha256(open(other, "rb").read()).hexdigest()[:16]
@@ -5430,7 +5430,7 @@ def _prune_plan(src, store, now_ms, today, days=ARCHIVE_DAYS):
         #   旧解析把将来的日子(09-17 到期)算成去年 ⇒ first = 2025-09-17。板机制 08-26 才有 ⇒ 比 120 天还早的 first 一律不可信。
         if rec.get("first") and (now_ms - rec["first"]) > 120 * 86400000:
             rec = dict(rec, first=None)
-        # 1113 夜(电商-选品 #d4b8):原来扫正文,出现最近 / 将来的日子就留 ⇒ 「下一轮 11-14」这种顺口一提的日子让 40 行做完的老行永远不搬。
+        # 1113 夜(示例-选品 #d4b8):原来扫正文,出现最近 / 将来的日子就留 ⇒ 「下一轮 11-14」这种顺口一提的日子让 40 行做完的老行永远不搬。
         #   ⇒ 只按做完了多久:有伺服端 first(第一次见到做完)就按它;没有才看行上最后改字(data-upd / data-txt-at)和标题日期;⛔ 不再扫正文日子。
         #     真要靠日子留的事该是一行没做完、写 --wait-for "日子:…" --eta 的行(没做完的一行都不动)。
         _ages = []
@@ -5971,7 +5971,7 @@ def _touch_rows_track(t, now=None):
 #     ② 方案板网址(本机 /proposals/)写在 <a> 之外 ⇒ lint 报错;`ask` / `row` 当场拒写、什么都不写;
 #     ③ 其余写成文字的网址由 kit 在打开时变成可点(linkifyBare)。
 #   ⛔ 没做「任何裸网址都报错」:10-01 全机 20 块板实测,正文里的裸网址只有 3 处,其中 1 处是抄给同事的一段话里的外部网址
-#      (电商-投流:「按 https://…/install.md 安装」)—— 那是正文不是入口,报错就是字面子串误咬。
+#      (示例-投流:「按 https://…/install.md 安装」)—— 那是正文不是入口,报错就是字面子串误咬。
 _URL_STOP = r"""\s<>"'，。；、）)】」』"""
 _LOCAL_URL_RE = re.compile(r"https?://(?:127\.0\.0\.1|localhost)(?::\d+)?/[^%s]*" % _URL_STOP)
 _PROPOSAL_URL_RE = re.compile(r"https?://(?:127\.0\.0\.1|localhost)(?::\d+)?/proposals/[^%s]+" % _URL_STOP)
@@ -6008,7 +6008,7 @@ _WALL_MIN_CHARS = 600
 def _page_wall_of_text(path):
     """这一页是不是「全是字的手写页」:不是 plan.py 出的 + 一张图都没有 + 露出的字超过 _WALL_MIN_CHARS。
     是 ⇒ (字数, 图数);不是 / 读不到 ⇒ None。纯函数(只读那一个文件)。
-    ⭐ 1012(负责人对电商-选品:「这个方案板做的可视化几乎为0…全部打回去重做」):那两页是 Markdown 直接转的网页,
+    ⭐ 1012(负责人对示例-选品:「这个方案板做的可视化几乎为0…全部打回去重做」):那两页是 Markdown 直接转的网页,
       `publish` 的提示被 `| grep` 滤掉,`ask --deep` 不看页面 ⇒ 一路全绿。
     ⚠ 表格不算图(那两页正是大宽表);以图为主的对照页 / 快审页(有 <img> / <svg>)不归这条管。"""
     try:
@@ -6031,7 +6031,7 @@ _WALL_HOWTO = ("写一份短 Markdown 草稿,让方案板工具出页面(结论�
 
 def _deep_is_external(href):
     """「看完整方案」按钮指的是外部网址(不是本机 127.0.0.1 / localhost)吗。纯函数。
-    ⭐ 1026(电商-选品 v2.6 转负责人 18:1x):卡 ask-607d5dc4 的 --deep 挂了飞书多维表格外链,他在 In-App 面板里点进去卡住好几次 ——
+    ⭐ 1026(示例-选品 v2.6 转负责人 18:1x):卡 ask-607d5dc4 的 --deep 挂了飞书多维表格外链,他在 In-App 面板里点进去卡住好几次 ——
       「完整方案就应该进方案板，而不应该进任何外部页面。外部页面我不会在那个In-App Browser里打开。」
       原来 ask 放行、lint 只给一条 ⚠「找不到对应文件……要么指的是外部链接」。⇒ ask 拒写、lint 判错。"""
     h = str(href or "").strip()
@@ -6062,7 +6062,7 @@ def _ask_deep_problem(deep, deep_why, local=None, report=None):
         return None
     if _deep_is_external(deep):
         problem = ("--deep 只收本机 8777 上的方案页(http://127.0.0.1:8777/proposals/…),现在是外部网址「%s」—— 他在面板里点,"
-                "外部页面在面板里打不开或卡住(负责人 10-26 对电商-选品:「完整方案就应该进方案板，而不应该进任何外部页面」)。\n"
+                "外部页面在面板里打不开或卡住(负责人 10-26 对示例-选品:「完整方案就应该进方案板，而不应该进任何外部页面」)。\n"
                 "   ⇒ 外部链接写进卡的正文(--why;要他复制的用 --copy \"标题|网址\");完整方案写成 Markdown 草稿 → "
                 "`plan.py render 草稿.md -o 方案.html` → `board.py publish 方案.html`,拿 8777 地址再挂 --deep。" % str(deep)[:80])
         if report is None:
@@ -6581,7 +6581,7 @@ def _accept_fmt2_bits(f, opts, imgs):
              else '<span class="accept-got-t">%s</span>' % _esc(name))
         result = '' if batch_drop else '<span class="accept-got-a">→</span><span class="accept-got-v">%s</span>' % _esc(got)
         out.append('<div class="accept-got-i">%s%s</div>' % (t, result))
-    for got in f.get("more_got") or []:      # 1115 FDE #c41e:单行验收的第 2–4 条结果,接在第一条下面
+    for got in f.get("more_got") or []:      # 1115 客户项目甲 #c41e:单行验收的第 2–4 条结果,接在第一条下面
         out.append(('<div class="accept-got-i"><span class="accept-got-v">%s</span></div>' if f.get("asked")    # 1117 二轮:回答卡每条结论一行,不带「·」
                     else '<div class="accept-got-i accept-got-more"><span class="accept-got-a">·</span><span class="accept-got-v">%s</span></div>') % _esc(got))
     out.append('</div>')
@@ -6595,7 +6595,7 @@ def _accept_fmt2_bits(f, opts, imgs):
         bits = [_answer_block_html(f)] + bits[:-1]
     elif f.get("table"):
         bits.append(_card_table_html(f["table"]))
-    if f.get("todo"):                        # 1115 FDE #c41e:「还要你做」一块(他点通过以外还得亲手做的)
+    if f.get("todo"):                        # 1115 客户项目甲 #c41e:「还要你做」一块(他点通过以外还得亲手做的)
         bits.append('<div class="accept-todo"><b>还要你做</b><ul>%s</ul></div>' % "".join('<li>%s</li>' % _esc(x) for x in f["todo"]))
     if batch_drop:
         bits.insert(0, '<div class="accept-drop"><b>这几件打算不做了，原因:</b><span class="accept-drop-v">%s</span></div>' % _esc(f["drop"]))
@@ -6738,7 +6738,7 @@ def _ask_how_log(board, q, how, deep, hinted):
         pass
 
 
-# ⭐ 1027(电商-选品 v2.6 转):`ask --row r1026-b3de` 挂了卡,卡上写着「对应你交代的那一行」,那一行却还显示「不用你做 · 我在做」,
+# ⭐ 1027(示例-选品 v2.6 转):`ask --row r1026-b3de` 挂了卡,卡上写着「对应你交代的那一行」,那一行却还显示「不用你做 · 我在做」,
 #   区头「要你拍」算成 0、「要你的」里却有 1 张 ⇒ 同一件事两处说法打架。
 #   ⇒ 挂卡时那一行(没做完、还没标着要他拍 / 动手 / 去催)改标 decide,并记下是哪张卡标的(data-you-card);
 #     他答完 `answer --why` / `--done` 照常改掉;`answer --no-row` 只拿卡时,卡标的那一行一起改回来(_answer_apply)。
@@ -6826,7 +6826,7 @@ def _ask_do_problem(do, steps):
             % (ASK_DO_STEPS + ASK_DO_STEPS))
 
 
-# 1023(电商-基建转,负责人原话:「我前面就已经点过这个状态板，它就点过这个事项了，为什么没有处理？」):
+# 1023(示例-基建转,负责人原话:「我前面就已经点过这个状态板，它就点过这个事项了，为什么没有处理？」):
 #   要发给真人的稿挂成了只有补充栏的卡 ⇒ 他在补充里写「直接发吧」,发消息闸(outbound-message-gate,AI Harness 的)只认点过的选项 ⇒ 拒;
 #   重挂时 `--text "$(cat 不存在的文件)"` 又挂成了空稿卡。⇒ --text 有空段就拒;--text 卡没给 --opt(也不是 --do)⇒ 自动带「发出去 / 再改」。
 ASK_TEXT_OPTS = ["发出去|照原文发", "再改|在补充里写改哪"]
@@ -6853,7 +6853,7 @@ def _ask_text_problem(texts):
             "   ⇒ 把这个网址从原文里拿掉,入口用 `--deep <网址> --deep-why \"点进去能看到什么\"` 挂在卡上。" % hits[0][:100])
 
 
-# ⭐ 1117 #b7d1(电商-基建 报):`ask --text @/tmp/x/msg.txt`(lark-cli 的 @文件 写法)原样上了卡 —— 他 14:04 在板上看到「请你过目的原文」只有一行路径:
+# ⭐ 1117 #b7d1(示例-基建 报):`ask --text @/tmp/x/msg.txt`(lark-cli 的 @文件 写法)原样上了卡 —— 他 14:04 在板上看到「请你过目的原文」只有一行路径:
 #   「这状态板出问题了啊」。⇒ --text 认 @文件(读内容当原文);别的会印到他板上的文字参数,整串是一个文件路径 ⇒ 拒写(他只会看到一行路径)。
 #   参数清单 = BOARD_PROSE_ARGS(查)+ BOARD_PROSE_ARGS_OK(放过:本来就是路径 / 编号 / 开关 / 枚举);自检核 ask / row / answer / head / dir / deep-ok
 #   每个参数都归了类 ⇒ 以后加参数没归类,自检就红。
@@ -7146,7 +7146,7 @@ def _say_wait_words(text):
 def _say_wait_problem(say, fact, linked, you_arg, path="<板>"):
     """`row --say` 的新文字说「在等他」,而这一行既没标着要他、也没有卡在讲它、这次也没表态 ⇒ 返回要报的话;否则 None。纯函数。
     fact = 改完之后这一行的事实(_yours_zone_rows 的一项);linked = 「要你的」里是否已有卡链到这一行;you_arg = 这次命令给的 --you。
-    ⭐ 1013(负责人对电商-投流:「状态板怎么又腐烂了…这个问题很大」):那条线三轮在聊天里以「要你定的一件」收尾,只把这句话写进了行的现状,
+    ⭐ 1013(负责人对示例-投流:「状态板怎么又腐烂了…这个问题很大」):那条线三轮在聊天里以「要你定的一件」收尾,只把这句话写进了行的现状,
       「要你的」里没有卡;它自己说:「row --say 成功 + lint PASS 给了我『已经上板』的感觉,而『行里提到在等你』和『要你的里有卡』是两回事」。
       ⛔ 只在命令行这条路、只看这次新写的文字;不进 lint(全机 112 行没做完的行里有「等你」字样的约 10 行,多数是他已搁置 / 在别的板上等,进 lint 就是误咬)。"""
     ws = _say_wait_words(say)
@@ -7157,7 +7157,7 @@ def _say_wait_problem(say, fact, linked, you_arg, path="<板>"):
     import shlex as _shx
     q, k = _shx.quote(path), fact.get("ack") or "<这一行的编号>"
     return ("--say 里写着「%s」,但这一行没标着要他、「要你的」里也没有它的卡 —— 写进行的现状 ≠ 摆到他面前:他开板先看「要你的」,"
-            "那里没有,这件事对他就不存在(负责人 10-13 对电商-投流:「状态板怎么又腐烂了」)。三选一:\n"
+            "那里没有,这件事对他就不存在(负责人 10-13 对示例-投流:「状态板怎么又腐烂了」)。三选一:\n"
             "   ① 要他判断 ⇒ 这条命令加 `--you decide --act \"要他定的一句\"`,紧接着挂展开卡:\n"
             "        python3 ~/.claude/scripts/board.py ask %s --row %s --q \"他能直接回答的一个问题\" --why \"前因后果\" --rec \"我的建议\" --opt \"选项|说明\"\n"
             "   ② 要他动手(一句话讲得清的动作)⇒ 加 `--you do --act \"他要做的一句\"`\n"
@@ -7165,7 +7165,7 @@ def _say_wait_problem(say, fact, linked, you_arg, path="<板>"):
             % ("」「".join(ws), q, k))
 
 
-# ⭐ 1117 J2(电商-基建 #b8d4③):--wait-for 写的是等他(「你在…那张卡上的回答」「你拍…」「等负责人」「他自己验」),他面前却没有这件事的卡 ⇒ 拒写,
+# ⭐ 1117 J2(示例-基建 #b8d4③):--wait-for 写的是等他(「你在…那张卡上的回答」「你拍…」「等负责人」「他自己验」),他面前却没有这件事的卡 ⇒ 拒写,
 #   同 --say 里「等你」那条(_say_wait_problem,负责人 10-13「状态板怎么又腐烂了」)。11-17 全机只读扫:没做完、在等他、同板没卡链着的行 17 行。
 #   放过:等日子(「日子:…」开头)/ 这一行有卡链着 / 这一行或这次命令标着要他拍 / 动手 / 去催 / 写了卡号(ask-xxxxxxxx,卡挂在别的线板上)。
 #   否过什么:⛔ 不放过 --you wait —— 「不用你做」和「在等你」自相矛盾(--say 那条放过它,是因为 --say 里常写「你 10-07 说先搁着」这类记事);
@@ -7408,7 +7408,7 @@ def _ans_ts_epoch(ts):
 
 
 def _ans_kept(rec):
-    """⭐ 1027(电商-基建 v2.2 转,负责人:「为什么我也点了记下呀？为什么没有，你看不到呢？是因为我没有点交给这条线吗？」):
+    """⭐ 1027(示例-基建 v2.2 转,负责人:「为什么我也点了记下呀？为什么没有，你看不到呢？是因为我没有点交给这条线吗？」):
     他亲手点了卡上的「记下」(记录带 keep,且 keep ≥ ts)= 这一张他写完了 ⇒ answers / 注入钩子照常列给 AI 看;
     但不算「交给这条线」⇒ 不为它叫醒(他可能还在答别的卡,1026 晚他要「全部答完再一次交」)。自动存的半截字没有 keep,照旧藏着。"""
     t, k = _ans_ts_epoch(rec.get("ts")), _ans_ts_epoch(rec.get("keep"))
@@ -7707,7 +7707,7 @@ def _answers_mark(items, now_iso, adir=None, marked=None):
     return n, bad
 
 
-# ⭐ 1026 晚(电商-投流达人 v1.9 转,负责人让反馈):他在板上写完、回到对话说「看一下状态板上的回复」,
+# ⭐ 1026 晚(示例-投流达人 v1.9 转,负责人让反馈):他在板上写完、回到对话说「看一下状态板上的回复」,
 #   可写了字的要停手 10 分钟才算交 ⇒ AI 只读到「他还在写」,两次都晚了约 10 分钟。他在对话里点名叫看板 = 他认为交了。
 #   ⇒ `answers --take-drafts` 把这块板(连方案页)上还没交的记成交了(记录上写 sub,与「交给这条线」按钮同一个字段);
 #     注入钩子认出他这一轮的话在叫看板时自动带上它。读进来之后他又改了(ts 变了)的不动。
@@ -7827,7 +7827,7 @@ def cmd_answers(a):
     mk = getattr(a, "mark", None)
     if mk is None or mk is False:
         return 0
-    # 1113 电商-选品 #3b90:--mark 原来一把全标、只回「2 条标成已消化」,不说是哪两题 ⇒ 它漏办了一题(他选了「全部下」)。
+    # 1113 示例-选品 #3b90:--mark 原来一把全标、只回「2 条标成已消化」,不说是哪两题 ⇒ 它漏办了一题(他选了「全部下」)。
     #   ⇒ 可写题号只标办完的那几题;标完逐题列出题干和他选了什么;写了题号还剩没标的也列出来。
     can = [x for x in items if x["kind"] == "page" or x["machine"]]
     ids = [] if mk is True else [str(i).strip() for i in mk if str(i).strip()]
@@ -9044,7 +9044,7 @@ def cmd_wake_lines(dry=False, sess_dir=None, now=None):
         pend = _answers_pending(src, bname, _answers_map(bpath, src), now=now)
         # 1113 负责人第一次真点(AI Harness 报):验收卡点「通过」他就认了 ⇒ 不等他点「交给这条线」、也不被同板别的草稿 / 刚交等满压住,先单独收掉。
         if BP._load().get('accept_autoclose', True) is not False and not dry:
-            # 1113 夜(电商-投流达人【急】):点完通过 17 秒就收,38 秒后写的补充没人收 ⇒ 只收没写补充、点完满一分半的;带补充的照普通回答叫醒那条线
+            # 1113 夜(示例-投流达人【急】):点完通过 17 秒就收,38 秒后写的补充没人收 ⇒ 只收没写补充、点完满一分半的;带补充的照普通回答叫醒那条线
             passes = [x for x in pend if x.get('kind') == 'card' and x.get('choice') in _ACCEPT_YES and _accept_quiet(x, now)
                       and (x["id"] in (due.get(x["page"]) or {}) or x["id"] in (due_pass.get(x["page"]) or {}))
                       and _accept_card(src, x['id'])]
@@ -9286,7 +9286,7 @@ def _workdays_between(start, today):
 
 def _wait_since_dt(f):
     """行的「开始等」时间:data-wait-since;老行没有 ⇒ 这一行最早可得的时间(_wait_first_dt:data-wait-first / data-fp0 / data-txt-at / data-upd 里最早的)。都没有 ⇒ None。
-    ⭐ 1117 J1(电商-基建 #b8d4①):原来退回「上次动的时间」(_row_moved_at 先取 data-txt-at)—— 每次 --say 改字都把它推到今天,
+    ⭐ 1117 J1(示例-基建 #b8d4①):原来退回「上次动的时间」(_row_moved_at 先取 data-txt-at)—— 每次 --say 改字都把它推到今天,
       有 --wait-for 却没记开始等的老行「到点该追」永远不触发。⇒ 读行时缺起算就用最早可得的时间,不靠作者补。
       否过什么:⛔ 不在 touch 里给老行补写 data-wait-since —— 那是 --chase 的语义(最近一次追),补了会把「追过」和「开始等」搅在一起。"""
     return _parse_stamp(f.get("wait_since")) or _wait_first_dt(f)
@@ -9297,7 +9297,7 @@ def _chase_after_n(f):
     return int(v) if v.isdigit() and int(v) > 0 else CHASE_WORKDAYS
 
 
-# ⭐⭐ 1119 过了预计、球在 AI 这边(负责人 11-19 看电商-基建「要你的」里「这 N 件还没做完:过了预计,或挂了 3 天以上」那张卡:bad case,「可读性为0」)。
+# ⭐⭐ 1119 过了预计、球在 AI 这边(负责人 11-19 看示例-基建「要你的」里「这 N 件还没做完:过了预计,或挂了 3 天以上」那张卡:bad case,「可读性为0」)。
 #   那张卡四个毛病:挤字被白块切开 · 每件贴几百字现状 · 「你要做:问我为什么拖了 / 问我预计哪天能完」叫他去催 AI(方向反了)·
 #   kit 还给它挂「这张卡没写要你答什么」。根上:过了预计、AI 自己该动的事,不是他要做的,不该进「要你的」。
 #   ⇒ 提醒卡撤掉(_stale_apply 和 kit paintStale 只撤旧卡);这类行并进「到点该追」:
@@ -9406,8 +9406,8 @@ def _chase_overdue(f, today):
     return max(1, (today - start).days)
 
 
-# ⭐⭐ 1116 等外部被套话重置计时(AI Harness #9b59;负责人 11-16 在电商-基建线问「是不是腐烂了」)。
-#   实例:电商-基建 某店乙 换绑手机号工单 11-05 提交,11 天一直「处理中」,平台隔几天回一句套话;每次 --chase(或改现状)都把 data-wait-since 重置,
+# ⭐⭐ 1116 等外部被套话重置计时(AI Harness #9b59;负责人 11-16 在示例-基建线问「是不是腐烂了」)。
+#   实例:示例-基建 某店乙 换绑手机号工单 11-05 提交,11 天一直「处理中」,平台隔几天回一句套话;每次 --chase(或改现状)都把 data-wait-since 重置,
 #   「等了几天」永远到不了 3 个工作日,事情一直停着却从不暴露。⇒ 三条:
 #   ① 行上另记 data-wait-first = 第一次开始等(--chase / 改字 / 挪日子都不动它);只有这件事了结(做完 / --review / --drop / 挂卡给他)
 #      或 --wait-for 换成另一个对象(_same_wait_obj:去掉空白标点后互不包含)才清。--chase 次数记 data-chase-n。
@@ -9652,7 +9652,7 @@ def _row_apply(src, ack, say=None, status=None, eta=None, you=None, act=None, wa
     inner, why_old = cut(inner, "why")
     inner, act_old = cut(inner, "act")
     inner, res_old = cut(inner, "res")
-    # 1009(负责人点名电商-投流的板又腐了):row 改了一行的状态和现状,没带 --no-you ⇒ 旧的「要你拍」标记和那句话原样留着,
+    # 1009(负责人点名示例-投流的板又腐了):row 改了一行的状态和现状,没带 --no-you ⇒ 旧的「要你拍」标记和那句话原样留着,
     #   机器卡继续把他已经答过的问题摆在「要你的」里,lint 全程 PASS。指向他的标记是现在时(R2.7),改这一行时必须当场重判:
     #   行上标着要他(decide / do / nudge / stuck)、这次改了现状或状态、却对「还要不要他」只字没提 ⇒ 报错不写(只在命令行这条路上)。
     _oy = attr("data-you")
@@ -9711,7 +9711,7 @@ def _row_apply(src, ack, say=None, status=None, eta=None, you=None, act=None, wa
             tag2 = _attr_set(tag2, "data-after", None)
             notes.append("不再排在 %s 后面" % old_after)
     else:
-        # ⭐ 1028(电商-选品 v2.8):r1028-31f4 先标做完带了 --sum「已过审在售」,发现 某店乙 两条没做又改回在做 ⇒ 总结照留,rows 里新现状和旧总结自相矛盾
+        # ⭐ 1028(示例-选品 v2.8):r1028-31f4 先标做完带了 --sum「已过审在售」,发现 某店乙 两条没做又改回在做 ⇒ 总结照留,rows 里新现状和旧总结自相矛盾
         if old_st == "done" and attr("data-sum"):
             tag2 = _attr_set(tag2, "data-sum", None)
             notes.append("拿掉了做完时的总结「%s」(它说的是做完)" % _clause(attr("data-sum"), 30))
@@ -9723,7 +9723,7 @@ def _row_apply(src, ack, say=None, status=None, eta=None, you=None, act=None, wa
         else:
             raise ValueError("没做完的行要写为什么没做完 / 现在到哪了(--say)")
         new_you = None if no_you else (you if you is not None else attr("data-you"))
-        # ⭐ 1027(电商-选品 v2.6 转):r1024-4163 从 blocked + wait「在等 同事乙」用 `row --status doing` 改成在做,
+        # ⭐ 1027(示例-选品 v2.6 转):r1024-4163 从 blocked + wait「在等 同事乙」用 `row --status doing` 改成在做,
         #   data-you=wait / data-wait-for 照留 ⇒ 板上还写「在等 同事乙」,其实是 AI 在做。⇒ 改成在做 / 盯着时,旧的「在等」一起清(显式给 --you 不管)
         _wait_cleared = False
         if you is None and new_st in ("doing", "watch") and new_you == "wait":
@@ -9741,7 +9741,7 @@ def _row_apply(src, ack, say=None, status=None, eta=None, you=None, act=None, wa
             act_html = act_old
         # ⭐ 1110 往后拖(AI Harness #7e4b):--wait-for 放开到 todo / doing / watch(同一个 data-wait-for;这几种状态默认就是「不用你做」,不写 data-you)。
         #   blocked 照旧只认 wait;标着要他的(decide / do / nudge / stuck)不落;改成在做 / 盯着时上面 1027 那段清掉的旧「在等」不带回来,除非这次又给了 --wait-for。
-        # 1116(电商-基建 11-15 报):--no-you 只拿掉「要你」,显式给的 --wait-for 照写;没给才连旧的「在等」一起清(收卡路径照旧)
+        # 1116(示例-基建 11-15 报):--no-you 只拿掉「要你」,显式给的 --wait-for 照写;没给才连旧的「在等」一起清(收卡路径照旧)
         if (no_you and wait_for is None) or new_you not in (None, "wait") or (new_you is None and new_st not in ("todo", "doing", "watch")):
             new_wait = None
         elif wait_for is not None:
@@ -9876,7 +9876,7 @@ def _row_apply(src, ack, say=None, status=None, eta=None, you=None, act=None, wa
 
 
 # ──────────────── 1008 往「你交代的」里新增一行:`row --new`
-#   之前没有命令能加行,各线只能手改 HTML ⇒「他说以后再做的事」常常就没落成一行(电商-基建:答完的卡收走,那件事从此不在板上)。
+#   之前没有命令能加行,各线只能手改 HTML ⇒「他说以后再做的事」常常就没落成一行(示例-基建:答完的卡收走,那件事从此不在板上)。
 #   生成的行与 `_row_apply` 写出来的同一个形状(先放一个只有标题和日期的骨架,再交给 _row_apply 填 —— 规则只有一份)。
 ROW_NEW_ST = ("todo", "doing", "blocked", "watch")
 _ACK_OK_RE = re.compile(r"[A-Za-z0-9][A-Za-z0-9_.-]{0,63}")
@@ -9979,7 +9979,7 @@ def _row_new(src, title, status=None, say=None, eta=None, after=None, ack=None, 
                                       say=say, status=status, eta=eta, wait_for=wait_for)
     if duplicate:
         raise ValueError("已有未完成的同标题行 %s，刚建过；用 row --ack %s 改这一行。" % (duplicate, duplicate))
-    # ⭐ 1028 电商-选品:每晚抽查同事乙的结论只能塞进长期行的第一句,负责人「是这个事项直接淹没在今天的事情里了吗?」⇒ 当时开了「新开一行直接标做完」。
+    # ⭐ 1028 示例-选品:每晚抽查同事乙的结论只能塞进长期行的第一句,负责人「是这个事项直接淹没在今天的事情里了吗?」⇒ 当时开了「新开一行直接标做完」。
     #   ⛔ 1114 起命令行上的 status done 一律拒(cmd_row「做完须经他验收」,--new 也不例外)⇒ 这一支只剩自检和内部调用;
     #   「只是告诉他一声」的结果现在照常开行再 `--review` 交他点。
     if status == "done":
@@ -10031,7 +10031,7 @@ class _AnswerWhyDrops(Exception):
     """answer --why:新现状把原现状里提到的货号 / 编号丢了(args = 行编号, 原现状, [丢了的编号])。只在 _answer_apply 里用。"""
 
 
-# ⭐ 1104(电商-选品 v3.2 转,负责人 11-04 21:3x 要各线报板上腐烂):r1103-92d9 一行装着 AAA / BBB1 / 某商品丙 / CCC1 几个品,
+# ⭐ 1104(示例-选品 v3.2 转,负责人 11-04 21:3x 要各线报板上腐烂):r1103-92d9 一行装着 AAA / BBB1 / 某商品丙 / CCC1 几个品,
 #   收 CCC1 那张卡写 --why,整行现状被换成只讲 CCC1 的一句 —— 其余几个品到哪了从板上没了,他看到的是残缺现状,工具一声不响。
 #   ⇒ 新现状里漏了原现状提到的货号 / 编号(大写字母开头 3 位以上,同 _CODE_RE)⇒ 拒,摆出原文;
 #     --why-add = 新这句放最前、原现状接在后面;--why-replace = 确认整段换掉。都没漏 ⇒ 照旧换,并印出被换掉的原文。
@@ -10056,7 +10056,7 @@ def _answer_later_hint(res, path):
             "     已经有这一行了 ⇒ `board.py row %s --ack <行> --after <前面那行>`。不是这个意思就不用管这段。" % path]
 
 
-# 1023(电商-选品转,负责人原话:「我不是让你把某商品的那个1688链接给我吗？你这事怎么没做呢？你不应该放在状态板上吗？
+# 1023(示例-选品转,负责人原话:「我不是让你把某商品的那个1688链接给我吗？你这事怎么没做呢？你不应该放在状态板上吗？
 #   为什么这个事情你只在对话里讲了，没有在那个状态板上讲？」):他在卡的补充里要一个链接,AI 用 answer --why 把链接写进行的现状、卡收了;
 #   随后 row --you do 出的「等你的行」机器卡只印 --act 那句 ⇒ 链接只在行里(点不动、首屏只露第一句)和聊天里。
 #   实测(10-23 全机 500 行):没做完、写着网址的行只有这 1 行;带外链的 30 行全是做完的(产物存档,照放)。
@@ -10101,7 +10101,7 @@ def _answer_update_why(out, rk, why, why_mode, today, q, ack, require_open=False
         _drop = _why_dropped_codes(_old, why)
         if _drop:
             raise _AnswerWhyDrops(rk, _old, _drop)
-    # ⭐ 1116 讲人话 ⑤(电商-基建 #b6c2):一行挂着几张卡,收其中一张时 --why 整段换掉现状 ⇒ 另几张卡问的那几件到哪了,板上就没了。
+    # ⭐ 1116 讲人话 ⑤(示例-基建 #b6c2):一行挂着几张卡,收其中一张时 --why 整段换掉现状 ⇒ 另几张卡问的那几件到哪了,板上就没了。
     #   ⇒ 行上还有别的没收的卡:不换现状、不改状态、不拿掉「要你」,只在末尾追加「<卡> 已收:…」;最后一张收时才按 --why 换。
     _others = _row_linked_cards(out, rk)
     if _others:
@@ -10194,7 +10194,7 @@ def _answer_apply(src, ack, res, row=None, done=False, why=None, no_row=False, t
     """他答了「要你的」里一张卡 ⇒ 拿掉卡(R3「拍完当轮拿掉」),对应的那一行一起改成不再等他 —— 纯函数,吐 (新文本, [说明])。
     对应的行:--row 指定 › 卡里链到的 #row-<ack> › 标着 data-you-card 的行 › 卡号与行的 data-ref 相同的行。
     撤卡模式会另外读取这张卡的回答记录，确认没人答过。
-    ⭐ 1008(负责人,电商-基建:一行里写着几件事,他只答了其中一张卡,那一行的现状被整段换成「你 10-08 答了:…」,另外半件事的状态看不出来了):
+    ⭐ 1008(负责人,示例-基建:一行里写着几件事,他只答了其中一张卡,那一行的现状被整段换成「你 10-08 答了:…」,另外半件事的状态看不出来了):
        有对应的行、没给 done、也没给 why ⇒ ValueError、什么都不改 —— 他答完之后这一行到哪了只有作者知道,不再拿他的回答去盖。
     ⛔ 机器卡(每次落板现算)不能手拿:下一次 touch / queue 原样长回来 —— 报错并说改源头。"""
     today = today or datetime.date.today()
@@ -10284,7 +10284,7 @@ def _answer_apply(src, ack, res, row=None, done=False, why=None, no_row=False, t
         return out, notes + ["这张卡没链到「你交代的」里的行 —— 他的答复只在聊天里;要留痕就写进它的卡号或账本"]
     try:
         if done:
-            # 1008 晚(电商-基建 v1.7 实撞两次):`--done` 被读成「这张卡处理完了」,而它做的是「把对应那一整行标成做完」——
+            # 1008 晚(示例-基建 v1.7 实撞两次):`--done` 被读成「这张卡处理完了」,而它做的是「把对应那一整行标成做完」——
             #   一张「这张卡没讲清楚,重写」的卡 --done,把还没做完的 137 行标完成并搬进了留档页;另一张把已做完行的结论盖成了「不用答了」。
             #   ⇒ 已做完的行不许再被盖结论;命令行上 --done 必须同时用 --row 点名那一行(报错里把那一行的标题和现状摆出来)。
             _da, _db, _dz = _row_span(out, rk)
@@ -10344,7 +10344,7 @@ def _answer_apply(src, ack, res, row=None, done=False, why=None, no_row=False, t
     return out, notes + ["那一行(%s):%s" % (rk, ";".join(ch) or "没变")] + cleared
 
 
-# ⭐ 1027(电商-选品 v2.6 转):收「床头充电站」那张卡(他选先不做)用了 --no-row,r1023-9711 就一直挂着「等同事乙找 S000」—— 没人回头改。
+# ⭐ 1027(示例-选品 v2.6 转):收「床头充电站」那张卡(他选先不做)用了 --no-row,r1023-9711 就一直挂着「等同事乙找 S000」—— 没人回头改。
 #   ⇒ --no-row 时:① 这张卡挂上时自动标「要你拍」的那一行(data-you-card = 这张卡)改回来;
 #     ② 列出文字里提到这张卡上同一个货号 / 编号(大写字母开头 3 位以上)的没做完的行,提示重判(只提示,不改)。
 _CODE_RE = re.compile(r"(?<![A-Za-z0-9])[A-Z][A-Z0-9]{2,}(?![A-Za-z0-9])")
@@ -10371,7 +10371,7 @@ def _answer_norow_rows(src, card, ack, today=None):
     return src, notes
 
 
-# ⭐ 1027(电商-选品 v2.6 转):`answer --why` 整段换掉那一行的现状,两次被写成了这一张卡的事(对标监控那行第一句成了「加了 AI 代发后重新挂卡」)。
+# ⭐ 1027(示例-选品 v2.6 转):`answer --why` 整段换掉那一行的现状,两次被写成了这一张卡的事(对标监控那行第一句成了「加了 AI 代发后重新挂卡」)。
 #   ⇒ 印出旧 → 新第一句;新现状和行标题一个词都对不上 ⇒ 提醒(只提醒,不拦:机器分不清是不是换了说法)。
 def _answer_why_check(f, why):
     old = re.split(r"[。;;\n]", str(f.get("why") or ""))[0].strip()
@@ -10617,7 +10617,7 @@ def _touch_after_edit(p, no_touch):
     return _touch_child(p)
 
 
-# ⭐ 1028(电商-选品 v2.8 转,负责人 10-28 17:1x「你这个是个很严重的bad case啊」):卡 ask-f9bdb099 问「插排重量的私信能不能发给同事乙」,
+# ⭐ 1028(示例-选品 v2.8 转,负责人 10-28 17:1x「你这个是个很严重的bad case啊」):卡 ask-f9bdb099 问「插排重量的私信能不能发给同事乙」,
 #   他答「我直接问掉好了」;AI 照常 `answer --why` 把卡收了 ⇒ 他问完供应商回来,板上没有地方填:「我现在都不知道在哪个版,在哪个哪个地方回复你了」。
 #   他的回答是「这一步我来」时,卡其实没完结,只是从「要他拍」变成「要他动手」;「要你的」里的机器小卡没有回答框,标 --you do 也接不住。
 #   ⇒ 他的回答 / --res / --why 里有「我去问 / 我自己来 / 我直接…」⇒ 不让直接收(--done 除外):先挂一张给他填结果的卡再收(--followup <新卡>),
@@ -10627,7 +10627,7 @@ _SELF_DO_RE = re.compile(r"我(?:已经)?(?:自己(?:去|来|先|直接)?|来|�
                          rf"|(?:他|{_owner_pattern()})(?:说)?自己(?:在|去|来)?(?:问|联系|找|处理|发)")
 
 
-# ⭐ 1029(电商-选品 v2.9 转,负责人 10-29 14:5x:「我还没讨论完,怎么就已经没了?……很多事情感觉就我还没有讨论完,那个事情就已经直接从板上消失了」):
+# ⭐ 1029(示例-选品 v2.9 转,负责人 10-29 14:5x:「我还没讨论完,怎么就已经没了?……很多事情感觉就我还没有讨论完,那个事情就已经直接从板上消失了」):
 #   他在卡上没选选项、写的是追问 / 讨论(「购买理由表是什么」「先拿几个 case 试、调研、算收益和成本」),线照「答了当轮收」把卡收了、没续一张 ⇒ 这件从「要你的」消失。
 #   ⇒ 他没选选项(空 / 「其他」)、补充里在问或说还要再讨论 ⇒ 同「这一步我来」:要 --followup <续的那张卡> 或 --no-followup「他其实拍了什么」。--done 不放行(他的问题还没回)。
 #   依据:10-20~10-29 消化掉的 457 条卡上回答,212 条只写补充,其中 120 条命中下面的词(抽 15 条看,都是他在问 / 推回去);「好吧? / 对吧?」这类反问不算。
@@ -10668,14 +10668,14 @@ def _answer_selfdo_problem(src, a, answers):
         t = dm.string
         clip = t[max(0, dm.start() - 16):dm.end() + 12].replace("\n", " ")
         return ("✗ 他没选选项,补充里在问 / 说还要再讨论(「…%s…」)—— 现在收卡,这件就从「要你的」消失了"
-                "(10-29 电商-选品:他问「购买理由表是什么」、又说「先拿几个 case 试」,卡收了没续,他:「我还没讨论完,怎么就已经没了」)。\n"
+                "(10-29 示例-选品:他问「购买理由表是什么」、又说「先拿几个 case 试」,卡收了没续,他:「我还没讨论完,怎么就已经没了」)。\n"
                 "   ⇒ 还要他接着回 / 接着拍 ⇒ 先挂续的那张:`board.py ask <板> --row <行> --q \"<他问的那句的答案 + 现在要他定的>\" --rec …`,"
                 "再 `board.py answer … --followup <新卡号>`;\n"
                 "   ⇒ 他其实已经拍了、问的只是顺口一句 ⇒ `--no-followup \"他拍的是:…;问的那句已在 <哪里> 答了\"`。" % clip)
     t = m.string
     clip = t[max(0, m.start() - 12):m.end() + 16].replace("\n", " ")
     return ("✗ 他的回答里说这一步他自己来(「…%s…」)—— 收了卡,他做完回来就没地方填结果"
-            "(10-28 电商-选品:他说自己问供应商,卡被收了,问完「都不知道在哪个版,在哪个地方回复你了」)。\n"
+            "(10-28 示例-选品:他说自己问供应商,卡被收了,问完「都不知道在哪个版,在哪个地方回复你了」)。\n"
             "   ⇒ 先给他留个填结果的地方:`board.py ask <板> --do --row <行> --q \"问完供应商,把结果填这里\" --rec … --steps …`,"
             "再 `board.py answer … --followup <新卡号>`;\n"
             "   ⇒ 他确实不用再回你(只是说自己发、发完就完)⇒ `--no-followup \"为什么不用他再回\"`;他做完了、结果也给了 ⇒ `--done`。" % clip)
@@ -10688,7 +10688,7 @@ def _answer_acks(v):
     return [x for x in dict.fromkeys(re.split(r"[,，\s]+", str(v or "").strip())) if x]
 
 
-# ⭐ 1105(电商-选品 v3.2 转):批量改时每条都 touch + lint,改到一半他已经在看了 ⇒ `board.py batch <板>`:
+# ⭐ 1105(示例-选品 v3.2 转):批量改时每条都 touch + lint,改到一半他已经在看了 ⇒ `board.py batch <板>`:
 #   从标准输入(或 --file)读,一行一条 `row …` / `answer …`(写法和命令行一样,不写板路径),全部写完只盖一次戳。
 #   ⛔ 一条被拦不影响别的:照跑完,最后说清哪几条没成、原因;退出码非 0。每条只印一行结果,不重印那一大段提示。
 def cmd_batch(a, ap):
@@ -11227,7 +11227,7 @@ def _answer_finish_hints(a, p, notes):
 #     走板的扫描不进子目录 ⇒ 自动离开索引和同侪条;8777 上留一页「这块板已退场 → 去向」,他开着的面板不会变空白。
 #   ⇒ `retire --scan`:列出本机每块板对应的会话还在不在、多久没动、还有没有没做完的 —— 只列不动,撤哪块由他定。
 
-# ⭐ 1117 电商-基建 #a7c3:子线停下等人时标题按规矩改成「子线·X(等谁)」,要他进去亲手配合的叫「子线·X·要你进来」
+# ⭐ 1117 示例-基建 #a7c3:子线停下等人时标题按规矩改成「子线·X(等谁)」,要他进去亲手配合的叫「子线·X·要你进来」
 #   (rules/common/session-lifecycle.md 命名规则),板名仍是「子线-X」⇒ 比标题前先去掉这两种尾巴。不去的后果:
 #   改了名的子线被判成「子线会话不在」(主线板 lint 一直红),他在主线板上答的卡也叫不到它。
 def _title_tail_cut(x):
@@ -11468,7 +11468,7 @@ def _parent_problem(child_path, parent, row=None, boards=None):
         return ("只有子线 / 单开的板能声明父板(板名要是「子线-…」或「单开-…」),%s 不是 —— 常驻线的板自己就是主线的板。" % name), None
     par = os.path.basename(_strip_file_scheme(str(parent or "").strip()))
     if not par:
-        return "没给父板(派它的那条线的板文件名,如 电商-基建.html)", None
+        return "没给父板(派它的那条线的板文件名,如 示例-基建.html)", None
     if not par.endswith(".html"):
         par += ".html"
     if par == name:
@@ -11832,7 +11832,7 @@ def _retire_pointer_html(name, to, when):
 
 def _retired_forget_own(name, state_path=None):
     """retire 之后:收尾钩子 state.json 里 own 指着这块板的条目,own 清掉(下次写别的板时重新学)。返回清了几条。读写不了 ⇒ 0(不挡退场)。
-    ⭐ 1113 FDE-总控报:退场后面板钩子每轮还报「客户甲-FDE.html N 分钟没被面板拉取」—— 钩子先信 state.json 学到的 own,而它没跟着清。
+    ⭐ 1113 客户项目甲-总控报:退场后面板钩子每轮还报「客户甲-客户项目甲.html N 分钟没被面板拉取」—— 钩子先信 state.json 学到的 own,而它没跟着清。
     钩子那一侧另有 own-board.js isRetiredBoard 兜底(这里清漏了、或别处先学回来也不追)。"""
     p = state_path or BP.state("board-stop-hook", "state.json")
     try:
@@ -12010,7 +12010,7 @@ def cmd_retire(path, to, force=False, dry=False):
             fh.write(json.dumps({"board": p, "to": to, "at": when, "moved": moved, "force": bool(force)}, ensure_ascii=False) + "\n")
     except OSError:
         pass
-    _retired_forget_own(name)      # 1113:钩子学到的「本会话的板」指着它 ⇒ 当场清掉(FDE-总控报:退场后面板钩子还在追)
+    _retired_forget_own(name)      # 1113:钩子学到的「本会话的板」指着它 ⇒ 当场清掉(客户项目甲-总控报:退场后面板钩子还在追)
     print("✓ %s 已退场 → %s" % (name, to))
     for x in moved:
         print("  挪进 %s" % x)
@@ -12023,7 +12023,7 @@ def cmd_retire(path, to, force=False, dry=False):
     return 0
 
 
-# ── 1026(电商-投流线【要你做】:负责人 10-26 15:43 板上拍线改名「电商-投流达人」):板跟着线改名 ─────────
+# ── 1026(示例-投流线【要你做】:负责人 10-26 15:43 板上拍线改名「示例-投流达人」):板跟着线改名 ─────────
 #   原来只有 retire,它要求板上没有没做完的 ⇒ 有在跑的行的线一改名,板只能停在旧名:侧栏按会话标题认不上、
 #   `board.py path <新线名>` 找不到。手动 mv 会断硬链(worktree / 8777 各一份)、丢他的答案和已读、▶ 变死链。
 #   ⇒ `rename <板> --to <新线名>`:同一个 inode 原地改名(行 / 卡 / 留档一样不丢),worktree 硬链跟着换名,
@@ -12038,7 +12038,7 @@ def _rename_sides(o, n):
 
 def _rename_text(s, o, n):
     """板 / 留档页里指自己的地方:<title>、<h1>(「X 状态板」「X · 已留档」)、页脚和链接里的文件名。纯函数。
-    ⛔ 正文里顺带提到旧线名的不动(「线改名电商-投流达人」前面不是 > / 引号 / 空白)、方案页名(「X-测品…」)不动。"""
+    ⛔ 正文里顺带提到旧线名的不动(「线改名示例-投流达人」前面不是 > / 引号 / 空白)、方案页名(「X-测品…」)不动。"""
     pat = r'(?<=[>/"\'\s])' + re.escape(o) + r'(?= 状态板| · 已留档|\.html|-留档\.html|' + re.escape(DERIVED_SUFFIX) + r')'
     return re.sub(pat, lambda m: n, s)
 
@@ -12116,7 +12116,7 @@ def cmd_rename(path, to):
     o = name[:-5]
     n = re.sub(r"\.html$", "", str(to or "").strip()).replace(" 状态板", "").strip()
     if not n or "/" in n or n.startswith(("_", ".")) or n.endswith("-留档"):
-        die("新名不对:--to 只写新线名(例:--to 电商-投流达人),不带路径、不以 _ / . 开头、不以「-留档」结尾。⇒ 什么都没动。")
+        die("新名不对:--to 只写新线名(例:--to 示例-投流达人),不带路径、不以 _ / . 开头、不以「-留档」结尾。⇒ 什么都没动。")
     if n == o:
         die("新名和旧名一样(%s)。⇒ 什么都没动。" % o)
     if _derived_copy(name) or not _is_board_file(p):
@@ -12260,7 +12260,7 @@ def _queue_drop_you(board_path, n):
         return 0
 
 
-# ──────────────── 1023 晚 电商-基建转(负责人 18:3x):外部群里对方的新回复被淹没,板上没出现
+# ──────────────── 1023 晚 示例-基建转(负责人 18:3x):外部群里对方的新回复被淹没,板上没出现
 #   「我这个事情我要还要回复那个示例群成员,这事情怎么就直接被淹没掉了?也没放在状态板上……」
 #   示例群 群 15:07 对方改了范围、18:14 ＠他追问;那条线下午没再读这个群,板上那一行停在旧结论,没有任何东西提醒它。
 #   ⇒ 行上登记对方群(`row --ack <行> --chat oc_…`,写 data-chat);`board.py chat-watch --all`(本机 LaunchAgent 每 10 分钟跑)
@@ -12535,9 +12535,9 @@ def cmd_chat_watch(a):
 
 _REVIEW_EXIT = '先验收: row <板> --ack <行> --review --q "哪件事 + 要你干什么" --got "现在的结果" --see "去哪看到什么变化" [--url <专门页面> --check "去哪看、看到什么算对"]'
 
-# 依据: 电商-基建 11-13 14:30 实例,只写「看这一行的现状」让他不知道看什么;至少八字交代入口里的核对内容。
+# 依据: 示例-基建 11-13 14:30 实例,只写「看这一行的现状」让他不知道看什么;至少八字交代入口里的核对内容。
 REVIEW_CHECK_MIN = 8
-# 依据: 电商-基建 11-13 14:30 的指路话实例及本轮明确列出的六种指代。
+# 依据: 示例-基建 11-13 14:30 的指路话实例及本轮明确列出的六种指代。
 _REVIEW_POINTERS = ('看这一行', '见上', '见行', '看现状', '如上', '同上')
 
 
@@ -12633,11 +12633,11 @@ CARD_Q_MAX = 50
 REVIEW_GOT_MAX = 40
 # 依据: 1114 凌晨 ask-8d3f00ad「这 2 件做好了,验收通过吗?」他点不通过;指代开头的标题他得回头找「这样」是哪样
 _CARD_Q_VAGUE = re.compile(r"^(?:这\s*\d+\s*件|这样|这个|上述|如下|以上)")
-# 1115 FDE #c41e(负责人 11-15):卡上写「在回复里 / 见对话 / 见上文」= 让他去别处找 ⇒ 拒(--q 与 --got 都查);
+# 1115 客户项目甲 #c41e(负责人 11-15):卡上写「在回复里 / 见对话 / 见上文」= 让他去别处找 ⇒ 拒(--q 与 --got 都查);
 #   --q 写「这样处理 / 这么做 / 这样改」= 做法不在标题里,他看标题不知道批的是什么 ⇒ 拒
 _SEE_ELSEWHERE_RE = re.compile(r"在回复里|见对话|见上文")
 _CARD_Q_POINTER_RE = re.compile(r"这样处理|这么做|这样改")
-# 依据: 负责人 11-15 FDE #c41e「单行验收最多 4 条 --got」(与 ASK_HOW_MAX 同:首屏一眼 4 条)
+# 依据: 负责人 11-15 客户项目甲 #c41e「单行验收最多 4 条 --got」(与 ASK_HOW_MAX 同:首屏一眼 4 条)
 REVIEW_GOT_ONE_MAX = 4
 REVIEW_TODO_MAX = 4   # 依据: 同上,「还要你做」也按首屏一眼 4 条
 # 1115 sw-drop:「不做了,同意吗」卡的两个选项;他点「同意不做」= 与验收「通过」走同一条自动收(_accept_pass),点「接着做」= 叫醒那条线
@@ -12793,7 +12793,7 @@ def _ask_rec_dup(rec, opts):
     return bool(re.sub(r"\s+", "", str(rec or ""))) and re.sub(r"\s+", "", str(rec or "")) == re.sub(r"\s+", "", first)
 
 
-# ⭐ 1116 周修(负责人 11-13 23:19 电商-基建 #e4f1:「做到哪里面是一大坨字……里面还有两句话是重复的」;11-16 周复查「看得懂吗」节):
+# ⭐ 1116 周修(负责人 11-13 23:19 示例-基建 #e4f1:「做到哪里面是一大坨字……里面还有两句话是重复的」;11-16 周复查「看得懂吗」节):
 #   kit 只在显示时去重(acceptDoingNode),作者照样写重复 ⇒ 挂卡那一刻拦:
 #   验收卡每条 --got、普通卡 --why(前因后果)每一句,去掉标点空白后与 --q(去掉标点和句尾「通过吗 / 行吗 / 同意吗…」)
 #   一方包含另一方(较短一方 ≥ CARD_DUP_MIN 字)或相似度 ≥ CARD_DUP_RATIO ⇒ 拒写。
@@ -12841,7 +12841,7 @@ def _card_dup_q_problem(q, gots=None, why=None, report=None):
     return None
 
 
-# ⭐ 1116 讲人话(负责人 11-16 11:18 在电商-基建卡 ask-5d701b19 点「不通过」:「这个我没太看懂你在说什么……你的验收卡就很大的问题,就是不讲人话。
+# ⭐ 1116 讲人话(负责人 11-16 11:18 在示例-基建卡 ask-5d701b19 点「不通过」:「这个我没太看懂你在说什么……你的验收卡就很大的问题,就是不讲人话。
 #   你这边验收的很多事情,我根本就看不懂你到底干了什么……毕竟这验收卡老是不讲人话,看得很累。」
 #   那张卡标题「出单来源改读主站渠道号接口:在香港读通了」,做到哪写「接口」「本地名单」「退出码 2」「未命名号」,没说他在哪个页面能看到什么变化)。
 #   11-14 他批过「所有卡一种写法、写不清当场拒」(ask-4d24a8ae)⇒ 直接拒写,不走只记不拦。
@@ -12855,7 +12855,7 @@ def _card_dup_q_problem(q, gots=None, why=None, report=None):
 PLAIN_WORDS = ("退出码", "exit", "脚本", "部署", "读回", "兜底", "字段", "PR", "commit", "提交号", "哈希",
                "hook", "钩子", "lint", "selftest", "自检", "变异", "正本", "sync", "子代理", "闸", "本地名单", "未命名号",
                "参数", "报错码", "json", "日志")
-# 正常业务说法(电商卖手机配件、做带货视频,这些是他会说的话)⇒ 先抹掉再找
+# 正常业务说法(示例业务卖手机配件、做带货视频,这些是他会说的话)⇒ 先抹掉再找
 _PLAIN_OK_RE = re.compile(r"(?:充电|耳机|USB|Type-?C|数据线|网线|网口|音频|电源|硬件|Lightning|HDMI)\s*接口"
                           r"|(?:视频|拍摄|口播|直播|带货|分镜|短视频|广告|剧情)\s*脚本"
                           r"|(?:产品|商品|规格|技术|相机|拍摄|配置|尺寸)\s*参数"
@@ -13061,7 +13061,7 @@ def _review_how_problem(how, needed=False, report=None):
     return None
 
 
-# ⭐ 1116 讲人话 ④(电商-基建 #b6c2):盯着 / 卡着的行,现状第一句写「已了结 / 已上线 / 已做完……」,后面才是要等的那个日子
+# ⭐ 1116 讲人话 ④(示例-基建 #b6c2):盯着 / 卡着的行,现状第一句写「已了结 / 已上线 / 已做完……」,后面才是要等的那个日子
 #   ⇒ 他读第一句以为做完了,其实这一行还挂着一件等日子的事。提醒拆成两行:做完的那件交验收,这一行只留那个日子的待办。
 #   只提醒、不拦(lint warn)。否过什么:⛔ 不并进写行时的 done-first(那条只管 todo / doing / blocked,watch 在 1110 判过不报;
 #     这里管的是「两件事挤一行」,改法不同)。⛔ 子句前面有「等 / 没 / 未 / 还」的不算(「等基建上线了再接」是在等)。
@@ -13076,7 +13076,7 @@ def _watch_done_first_hit(f):
     return first if _WATCH_DONE_FIRST_RE.match(first) else None
 
 
-# ⭐ 1116 板腐烂 7(电商-基建 #f2c6②):第一句完成语的提醒 839d3624 已加,可提醒只在 touch / lint 输出里,没人处理就一直挂着。
+# ⭐ 1116 板腐烂 7(示例-基建 #f2c6②):第一句完成语的提醒 839d3624 已加,可提醒只在 touch / lint 输出里,没人处理就一直挂着。
 #   ⇒ touch 第一次看到这一行这样写时记 data-df-at=<那一刻>(已有的不盖);改好了(不再是完成语 / 不再盯着卡着)touch 拿掉。
 #   连着挂满 DONE_FIRST_RED_H 小时 ⇒ kit 在他首屏「卡着的」标红(和「等了 N 天没人追」同一种红,kit doneFirstHours),lint 那句加一句「已挂满 N 小时」。
 #   仍只提醒、不拦写。否过什么:⛔ 不按 data-txt-at 算(这条提醒 11-16 中午才上线,按改字时间算会把早就这样写的行当天全标红,不是「连续提醒满 24 小时」)。
@@ -13131,13 +13131,13 @@ def _done_first_mark(src, now=None):
     return src, n_set, n_clr
 
 
-# ⭐⭐ 1116 板腐烂三线反馈(负责人 11-16 下午让各线查自己板烂没烂;电商-基建 #f2c6、电商-选品 #e4a9、AI Harness #3f8a 报来机器没接住的几类)。
+# ⭐⭐ 1116 板腐烂三线反馈(负责人 11-16 下午让各线查自己板烂没烂;示例-基建 #f2c6、示例-选品 #e4a9、AI Harness #3f8a 报来机器没接住的几类)。
 #   下面五条(任务书第 2–6 条)全是 lint 提醒(touch / head 都会顺手 lint),⛔ 不拦写:先只记不拦跑一周看命中再定(ai-dev-loop「加新的拦截先只记不拦」)。
-#   否过什么:⛔ 编号对不上的回执不猜是哪一行(#e4a9 / #3f8a 都说过「猜错比不报更烦」);⛔ ntc 行按任务名去重不在这里(拉行脚本归电商-基建,它已修);
+#   否过什么:⛔ 编号对不上的回执不猜是哪一行(#e4a9 / #3f8a 都说过「猜错比不报更烦」);⛔ ntc 行按任务名去重不在这里(拉行脚本归示例-基建,它已修);
 #     ⛔ 检查点里没上板的未做事项不在这里(handoff-yours-check.py 归 AI Harness)。
 # 依据: 回执多在当天到;两周前的回执不再拿来比(避免很久以前的同号回执误报)
 ROT_INBOX_DAYS = 14
-# 依据: 信箱 jsonl 一行一封;一条线两周进信 < 500 封(11-16 实数:电商-基建 478 封是从开箱起的总数)
+# 依据: 信箱 jsonl 一行一封;一条线两周进信 < 500 封(11-16 实数:示例-基建 478 封是从开箱起的总数)
 ROT_INBOX_TAIL = 1500
 # 已撤机制词表(任务书第 5 条):[(在行里怎么写, 哪天撤的)]。新撤一个机制就往这里加一行。
 # 依据: 负责人 11-15 撤掉验收卡分三档 / 标档(AI Harness #3f8a②;板上还有行在等它)
@@ -13251,7 +13251,7 @@ def _rot_line_keys(line, universe):
 
 
 def _rot_receipt_warns(facts, receipts, universe=(), consumed=None):
-    """任务书第 2 条(电商-基建 #f2c6①、AI Harness #3f8a①):在等回执的行,回执到了板上不知道。纯函数。
+    """任务书第 2 条(示例-基建 #f2c6①、AI Harness #3f8a①):在等回执的行,回执到了板上不知道。纯函数。
     行的「在等 / 现状」里写着 #xxxx,信箱里有同号回执、晚于这一行上次核过 ⇒ 提醒;编号对不上不猜;
     只写了线名(没写编号)的,那条线在这一行上次核过之后发来过回执 ⇒ 弱一档提醒。"""
     out = []
@@ -13323,7 +13323,7 @@ def _rot_find_row(ack, boards=None):
 
 
 def _rot_waitdone_warns(facts, find=None):
-    """任务书第 3 条(电商-选品 #e4a9②):--wait-for 里写了 rMMDD-xxxx,那一行在同板(或全机)已经做完 ⇒ 提醒。纯函数(find 注入全机查找)。"""
+    """任务书第 3 条(示例-选品 #e4a9②):--wait-for 里写了 rMMDD-xxxx,那一行在同板(或全机)已经做完 ⇒ 提醒。纯函数(find 注入全机查找)。"""
     own = {f.get("ack"): f for f in facts if f.get("ack")}
     out = []
     for f in facts:
@@ -13346,7 +13346,7 @@ def _rot_waitdone_warns(facts, find=None):
 
 
 def _rot_statewait_warns(facts):
-    """任务书第 4 条(电商-选品 #e4a9③):标着在做 / 没开工、没写 --wait-for,现状却写「等 X 回 / 回复 / 确认」⇒ 提醒改成卡着 + --wait-for。纯函数。"""
+    """任务书第 4 条(示例-选品 #e4a9③):标着在做 / 没开工、没写 --wait-for,现状却写「等 X 回 / 回复 / 确认」⇒ 提醒改成卡着 + --wait-for。纯函数。"""
     out = []
     for f in facts:
         if f.get("st") not in ("todo", "doing") or str(f.get("wait_for") or "").strip():
@@ -13455,7 +13455,7 @@ def _rot1116_warns(path, src, now=None, inbox_dir=None, sched_dir=None, find=Non
 
 
 # ⭐ 1116 防样式漏定义(根治 .accept-small 那一类):13:35 上线的小修卡用了 kit.css 里没定义的 .accept-small,第一次挂卡各线板 lint 当场红
-#   (电商-基建 #a5b9、AI Harness #5e21;83e3496b 补了 CSS)。根因:板上的「class 没样式」那道 lint 只看已经在板上的卡 ——
+#   (示例-基建 #a5b9、AI Harness #5e21;83e3496b 补了 CSS)。根因:板上的「class 没样式」那道 lint 只看已经在板上的卡 ——
 #   新卡类型上线时全机一张都没有,它没机会跑。⇒ 自检把每一类卡都实际生成一张(_class_zoo),收它们 HTML 里的 class,
 #   连同 kit.js 运行时注入的(className= / classList.add / toggle / 字符串里的 class="…"),逐个核 kit.css 有定义;缺一个就红,报出是哪类卡的哪个 class。
 #   ⚠ 新加一类卡 = 在 _class_zoo 里加一张,不然这条自检替它守不住。
@@ -13589,7 +13589,7 @@ def _split_at_sentence_end(text, width, max_parts):
 
 
 def _review_got_problem(gots, n, report=None, *, shortened=None, field="--got"):
-    """--got 条数要和送验收的行数一样(单行可给 1–REVIEW_GOT_ONE_MAX 条,1115 FDE #c41e)、每条非空且不超 REVIEW_GOT_MAX 字、不写「见对话」;不合规 ⇒ 一句说明。纯函数。"""
+    """--got 条数要和送验收的行数一样(单行可给 1–REVIEW_GOT_ONE_MAX 条,1115 客户项目甲 #c41e)、每条非空且不超 REVIEW_GOT_MAX 字、不写「见对话」;不合规 ⇒ 一句说明。纯函数。"""
     g = [re.sub(r"\s+", " ", str(x or "")).strip() for x in (gots or [])]
     if n == 1 and len(g) > REVIEW_GOT_ONE_MAX:
         problem = '--got 给了 %d 条,一行最多 %d 条(他一眼看完)—— 多的做一页 plan.py batch,卡上放入口' % (len(g), REVIEW_GOT_ONE_MAX)
@@ -13628,7 +13628,7 @@ def _review_got_problem(gots, n, report=None, *, shortened=None, field="--got"):
 
 
 def _review_todo_problem(todos, report=None):
-    """--todo(验收卡上「还要你做」,1115 FDE #c41e):最多 REVIEW_TODO_MAX 条、每条非空、≤REVIEW_GOT_MAX 字、不写「见对话」;合规 ⇒ None。纯函数。"""
+    """--todo(验收卡上「还要你做」,1115 客户项目甲 #c41e):最多 REVIEW_TODO_MAX 条、每条非空、≤REVIEW_GOT_MAX 字、不写「见对话」;合规 ⇒ None。纯函数。"""
     t = [re.sub(r"\s+", " ", str(x or "")).strip() for x in (todos or [])]
     if len(t) > REVIEW_TODO_MAX:
         problem = '--todo 给了 %d 条,最多 %d 条 —— 他一眼看完;多的另挂 ask --do' % (len(t), REVIEW_TODO_MAX)
@@ -13915,7 +13915,7 @@ def _small_split(board_path, card_ack, src, card, rec, backs, owner):
 ANSWER_OPTS = ['看过了|这个回答够了', '没答到点上|补充里写还想知道什么']   # 依据: 负责人 11-17 批的方案页原文按钮字;「看过了」下面的小字按状态板线 11-17 二轮返工单第 4 条改(原来抄的是验收卡的「以后就这样」)
 ANSWER_VALS = ['通过', '不通过']   # 依据: 同上「值与现有通过 / 不通过同一套」
 
-# ⭐ 1120 做完没有的牌子(负责人 11-20 18:19 在电商-基建回答卡上打回:「到底这个是完成了还是没完成？……这个验收卡的设计的问题？」;
+# ⭐ 1120 做完没有的牌子(负责人 11-20 18:19 在示例-基建回答卡上打回:「到底这个是完成了还是没完成？……这个验收卡的设计的问题？」;
 #   19:23 方案页 stuck-and-done-state-plan-1120 选「强制,卡顶一个牌子」)。
 #   验收卡(row --review):牌子默认「做完了」(验收本来就是做完才挂);给 --left "还差什么" ⇒「没做完 · 还差 …」。不加新必填。
 #   回答卡(提问行 --review --answer):必须 --state done|partial|na;partial 要带 --left;na(纯问答、不涉及进度)不出牌子。
@@ -14351,9 +14351,9 @@ def _covered_cites(src, page, ids, adir=None):
     return out
 
 
-# ⭐ 1116 讲人话 ③(电商-基建 #b6c2):定时提醒每天一条被拉成新行(ntc-d70c6ef0 与 ntc-bf7c63b3 是同一件),作者只能把它挂成在等、摆在板上。
+# ⭐ 1116 讲人话 ③(示例-基建 #b6c2):定时提醒每天一条被拉成新行(ntc-d70c6ef0 与 ntc-bf7c63b3 是同一件),作者只能把它挂成在等、摆在板上。
 #   ⇒ `row --dup-of <行>`:机器拉进来的行收成「和 <行> 重复」,直接搬进留档页(不进要你的、不占首屏)。
-#   只认机器拉进来的行:编号 ntc- 开头(电商-基建 infra-notices/pull_to_board.py 的行号 = "ntc-" + 去重键哈希;board.py 里没有别的机器拉行标记)。
+#   只认机器拉进来的行:编号 ntc- 开头(示例-基建 infra-notices/pull_to_board.py 的行号 = "ntc-" + 去重键哈希;board.py 里没有别的机器拉行标记)。
 #   否过什么:⛔ 他交代的行(r 开头)不许 —— 重复不重复、要不要由他定,走 --drop 挂「不做了,同意吗」卡让他点;
 #     ⛔ 不放在板上标做完 —— 首屏「最近做完的」会挂 24 小时,他看到一件「做完了」其实什么都没做。
 MACHINE_ROW_ACK_RE = re.compile(r"ntc-[0-9a-f]{6,}$")   # 依据: pull_to_board.py 行号 = "ntc-" + sha1(去重键)[:8]
@@ -15129,7 +15129,7 @@ def cmd_row(a):
     if _imgs_arg and not _review:
         checks.add("image-review", '--img 只和 --review 一起用(验收卡上放图);普通卡放图用 `board.py ask … --img <图>`\n  ⇒ 什么都没写。')
     _img_err, _imgs = _card_imgs_prepare(_imgs_arg, report=checks.add)
-    # ⭐ 1113 晚负责人(经电商-基建 #d3a9 追加):「Settlements Analytics 是个非常大的界面,我都不知道我该在哪里去看……你验收的时候本来就会去截图去看那个网页,
+    # ⭐ 1113 晚负责人(经示例-基建 #d3a9 追加):「Settlements Analytics 是个非常大的界面,我都不知道我该在哪里去看……你验收的时候本来就会去截图去看那个网页,
     #   那你为什么不把截图直接给我放到板上呢?」⇒ 入口是外部网站的验收卡,不带 --img 截图当场拒写(原来只是 lint 提醒,当晚两张照样挂上去了)。
     if _review and not _img_err and _review_img_problem(_url, _imgs):        # 1115 大扫除 D1:外部网站 + 本机方案页 / 8777 页面都要图
         checks.add("review-image-required", '%s\n  ⇒ 什么都没写。' % _review_img_problem(_url, _imgs))
@@ -15139,7 +15139,7 @@ def cmd_row(a):
         checks.add("review-page-missing", '--url 指的方案页在本机找不到对应文件(%s)—— 先 `board.py publish <源文件>` 拿到地址再挂,否则他点开是 404。\n  ⇒ 什么都没写。' % str(_url)[:100])
     _cov = [x.strip() for x in str(getattr(a, 'covered_by', None) or '').split(',') if x.strip()]
     if getattr(a, 'covered_by', None) is not None:
-        # 1114 凌晨(电商-选品 #d4b8):他已经在别的卡 / 别的行点过通过的事,再挂一张卡让他点一遍 = 白花他的注意力(ask-8d3f00ad:「要我验收通过什么东西啊?」)
+        # 1114 凌晨(示例-选品 #d4b8):他已经在别的卡 / 别的行点过通过的事,再挂一张卡让他点一遍 = 白花他的注意力(ask-8d3f00ad:「要我验收通过什么东西啊?」)
         if not _cov:
             checks.add("covered-by-empty", '--covered-by 要写他点过通过的卡号或行号(ask-xxxxxxxx / rMMDD-xxxx / 别的板上的卡或行加 <板文件名>: 前缀,逗号分隔)\n  ⇒ 什么都没写。')
         if _review or getattr(a, 'new', False) or a.status or (a.ack and ',' in str(a.ack)):
@@ -15159,7 +15159,7 @@ def cmd_row(a):
     _batch = []
     if _review:
         checks.repair_review(_drop, _asked, _small, _asked_title, _gots, _answer)
-    if _review and a.ack and ',' in str(a.ack):           # 1113 夜(电商-选品 #d4b8):一批行一张验收卡,他点一次全过
+    if _review and a.ack and ',' in str(a.ack):           # 1113 夜(示例-选品 #d4b8):一批行一张验收卡,他点一次全过
         _batch = _batch_acks
         if len(_batch) < 2 or len(set(_batch)) != len(_batch):
             checks.add("review-batch-rows", '--ack 多行写成 r1,r2,…(至少两行、不重复)\n  ⇒ 什么都没写。')
@@ -15359,8 +15359,8 @@ def cmd_row(a):
         out, _cn = _row_chat_set(out, a.ack, chat=_chat, no_chat=_no_chat, kw=getattr(a, "chat_kw", None))   # 1023 晚:盯对方群(见 cmd_chat_watch 那一节)
         notes += _cn
         if not _new and not _review and _checked is None and _row_mark_baton(s, a.ack) == out:
-            # 1028 电商-选品:换棒时 10 行跑 `row --eta <原日期>` 盖了「这一棒核过」,至少 3 行内容早就旧了 ⇒ 什么都没改的 row 不再算核过
-            raise ValueError("这条命令什么都没改 —— 不算这一棒核过(1028 电商-选品:`--eta <原日期>` 盖章、正文没读,3 行写着「过检查中 / 开跑」其实早合了)。\n"
+            # 1028 示例-选品:换棒时 10 行跑 `row --eta <原日期>` 盖了「这一棒核过」,至少 3 行内容早就旧了 ⇒ 什么都没改的 row 不再算核过
+            raise ValueError("这条命令什么都没改 —— 不算这一棒核过(1028 示例-选品:`--eta <原日期>` 盖章、正文没读,3 行写着「过检查中 / 开跑」其实早合了)。\n"
                              "  先看这一行:`board.py rows <板> --ack %s`;\n"
                              "  · 内容旧了 ⇒ `--say \"现在到哪了\"`(状态也变了加 --status);\n"
                              "  · 逐句核过、仍然对 ⇒ `--checked \"核了什么事实\"`(例:「#3347 还开着、基建 Codex 还在改」)" % a.ack)
@@ -15479,17 +15479,17 @@ def cmd_row(a):
     return _rc
 
 
-# ⭐ 1027(电商-基建 v2.2 转,负责人 18:2x 判基建板「彻底腐烂」:17 行没做完里 5 行和事实不符,lint / touch 全没拦)。
+# ⭐ 1027(示例-基建 v2.2 转,负责人 18:2x 判基建板「彻底腐烂」:17 行没做完里 5 行和事实不符,lint / touch 全没拦)。
 #   回放全机 102 行没做完的(10-27 18:4x):① 在等外面「回话 / 回复」却没登记 --chat 的 blocked 行 9 行,真等群里人回话的 1 行(其余 8 行是等他答卡);
 #   ② 标着在做、现状第一句却写「等 X 回 / 已发…等」2 行,一行半真。⇒ 都不进 lint(准头不够、会把各线的板一片刷红),
 #   改在写那一行的那一刻提醒一句(读的人正是刚写它的 AI,零误伤成本)。
 #   ⛔ 没做:行里写「21:00 到期」查本会话有没有定时 —— 板看不见会话的定时任务,会话内定时重启即丢;到期那天写进 data-eta,过了板就标红。
 #   ⛔ 没做:在做的行引用的 PR 全合了就提示 done —— 在做的行 24 小时没动 touch 已报错(_doing_stale_error),全机此刻只 2 行引用 PR,不值得每次 touch 调 gh。
 _HINT_WAIT_REPLY = re.compile(r"回话|回复|回消息|答复|群里|在群")
-# 1028(电商-选品 v2.8):r1023-e5b1 标在做、现状「在等同事乙组找货」—— 「找」不在词表里,没提醒 ⇒ 加上「在等 / 等着」和找 / 给 / 发 / 做完
+# 1028(示例-选品 v2.8):r1023-e5b1 标在做、现状「在等同事乙组找货」—— 「找」不在词表里,没提醒 ⇒ 加上「在等 / 等着」和找 / 给 / 发 / 做完
 _HINT_SAY_WAITING = re.compile(r"在等|等着|等[^待,，。;；]{0,12}(回|重跑|确认|批|合并|上线|审|答复|反馈|找|给|发|寄|做完)|已发[^,，。]{0,10}等")
 
-# ⭐ 1029 电商-基建 v2.4 转,负责人 18:3x:「怎么感觉老是这些事项都做到一半,然后就我不知道结果了……彻底完成可能是 5.0,但是做到 3.0 或者 4.0 的时候,就没有结果了」
+# ⭐ 1029 示例-基建 v2.4 转,负责人 18:3x:「怎么感觉老是这些事项都做到一半,然后就我不知道结果了……彻底完成可能是 5.0,但是做到 3.0 或者 4.0 的时候,就没有结果了」
 #   r1029-09b7:他把「某店乙 再下 6 条」改大成「下架归档整套体系 + 讲给同事甲 + 他的守护照规则走」,新范围只追加在现状里、标题还是小范围;
 #   之后每轮报「某一步合并了」,没写离收尾还差什么;收尾那步(给同事甲写规则、他改守护、验没碰)只在设计页里,板上没日期。
 #   ⇒ 写行那一刻两种提醒(只提醒不拦):现状报做完一部分却没写「还差」;现状写着范围改大了,标题却还是原来那件。
@@ -15509,7 +15509,7 @@ def _remaining_text(say):
 # 1115 B:「范围变大标题没变」那条提醒(scope-up)撤了(负责人 sw-zero);规矩本身(改大另起一行)仍在规则全文 R2.7
 
 
-# ⭐ 1110 负责人在电商三块板上连问(基建 12:0x「为什么有这么多事情？25 个在推进的，10 个卡着的」· 选品 12:1x「这什么东西啊？一堆这么多的事项」·
+# ⭐ 1110 负责人在示例业务三块板上连问(基建 12:0x「为什么有这么多事情？25 个在推进的，10 个卡着的」· 选品 12:1x「这什么东西啊？一堆这么多的事项」·
 #   投流「你这个状态表上有没有腐烂的事项」),三条线自查后各报了机器没拦住的坏例子(#d5a9 / #7f3e / #a169)。
 #   它们手改掉的 30 多行归成几种写法,都在写那一行的那一刻能认出来 ⇒ 加进写行时的提醒(只提醒不拦,读的人正是刚写它的 AI):
 #   ① 标着在做 / 盯着,现状写的却是别的线在动(投流 3 行:「基建第一段取数已开工,11-12 给完整排期」)—— 原来只认「交给 / 让 X 做」这种说法;
@@ -15523,14 +15523,14 @@ def _remaining_text(say):
 #   否过什么、为什么:
 #   ⛔ 不拒写、不让 --checked 失败 —— 新的拦截先只记不拦一周(ai-dev-loop 规矩;两道闸上线后被他拍掉过)。命中记 state_dir/board-hints.log,
 #      11-16 周复查看命中里多少是真问题、提醒之后那一行有没有跟着改,再定哪几条改成拦。
-#   ⛔ 不做「现状里的品码和标题对不上就提示开新行」(选品建议)—— 品码只有电商板有,别的板全是误报;④ 已经接住同一类里能机器认的那部分。
+#   ⛔ 不做「现状里的品码和标题对不上就提示开新行」(选品建议)—— 品码只有示例业务板有,别的板全是误报;④ 已经接住同一类里能机器认的那部分。
 #   ⛔ prune 的判据不改 —— 它没坏:选品板 30 行搬不走,25 行只是最近一周内的。
-_HINT_BALL_RE = re.compile(r"(?:电商-)?(?:基建|选品|投流达人|投流|AI ?平台|Harness|运维|总控|iOS|内容助理|个人助理)(?:线|那边)?[^,，。;；]{0,10}"
+_HINT_BALL_RE = re.compile(r"(?:示例业务-)?(?:基建|选品|投流达人|投流|AI ?平台|Harness|运维|总控|iOS|内容助理|个人助理)(?:线|那边)?[^,，。;；]{0,10}"
                            r"(?:已开工|在做|在改|在跑|给排期|给完整排期|排在|排到|接了|处理中|手上)")
 _HINT_OWN_NEXT = re.compile(r"我(?:这边)?(?:下一步|接着|正在|先|在)|本线(?:下一步|接着|正在|在)|下一步[::]")
 _HINT_DATE_LATER = re.compile(r"\d{1,2}-\d{1,2}\s*(?:再看|再核|再判|再量|再定|再说|复查|出结论|看数据|看结果)|观察出单|等出单|攒批|等这批(?:上完|跑完|做完)?")
 _HINT_ETA_REASON = re.compile(r"因为|等|要先|依赖|排在|之后|才能|到货|审核|回复|窗口|你说|你定|到时再|没结")   # 后四个:11-10 回放全机命中 5 行,2 行是他自己定的往后放 / 写了原因
-# ⭐ 1110 晚 往后拖(AI Harness #7e4b、电商-基建 #7e31 转负责人 11-10 三次原话:「定了日子的很多是,那个日子其实是瞎定的……
+# ⭐ 1110 晚 往后拖(AI Harness #7e4b、示例-基建 #7e31 转负责人 11-10 三次原话:「定了日子的很多是,那个日子其实是瞎定的……
 #   只是说这AI自己预估说……这个事情可能要明天才能来得及做完,但实际上很多时候它今天,或者说甚至一个小时以后就能做完了……反正就最终就不能让他们把所有事情往后拖」)。
 #   全局规则「预计日不是开工日」:往后排的每一行写明在等什么;写不出在等什么 = 现在就该做;已批的方案里不许自加「动手前再确认」。板这半边:
 #   ① eta-later(1115 起拒写,见 _eta_later_problem)从 todo 扩到 doing / watch(行上写了 data-wait-for 的不提醒;日子本身是这件事的一部分 _HINT_ETA_DAY、watch 写明盯什么 _HINT_WATCH_WHAT 的不提醒);
@@ -15545,11 +15545,11 @@ _HINT_WATCH_WHAT = re.compile(r"盯[^,，。;；]{1,}|观察|看(?:数据|结果
 _HINT_DATE_START = re.compile(r"(?<!\d)(\d{1,2})-(\d{1,2})\s*(?:给排期|再开工|开工|再做|再动手|开始做|再处理|才开始|才开工|才做)(?![了过完])")
 _HINT_FIRST_DONE = re.compile(r"已上线|已合并|已合(?![适理同作格])|已做完|做完了|已修好|已发布|已全部|全部(?:做完|上线|合并)|已完成|已交付")
 _HINT_FIRST_LEFT = re.compile(r"还差|还剩|只差|差|在等|等|下一步|还没|没做|未做|剩|待")
-# ⭐ 1110 晚(电商-选品 #e5a2):`--wait-for "等本线出方案页,不等别人"` 写进了没开工的行,预计日排到两天后,机器没吭声;
+# ⭐ 1110 晚(示例-选品 #e5a2):`--wait-for "等本线出方案页,不等别人"` 写进了没开工的行,预计日排到两天后,机器没吭声;
 #   负责人 18:1x 追问「是你在做了还是没在做……好多事情感觉就是不盯好就没有进展」才发现。「在等」是写给他看的:在等谁、等什么;等自己 = 没在等。
 #   ⇒ 这次命令新写的 --wait-for 明写着等自己 ⇒ 拒写(_wait_for_self_problem);行上现存的写自己的那条提醒(wait-for-self)1115 撤了,
 #     日志沿用行状态。
-#   否过什么、为什么:⛔ 「预计日晚于今天又没写在等什么」当时没一起升成拒写(提醒 11-10 才上线);1115 负责人定升成拒写(_eta_later_problem);⛔ 含本板线名的只提醒不拒(「电商-选品的子线回话」这类是真在等,靠后面跟不跟「子线」分,拿不准);
+#   否过什么、为什么:⛔ 「预计日晚于今天又没写在等什么」当时没一起升成拒写(提醒 11-10 才上线);1115 负责人定升成拒写(_eta_later_problem);⛔ 含本板线名的只提醒不拒(「示例-选品的子线回话」这类是真在等,靠后面跟不跟「子线」分,拿不准);
 #     ⛔ 不进 lint(只看这次命令新写的,同 _say_wait_problem:老行整板扫会误咬);引号里引的原话不算。
 #   实测: 11-10 全机 25 块板 45 行现存的「在等」,明写等自己的 0 行(拒写不会咬到现有的行)。
 _WAIT_SELF_RE = re.compile(r"不等别人|不等任何人|不等谁|没在等|不用等(?:别人|谁|任何人)|等本线|本线(?:自己|出|做|写|来做|先)|等(?:我|咱)?自己|我自己|等我(?!们)")
@@ -15586,7 +15586,7 @@ def _wait_for_self_problem(wait_for, path="<板>", ack=None):
             % (hit[1], q, k))
 
 
-# ⭐ 1110 晚 没落地(电商-基建转负责人 11-10 18:1x:「为什么我要的事没落地、效率这么低」)。他只看「要你的」(卡片)和首屏,
+# ⭐ 1110 晚 没落地(示例-基建转负责人 11-10 18:1x:「为什么我要的事没落地、效率这么低」)。他只看「要你的」(卡片)和首屏,
 #   只写在「你交代的」某一行现状里的话,他看不到。那条线查到三类,都在写的那一刻能认出来 ⇒ 只提醒不拦(新提醒先只记不拦一周,11-16 按命中定):
 #   A ask-in-row:行里写着向他要输入(r1109-8ddd「要扩到别家请给群名」11-09 起没卡,他从没看到)。
 #     _say_wait_problem 只认「等你 / 等负责人」(而且只看这次新写的 --say),都没覆盖「请给 / 要你给 / 发我」这类要东西的说法。
@@ -15970,7 +15970,7 @@ def _row_write_hints(src, ack, path=None, tasks=None, today=None, _eta=None):
     first = re.split(r"[。;;\n]", str(f.get("why") or ""))[0]
     _n0 = len(out)
     if f.get("st") in ("doing", "watch") and _HINT_HANDED_RE.search(str(f.get("why") or "")):
-        # 1028 电商-投流达人:r1028-8613 标在做,其实要电商-基建去做,基建板上没这一行;每轮改现状文字,在做 24 小时没动那道闸也绕过了
+        # 1028 示例-投流达人:r1028-8613 标在做,其实要示例-基建去做,基建板上没这一行;每轮改现状文字,在做 24 小时没动那道闸也绕过了
         out.append("  ↳ 这一行写着交给别的线做(「%s」)—— 球不在你这儿:`--status blocked --you wait --wait-for \"等 X 线做什么\"`"
                    "(等本机别的线一天没动 lint 会叫你去现查);再 `board.py rows <它的板>` 核那边有没有接这一行,没有就发【要你做】"
                    % _clause(_HINT_HANDED_RE.search(str(f.get("why") or "")).group(0), 24))
@@ -16005,7 +16005,7 @@ def _row_write_hints(src, ack, path=None, tasks=None, today=None, _eta=None):
                                                  or _md_future_in(_why, _td)))):
         if _eta is not None:                                     # 1115 sw-eta:这句升成拒写(cmd_row 走 _eta_later_problem),不再印成提醒
             _eta.append(_eta_later_msg(f, ack, path, _td))
-    # 1110 往后拖 A8(电商-投流 r1110-05be「已上线(#3829 已合并):…」其实还在等当晚第一次真发):没做完的行,现状第一句(板上 / rows 只露它)
+    # 1110 往后拖 A8(示例-投流 r1110-05be「已上线(#3829 已合并):…」其实还在等当晚第一次真发):没做完的行,现状第一句(板上 / rows 只露它)
     #   在说做完了、这一句里又没写还差 / 在等 ⇒ 提醒;它接住了下面「报了做完一部分却没写还差」⇒ 那条不再叠一句
     _fd = _HINT_FIRST_DONE.search(first)
     #   ⛔ 盯着的行(watch)不报:11-10 回放全机 25 块板,watch 命中 7 行全是「已上线,X 日看结果」—— 上线了在盯,正是这种行本来的写法
@@ -16024,14 +16024,14 @@ def _row_write_hints(src, ack, path=None, tasks=None, today=None, _eta=None):
                    "`board.py row <板> --ack %s --after <那一行的编号>`;那行一标做完,lint 就叫你回来开工。"
                    "只写在字里,那件做完了这一行照样挂着没开工(1028 Harness 板:「大扫除删完就开」,大扫除早做完了)。等的是 PR / 别人 ⇒ 不用管"
                    % (_clause(_am.group(0), 20), ack))
-    # 1110 没落地 A(电商-基建 r1109-8ddd「要扩到别家请给群名」11-09 起没挂卡,他从没看到):没做完的行里写着向他要东西,
+    # 1110 没落地 A(示例-基建 r1109-8ddd「要扩到别家请给群名」11-09 起没挂卡,他从没看到):没做完的行里写着向他要东西,
     #   没标要他、「要你的」里也没卡链到这一行 ⇒ 提醒当场挂卡(只提醒不拦)。判哪些算见 _ask_in_row
     _ak = (_ask_in_row(_why) or _ask_in_row(f.get("act"))) if f.get("st") in ("todo", "doing", "watch", "blocked") else None
     if _ak and f.get("you") not in ROW_YOU_MINE:
         _lr2, _lc2 = _rowyou_linked(src)
         if not (ack in _lr2 or (f.get("ref") and f["ref"] in _lc2)):
             out.append("  ↳ 行里写着向他要东西(「%s」),却没挂卡 —— 他只看「要你的」和首屏,只写在行里的话他看不到"
-                       "(电商-基建 11-09「要扩到别家请给群名」挂了一天他没看到)。要他给的当场挂卡:`board.py ask %s --row %s --q \"…\"`;"
+                       "(示例-基建 11-09「要扩到别家请给群名」挂了一天他没看到)。要他给的当场挂卡:`board.py ask %s --row %s --q \"…\"`;"
                        "是对别的线 / 同事说的 ⇒ 把是谁写进这句(「请基建线给…」)就不会再报" % (_ak, __import__("shlex").quote(path) if path else "<板>", ack))
     if path:
         _sc = _self_check_hint(f, os.path.basename(path)[:-5], _scheduled_tasks() if tasks is None else tasks)
@@ -16061,7 +16061,7 @@ def _eta_later_problem(src, ack, path=None, today=None):
 
 
 # 重复行提示统一走 _sinking_duplicate_warnings，写行和 lint 共用标题及原话判据。
-# ⭐ 1028(电商-选品 v2.7 转,负责人 10-28 03:0x「最近好像这个状态板的腐烂问题有点严重」):v2.7 开棒 touch 报 13 行没核过,
+# ⭐ 1028(示例-选品 v2.7 转,负责人 10-28 03:0x「最近好像这个状态板的腐烂问题有点严重」):v2.7 开棒 touch 报 13 行没核过,
 #   10 行跑了 `row --ack X --eta <原日期>` —— 那是工具自己教的(「没变就 --eta 原日期,跑成功就算核过」)—— 至少 3 行内容早旧了:
 #   「#3347 过检查中」(10-27 已合)、「某商品 第三轮 18:31 开跑」(当晚已上店)、标在做其实在等同事乙组。
 #   ⇒ ① 什么都没改的 row 不算核过,要 `--checked "核了什么"`;② 核的那一刻、列「没核过」的那一刻都把正文里会过时的说法亮出来。
@@ -16153,7 +16153,7 @@ def _self_check_hint(f, stem, tasks, today=None):
 
 
 _HINT_WAIT_DATE = re.compile(r"等[^,，。;；]{0,4}\d{1,2}-\d{1,2}[^,，。;；]{0,12}|^\s*\d{1,2}-\d{1,2}\s*(?:再|之?后)[^,，。;；]{0,12}")
-_HINT_HANDED_RE = re.compile(r"(?:交给|让|请|由|要|转给|派给)[^,，。;；]{0,4}(?:电商-)?(?:基建|选品|投流|AI ?平台|Harness|运维|总控|iOS|内容助理|个人助理|别的线|那条线)"
+_HINT_HANDED_RE = re.compile(r"(?:交给|让|请|由|要|转给|派给)[^,，。;；]{0,4}(?:示例业务-)?(?:基建|选品|投流|AI ?平台|Harness|运维|总控|iOS|内容助理|个人助理|别的线|那条线)"
                              r"[^,，。;；]{0,6}(?:做|去做|处理|删|改|接|跑|上|弄)")
 _HINT_AFTER_OTHER = re.compile(r"(?:等|待)[^,，。;；]{0,14}(?:做完|删完|跑完|弄完|结束)|(?:做|删|跑|弄)完(?:之后|以后|后|再|就)")
 def _board_claim(path, text, sessions=None, titles=None):
@@ -16927,7 +16927,7 @@ def cmd_ask(a):
 
 
 # ──────────────── 1007 板顶三样(棒次 / 大方向 / 数据来源;那句现状可选):`head` 命令 + touch 时拿板顶棒次对本会话
-#   负责人 10-07(电商-选品线):「你的那个状态板压根就没有更新」。现场:v1.5 接班后跑了几十次 row / ask / answer / touch,
+#   负责人 10-07(示例-选品线):「你的那个状态板压根就没有更新」。现场:v1.5 接班后跑了几十次 row / ask / answer / touch,
 #   全部成功、lint 全 PASS,而板顶还写着「第 v1.4 棒」,大方向、那句现状、数据来源全是上一棒五天前的。
 #   原因:没有任何命令会碰板顶,也没有任何检查拿它和别的东西对。⇒ 两处一起补:
 #     ① `board.py head`:一条命令把板顶三样(第几棒 / 大方向 / 数据来源)改成这一棒的,并在眉头上盖 `data-head-ok="vX.Y"`;
@@ -17116,10 +17116,10 @@ def _head_dir_html(d, text):
     return d["lead"] + body + d["trail"]
 
 
-# ──────────────── 1021 大方向多久没核过:同一棒里下面的事做完了、板顶大方向还停在旧结论(电商-选品 v2.1 转负责人 bad case)
+# ──────────────── 1021 大方向多久没核过:同一棒里下面的事做完了、板顶大方向还停在旧结论(示例-选品 v2.1 转负责人 bad case)
 #   负责人 10-21(对选品线):「你状态板上也没有显示任何东西啊……所以你这是所有东西都做完了吗?……如果你没有做完,那你状态板上还没有更新,那你这也是个 bad case」
 #   现场:选品板顶大方向停在旧结论,和「你交代的」里已做完的主线行矛盾;touch / lint 全过。
-#   同一刻全机量:电商-基建、电商-投流 两块的大方向还写着「先复核 Codex 两天的处理」,那件早已做完 —— 三块同一个形状:
+#   同一刻全机量:示例-基建、示例-投流 两块的大方向还写着「先复核 Codex 两天的处理」,那件早已做完 —— 三块同一个形状:
 #   大方向只在 `head`(换棒)时被问一次,同一棒里没有任何东西叫人回头看它。
 #   ⇒ touch 给大方向那一块记指纹与「上次改 / 核过」的时间(data-dir-fp / data-dir-at,机器记的,⛔ 别手填);
 #     超过 _DIR_STALE_H 小时没改也没核、而这期间「你交代的」里有行做完了 ⇒ 印一句「大方向还对吗」,列出做完的那几行。
@@ -17234,7 +17234,7 @@ def _dir_stale_tail(p):
         print(_dir_stale_say(p, st))
 
 
-# 1023(电商-选品转,负责人原话:「你大方向肯定是有问题的。你这个大方向啊,这个东西你要作为一个bad case反馈给状态板」):
+# 1023(示例-选品转,负责人原话:「你大方向肯定是有问题的。你这个大方向啊,这个东西你要作为一个bad case反馈给状态板」):
 #   选品板顶主句写成了一周前的进度流水(「同事乙 10-21 那批已收口……另在做……」),v2.3、v2.4 两棒接班都 `head --dir-same` 一句放过 ——
 #   head 的输出里只有「没动」两个字,原文根本没印出来。
 #   ⇒ ① 确认「没变」(head --dir-same / dir --same)时把原文整段印出来;② 主句里有进度词 ⇒ 点名报一句、记账(what=progress)。
@@ -17503,7 +17503,7 @@ def _head_gate_msg(path, text, sess, board, stamp):
     sr = _head_src_parse(text)
     src_arg = '--src "<这一棒的数据从哪来>"' if (sr and sr["hand_ok"]) else "--src-same"
     lines = [first,
-             "   他打开板第一眼看到的就是板顶这三样:棒次 / 大方向 / 数据来源(10-07 他对电商-选品线:「你的那个状态板压根就没有更新」)。现在板上写的是:"]
+             "   他打开板第一眼看到的就是板顶这三样:棒次 / 大方向 / 数据来源(10-07 他对示例-选品线:「你的那个状态板压根就没有更新」)。现在板上写的是:"]
     for i, (k, v) in enumerate(_head_now(text)):
         lines.append("     %s %s:%s" % ("①②③·"[i], k, v))
     lines += ["   ⇒ 逐样读一遍,照现在的情况重写,跑这一条(引号里换成你的话):",
@@ -17584,8 +17584,8 @@ def _queue_main_item(judg, n):
 def _head_main_problem(n, main, main_same, judg):
     """`head` 的第四样:板顶主线卡「现在:…」那一句(取自 `.queue.json` 主线那条的 why)。没处理 / 两样都给 / 给了空的 ⇒ 一句要报的话;否则 None。纯函数。
     板顶没有 `main:<卡号>`(无卡的线)⇒ 不要求。
-    ⭐ 1013(负责人 10-13 定「两处都做…要确保做的这些设计是真有价值的」;起因是电商-投流板顶主线那句是上两棒写的、和大方向直接矛盾):
-      逐块读过全机 11 块带主线卡的板 —— 3 块明显过时(记忆助手写着 12 天前「两个子代理在飞」;电商-选品是 15 天前的活;本线自己的写着「下一次复查在 10-05」),
+    ⭐ 1013(负责人 10-13 定「两处都做…要确保做的这些设计是真有价值的」;起因是示例-投流板顶主线那句是上两棒写的、和大方向直接矛盾):
+      逐块读过全机 11 块带主线卡的板 —— 3 块明显过时(记忆助手写着 12 天前「两个子代理在飞」;示例-选品是 15 天前的活;本线自己的写着「下一次复查在 10-05」),
       2 块是空的(「那张卡上没写现状」),而这些板都被 `head` 换过棒或当天刷过。`head` 原来只问棒次 / 大方向 / 数据来源。"""
     if n is None:
         return None
@@ -17751,7 +17751,7 @@ def _board_gen_epoch(p):
 
 
 # ⭐ 1104(AI Harness v3.0 报,负责人 11-04 21:1x 要各线把板腐烂的坏例子报给状态板):每次 touch / lint 本线的板都多出 3 条
-#   「同名副本没动」,说的是选品三个 worktree 里的 电商-选品-留档.html —— 跟本线的板无关,却次次占上下文。
+#   「同名副本没动」,说的是选品三个 worktree 里的 示例-选品-留档.html —— 跟本线的板无关,却次次占上下文。
 #   ⇒ 自愈照旧全机走一遍(那是依赖,别改);「要人判」的那几条只印跟这条命令点名的板有关的(同名,或它的 -留档 / 派生页);
 #     点名了板 = _COPY_FOCUS 是这几块板的文件名;--all / 没点名板 ⇒ None,照旧全印。那块板自己的线 touch 时照样看得到。
 _COPY_FOCUS = None
@@ -18241,7 +18241,7 @@ def cmd_launch_heal(reg_root=None, hosts=None, homes=None, log=None, dry=False, 
         for s in [s for s in by_sid if s not in alive]:
             by_sid.pop(s, None)
 
-    # ⭐ 1109 负责人(经 单开#r1109-6aa5,截图:~ 目录的面板列表里挂着电商-基建的板):共用目录的列表按目录共用,做不到每个会话只看自己的;
+    # ⭐ 1109 负责人(经 单开#r1109-6aa5,截图:~ 目录的面板列表里挂着示例-基建的板):共用目录的列表按目录共用,做不到每个会话只看自己的;
     #   能做的是把「别的线的板」清掉:这块板的线有活会话住在别处、这个目录里又没有活会话认它 ⇒ 它不该挂在这儿。
     #   ⛔ 认不出主人的板不动(宁缺勿错);那条线真搬回来,一 touch 就写回去(_write_launch)。
     owners = {}
@@ -19029,7 +19029,7 @@ def _same_name_copies_walk(root, name):
     return out
 
 
-# ⭐ 1105(电商-选品 v3.2 转:每条 row / answer 25–30 秒,改 11 行 + 收 8 张卡要 5 分钟,他已经在看了):
+# ⭐ 1105(示例-选品 v3.2 转:每条 row / answer 25–30 秒,改 11 行 + 收 8 张卡要 5 分钟,他已经在看了):
 #   量出来 lint 18.8 秒,其中 12 秒是下面这条慢路把全机走了 3 遍(23 万个目录):那 3 个方案页的源不在快路看的地方,次次都退回整仓走。
 #   ⇒ 结果按「仓 + 文件名 + 发布那份的 inode / 硬链数 / 改动时间」记 1 小时:硬链变了、页面改了立刻重走;只是多了一份不相干的同名文件,最多晚 1 小时报(只是警告)。
 SNC_CACHE_S = 3600
@@ -19170,7 +19170,7 @@ def _publish_images(src, web):
     return images
 
 
-# ⭐ 1116 publish 不盖别人的页(电商-投流达人 #b6f4):11-16 12:10 投流达人发了个 page.html,把 AI Harness 11-15 10:41 发的 proposals/page.html 盖掉了,原内容没了。
+# ⭐ 1116 publish 不盖别人的页(示例-投流达人 #b6f4):11-16 12:10 投流达人发了个 page.html,把 AI Harness 11-15 10:41 发的 proposals/page.html 盖掉了,原内容没了。
 #   ⇒ 目标已存在、内容不同、又不是同一份源文件 ⇒ 拒写,提示换唯一文件名或 `--replace` 明确覆盖;覆盖前旧版挪进 proposals/_replaced/<名>.<时间戳>.html(留 7 天,伺服的 kit 清理那一路一起清)。
 #   「同一份源文件」:硬链同一个 inode;或 _replaced/sources.json 记着上次就是从这个源路径发的(git checkout 换了 inode 那种照常重链)。
 #   这次改动之前发的页没有记录 ⇒ 目标已经没有别的硬链(源文件被换掉了)才当同一份照常重链;还连着另一份文件 ⇒ 那是别人的页,拒。
@@ -19723,7 +19723,7 @@ def _accept_title(t, cap=30):
     return t if len(t) <= cap else t[:cap].rstrip(" ,,、;;") + "…"
 
 
-# 1113 电商-选品报:11-10 起子代理一律走 codex-run.sh,running 里写的是运行目录 state_dir/codex-runs/<目录>,原表不认 ⇒ lint 一直报「没有进行中的证据」。
+# 1113 示例-选品报:11-10 起子代理一律走 codex-run.sh,running 里写的是运行目录 state_dir/codex-runs/<目录>,原表不认 ⇒ lint 一直报「没有进行中的证据」。
 #   只认运行目录这一种可核的写法;光写「Codex」一个词不算(那就又成了一句话填满)。
 _RUN_EVIDENCE = re.compile(r"https?://|subagent|子代理|codex-runs/\d{8}-\d{6}", re.I)
 
@@ -20434,7 +20434,7 @@ def _stale_apply(src):
     return _zone_block_apply(src, STALE_BEGIN, STALE_END, "")
 
 
-# ⭐⭐ 0928 负责人(经 电商-基建 v1.3 转来的 bad case):「在你交代的里面,有一个要你拍,但是在要你的这个里面就没有这个事项了,
+# ⭐⭐ 0928 负责人(经 示例-基建 v1.3 转来的 bad case):「在你交代的里面,有一个要你拍,但是在要你的这个里面就没有这个事项了,
 #   这是一个很大的问题……这是一个bad case。」—— 那一行 `blocked` + `data-you="decide"` + `.act`,从 v1.2 带到 v1.3,
 #   两棒都没进过「要你的」;lint 照样 PASS(旧闸 `_orphan_waiting` 只认 `waiting-you`)。
 #   根因:「你交代的」里标着要他动的行,只有过了预计 / 挂满 3 天才被提醒卡带进「要你的」;当天标的一件都进不去,
@@ -20473,7 +20473,7 @@ def _rowyou_linked(src):
     nz = _next_zone_start(src, zs[1])
     seg = _mask_noncontent(_machine_blank(src[zs[1]:nz if nz > zs[1] else len(src)]))
     rows = set(re.findall(r'href="#row-([^"]+)"', seg))
-    for _ar in re.findall(r'\bdata-accept-rows="([^"]*)"', seg):     # 1114(电商-选品):批量验收卡只链第一行,其余行在 data-accept-rows 里
+    for _ar in re.findall(r'\bdata-accept-rows="([^"]*)"', seg):     # 1114(示例-选品):批量验收卡只链第一行,其余行在 data-accept-rows 里
         rows.update(x for x in _ar.split() if x)
     return rows, set(re.findall(r'href="[^"]*/issues/(\d+)"', seg))
 
@@ -20939,7 +20939,7 @@ def _main_render(n, cards, judg, repo, prev=None):
     else:
         # ⛔ 0928(状态板周检,CI/AI Review 板 09-26 他贴回来的截图):这里原来先印一行 `<p class="lede"><b>标题</b></p>`,
         #   而卡的大标题(h2.q)本来就是这个标题 ⇒ 全机每张主线卡都把标题印两遍,一眼看去像板坏了。⇒ 只留大标题。
-        # ⭐ 1027(电商-选品 v2.6 转):首屏「现在:在做 同事乙回的品里 某商品…」停在几天前也不报(行 24 小时没动 lint 会报,这块不报)。
+        # ⭐ 1027(示例-选品 v2.6 转):首屏「现在:在做 同事乙回的品里 某商品…」停在几天前也不报(行 24 小时没动 lint 会报,这块不报)。
         #   ⇒ 记下这句的指纹和第一次出现的时间(上一版块里同指纹就沿用),lint 按它算几天没变(_main_stale_warn)。
         import hashlib as _hl
         _wfp = _hl.sha1(("%s|%s" % (where, why)).encode("utf-8")).hexdigest()[:10]
@@ -22111,7 +22111,7 @@ def _selftest_tmp_in_git(d):
 
 
 def _done_state_selftest():
-    """1120 做完没有的牌子:在仓外临时板上真跑 cmd_row(内容照 11-20 电商-基建那张被打回、重挂的回答卡),kit 用 node 假 DOM 现画比两端。"""
+    """1120 做完没有的牌子:在仓外临时板上真跑 cmd_row(内容照 11-20 示例-基建那张被打回、重挂的回答卡),kit 用 node 假 DOM 现画比两端。"""
     import contextlib
     import tempfile
     from pathlib import Path
@@ -22948,7 +22948,7 @@ def cmd_selftest():
         _w10 = _mkwt("w10"); _mklj(_w10, ["harness"], _T + 100); _mkses("local_w10", _w10, title="状态板 v1.4", origin=_main)
         _w10b = _mkwt("w10b"); _mklj(_w10b, ["harness"], _T + 100); _mkses("local_w10b", _w10b, title="接班状态板 v1.4", origin=_main)
         _heal()
-        # ⑦ touch 默认记住处那条路(record=True;0928 17:01 电商-基建撞 NameError 就在这条路上)—— 备忘换成临时文件,不碰真的
+        # ⑦ touch 默认记住处那条路(record=True;0928 17:01 示例-基建撞 NameError 就在这条路上)—— 备忘换成临时文件,不碰真的
         _w7 = _mkwt("w7"); _sm7 = os.path.join(_d, "sids7.json"); _hm7 = os.path.join(_d, "homes7.json")
         _orig_lhp, _orig_lsp = globals()["_launch_homes_path"], globals()["_launch_sids_path"]
         globals()["_launch_homes_path"] = lambda: _hm7
@@ -23296,8 +23296,8 @@ def cmd_selftest():
              _bare_proposal_urls(card % ("<code>%s</code>" % _DU)),                     # 必报:包一层 <code> 照样点不动
              _bare_proposal_urls(card % (std % (_DU, "截图"))),                         # ⛔ 标准入口不报
              _bare_proposal_urls(card % (std % (_DU, _DU))),                            # ⛔ <a> 里面的字不算
-             _bare_proposal_urls(card % "按 https://example.invalid/install.md 安装"),     # ⛔ 外部网址不报(电商-投流那句)
-             _bare_proposal_urls(card % "板在 http://127.0.0.1:8777/电商-选品.html，#2035"),  # ⛔ 板地址不是方案板
+             _bare_proposal_urls(card % "按 https://example.invalid/install.md 安装"),     # ⛔ 外部网址不报(示例-投流那句)
+             _bare_proposal_urls(card % "板在 http://127.0.0.1:8777/示例-选品.html，#2035"),  # ⛔ 板地址不是方案板
              _bare_proposal_urls("<script>// %s</script><!-- %s --><style>/* %s */</style>" % (_DU, _DU, _DU)))  # ⛔ 脚本 / 注释里的不算
         return g[0] == [_DU] and g[1] == [_DU] and list(g[2:]) == [[], [], [], [], []], g
 
@@ -23346,7 +23346,7 @@ def cmd_selftest():
             ("ask", "⭐ --why 放在最前(先讲前因后果再给建议)、--steps 按 | 分行(空的丢掉)、都转义", _c_ask_why_steps),
             ("ask", "⭐ --deep:按标准结构生成方案板入口(<a class=\"deep\"> + target + .deep-why),放在「不决定会卡住什么」之后、选项之前;不给 --deep 卡面一个字不变(1001 负责人:「没有办法点进方案板去看」)", _c_ask_deep),
             ("ask", "⛔ --deep 没带 --deep-why / 不是完整网址 / 本机那一页没 publish / 外部网址(飞书等,1026 负责人:在面板里点进去卡住)⇒ 报错不写;lint 把卡上的外部入口判错;publish 过的放行", _c_ask_deep_bad),
-            ("ask", "⛔ --deep 指的本机页全是字(不是 plan.py 出的 · 没有图 · 超过 600 字)⇒ 报错不写并指到 plan.py;有图 / plan.py 出的 / 短页 / 外部网址放行(1012 电商-选品两页被整页打回)", _c_wall_page),
+            ("ask", "⛔ --deep 指的本机页全是字(不是 plan.py 出的 · 没有图 · 超过 600 字)⇒ 报错不写并指到 plan.py;有图 / plan.py 出的 / 短页 / 外部网址放行(1012 示例-选品两页被整页打回)", _c_wall_page),
             ("ask", "⛔ 正文(--why 等)里的本机网址认得出(当场拒写用);外部网址不算", _c_local_urls),
             ("lint", "⭐ 方案板网址写成文字(在正文 / <code> 里)⇒ 报;标准入口、<a> 里的字、外部网址、板地址、脚本与注释里的 ⇒ 不报", _c_bare_urls),
             ("row", "⛔ row --say / --act 里写方案板网址 ⇒ 报错不写(入口只挂卡上);外部网址照写", _c_row_url)):
@@ -23359,7 +23359,7 @@ def cmd_selftest():
         cases.append((ok, _grp5, _desc5, "got=%s" % (_g5,)))
 
     # ── 1008:排在哪一行后面(row --after)· answer 不再盖行的现状 · row --new · 「以后再做」提示 —— 纯函数直接核。
-    #   出处:负责人 10-08(电商-基建):「如果我自己不想起来的话,这个事情就忘了……状态板好像也没有做到它应该有的责任」。
+    #   出处:负责人 10-08(示例-基建):「如果我自己不想起来的话,这个事情就忘了……状态板好像也没有做到它应该有的责任」。
     #   每个分支一正一反;接线(lint / cmd_row / cmd_answer 里那几行)在后面临时目录那组里另核。
     def _tag5(src, ack):
         a_, b_, _zz = _row_span(src, ack)
@@ -23619,11 +23619,11 @@ def cmd_selftest():
     def _c_copyfocus1104():
         # ⭐ 1104 Harness:touch 本线的板别印别线板的「同名副本没动」;点名的板自己、它的 -留档 照报;没点名 / --all 全报
         F = {"示例项目-状态板.html"}
-        g = [not _copy_related("/x/wt/.claude/boards/电商-选品-留档.html", F),
+        g = [not _copy_related("/x/wt/.claude/boards/示例-选品-留档.html", F),
              _copy_related("/x/wt/.claude/boards/示例项目-状态板-留档.html", F),
              _copy_related("/x/wt/.claude/boards/示例项目-状态板.html", F),
              not _copy_related("/x/wt/.claude/boards/示例项目-状态板控.html", F),
-             _copy_related("/x/wt/.claude/boards/电商-选品-留档.html", None),
+             _copy_related("/x/wt/.claude/boards/示例-选品-留档.html", None),
              "if not _copy_related(p_, _COPY_FOCUS):" in inspect.getsource(relink_stale_copies),
              '_COPY_FOCUS = set(_fp) or None' in inspect.getsource(main) and 'if not getattr(a, "all", False):' in inspect.getsource(main)]
         return all(g), g
@@ -23781,20 +23781,20 @@ def cmd_selftest():
 
     def _c_subwrite1110():
         # ⭐ 1110:子线 / 单开会话写常驻线的板不登记(否则那块板的回答会叫到子线头上);写自己的板、常驻线写任何板都照登记
-        sub, one, line = {"title": "子线·采购实付核账"}, {"title": "单开#r1107-1d43 清磁盘"}, {"title": "电商-基建 v2.8"}
-        g = [_record_write_skip("/x/电商-基建.html", sub) is True,
-             _record_write_skip("/x/电商-基建.html", one) is True,
+        sub, one, line = {"title": "子线·采购实付核账"}, {"title": "单开#r1107-1d43 清磁盘"}, {"title": "示例-基建 v2.8"}
+        g = [_record_write_skip("/x/示例-基建.html", sub) is True,
+             _record_write_skip("/x/示例-基建.html", one) is True,
              _record_write_skip("/x/子线-采购实付核账.html", sub) is False,
              _record_write_skip("/x/子线-采购核账.html", sub) is False,          # 名字差几个字的自己的板照登记
              _record_write_skip("/x/单开-清磁盘.html", one) is False,
-             _record_write_skip("/x/电商-基建.html", line) is False,
+             _record_write_skip("/x/示例-基建.html", line) is False,
              _record_write_skip("/x/子线-采购实付核账.html", line) is False,       # 常驻线代子线写它的板:照登记(叫谁归投影那一步定)
-             _record_write_skip("/x/电商-基建.html", {"title": ""}) is False,
-             _record_write_skip("/x/电商-基建.html", None) is False]
+             _record_write_skip("/x/示例-基建.html", {"title": ""}) is False,
+             _record_write_skip("/x/示例-基建.html", None) is False]
         src = inspect.getsource(_record_write)
         g.append(0 <= src.find("if _record_write_skip(path, _session_ident()):\n        return") < src.find("rec = {"))
         # 选人那一侧:只有常驻线登记过 ⇒ 叫常驻线(子线那条没进 writes)
-        g.append(_wake_pick_sid("电商-基建.html", {}, [{"board": "电商-基建.html", "sid": "L", "ts": 10}], {"L": 1, "S": 1}) == "L")
+        g.append(_wake_pick_sid("示例-基建.html", {}, [{"board": "示例-基建.html", "sid": "L", "ts": 10}], {"L": 1, "S": 1}) == "L")
         return all(g), g
 
     def _pj_cap(fn):
@@ -23831,9 +23831,9 @@ def cmd_selftest():
         # ⭐ 1110 子线投影 ①:声明落在子板的 wrap 上、真 sync 换外壳不丢;parent --set / --clear;父板不合格 ⇒ 拒、说清原因、一个字不写;new --parent
         import tempfile as _tf
         g = []
-        s1 = _set_parent_decl(_P5, "电商-基建.html", "k2")
-        g.append(_parent_decl(s1) == ("电商-基建.html", "k2"))
-        g.append(s1.startswith('<div class="wrap" data-parent="电商-基建.html" data-parent-row="k2">') and s1[s1.index(">") + 1:] == _P5[_P5.index(">") + 1:])
+        s1 = _set_parent_decl(_P5, "示例-基建.html", "k2")
+        g.append(_parent_decl(s1) == ("示例-基建.html", "k2"))
+        g.append(s1.startswith('<div class="wrap" data-parent="示例-基建.html" data-parent-row="k2">') and s1[s1.index(">") + 1:] == _P5[_P5.index(">") + 1:])
         g.append(_set_parent_decl(s1, None, None) == _P5 and _parent_decl(_P5) == (None, None))
         g.append(_parent_decl('<!-- <div class="wrap" data-parent="假.html"> --><div class="wrap">') == (None, None))   # 注释里的不算
         g.append(_parent_decl(_set_parent_decl(_P5, 'a"b.html', None)) == ('a"b.html', None))
@@ -23842,41 +23842,41 @@ def cmd_selftest():
         try:
             bd = os.path.join(d, "r", ".claude", "boards")
             os.makedirs(bd)
-            par, sub2 = os.path.join(bd, "电商-基建.html"), os.path.join(bd, "子线-别的.html")
+            par, sub2 = os.path.join(bd, "示例-基建.html"), os.path.join(bd, "子线-别的.html")
             ch, norm = os.path.join(bd, "子线-采购实付核账.html"), os.path.join(bd, "普通.html")
             for p_ in (par, sub2, ch, norm):
                 io.open(p_, "w", encoding="utf-8").write(_P5)
             boards = [par, sub2, ch, norm]
             P = lambda c, p, r=None: _parent_problem(c, p, r, boards=boards)
-            g.append(P(ch, "电商-基建.html") == (None, par))
-            g.append(P(ch, "电商-基建") == (None, par))                                    # 不带 .html 也认
+            g.append(P(ch, "示例-基建.html") == (None, par))
+            g.append(P(ch, "示例-基建") == (None, par))                                    # 不带 .html 也认
             g.append(P(ch, "file://" + par) == (None, par))
-            g.append(P(ch, "电商-基建.html", "k2") == (None, par))
-            e1 = P(ch, "电商-基建.html", "没有这行")
+            g.append(P(ch, "示例-基建.html", "k2") == (None, par))
+            e1 = P(ch, "示例-基建.html", "没有这行")
             g.append(e1[1] is None and "没有这行" in e1[0])
             e2 = P(ch, "子线-别的.html")
             g.append(e2[1] is None and "本身是子线" in e2[0])                               # 父板不能是子线 / 单开板
             e3 = P(ch, "退场了.html")
             g.append(e3[1] is None and "找不到" in e3[0])                                   # 不在活板里(退场的不在 all_boards)
-            e4 = P(norm, "电商-基建.html")
+            e4 = P(norm, "示例-基建.html")
             g.append(e4[1] is None and "只有子线" in e4[0])                                 # 常驻线的板不能声明父板
             g.append(P(ch, "子线-采购实付核账.html")[1] is None)
             g.append(sorted(all_boards()) == sorted(boards))
             NS = lambda **k: argparse.Namespace(**dict(dict(path=ch, set_parent=None, row=None, clear=False, no_touch=True), **k))
-            r1 = _pj_cap(lambda: cmd_parent(NS(set_parent="电商-基建.html", row="k2")))
-            g.append(r1[0] == 0 and _parent_decl(io.open(ch, encoding="utf-8").read()) == ("电商-基建.html", "k2"))
+            r1 = _pj_cap(lambda: cmd_parent(NS(set_parent="示例-基建.html", row="k2")))
+            g.append(r1[0] == 0 and _parent_decl(io.open(ch, encoding="utf-8").read()) == ("示例-基建.html", "k2"))
             before = io.open(ch, encoding="utf-8").read()
             r2 = _pj_cap(lambda: cmd_parent(NS(set_parent="子线-别的.html")))
             g.append(r2[0] == ("exit", 2) and "什么都没写" in r2[1] and io.open(ch, encoding="utf-8").read() == before)
             sync(ch, read_kit(), quiet=True)                                                # 换外壳:声明不丢
-            g.append(_parent_decl(io.open(ch, encoding="utf-8").read()) == ("电商-基建.html", "k2"))
+            g.append(_parent_decl(io.open(ch, encoding="utf-8").read()) == ("示例-基建.html", "k2"))
             r3 = _pj_cap(lambda: cmd_parent(NS(clear=True)))
             g.append(r3[0] == 0 and _parent_decl(io.open(ch, encoding="utf-8").read()) == (None, None))
             rp = os.path.join(d, "r")
-            r4 = _pj_cap(lambda: cmd_new("子线-新的", rp, parent="电商-基建.html", parent_row="k2"))
+            r4 = _pj_cap(lambda: cmd_new("子线-新的", rp, parent="示例-基建.html", parent_row="k2"))
             nb = os.path.join(bd, "子线-新的.html")
-            g.append(os.path.isfile(nb) and _parent_decl(io.open(nb, encoding="utf-8").read()) == ("电商-基建.html", "k2")
-                     and "投影到〈电商-基建.html〉" in r4[1] and "现在就送进面板" not in r4[1])
+            g.append(os.path.isfile(nb) and _parent_decl(io.open(nb, encoding="utf-8").read()) == ("示例-基建.html", "k2")
+                     and "投影到〈示例-基建.html〉" in r4[1] and "现在就送进面板" not in r4[1])
             r5 = _pj_cap(lambda: cmd_new("子线-坏的", rp, parent="子线-别的.html"))
             g.append(r5[0] == ("exit", 2) and not os.path.exists(os.path.join(bd, "子线-坏的.html")))
             r6 = _pj_cap(lambda: cmd_new("子线-无父", rp))
@@ -24001,8 +24001,8 @@ console.log(JSON.stringify([a.n===1 && a.why==='群里有新回复要重判 1 �
             os.makedirs(os.path.join(d, "st"))
             W = lambda n, s: io.open(os.path.join(bd, n), "w", encoding="utf-8").write(s)
             G5 = _P5.replace('<div class="wrap">', '<div class="wrap"><p id="freshness" data-gen="1789450000">v1</p>', 1)   # 总览只收带 data-gen 的板
-            W("电商-基建.html", G5)
-            W("子线-采购实付核账.html", _set_parent_decl(G5, "电商-基建.html", "k2"))
+            W("示例-基建.html", G5)
+            W("子线-采购实付核账.html", _set_parent_decl(G5, "示例-基建.html", "k2"))
             W("子线-无声明.html", G5)
             W("子线-指错.html", _set_parent_decl(G5, "没有这块.html", None))
             W("子线-指子线.html", _set_parent_decl(G5, "子线-无声明.html", None))
@@ -24019,22 +24019,22 @@ console.log(JSON.stringify([a.n===1 && a.why==='群里有新回复要重判 1 �
             k = {"file": "子线-采购实付核账.html", "title": "子线·采购实付核账", "row": "k2"}
             ss = _child_session_status("子线-采购实付核账.html", _session_registry(), _child_counts(G5)[0])
             if ss: k["session"] = ss
-            g.append(build() == {"电商-基建.html": [k]})
+            g.append(build() == {"示例-基建.html": [k]})
             W("子线-采购实付核账.html", G5)
             g.append(build() == {})
-            W("子线-采购实付核账.html", _set_parent_decl(G5, "电商-基建.html", None))
-            g.append(build() == {"电商-基建.html": [dict(k, row="")]})
+            W("子线-采购实付核账.html", _set_parent_decl(G5, "示例-基建.html", None))
+            g.append(build() == {"示例-基建.html": [dict(k, row="")]})
             os.makedirs(os.path.join(bd, "_retired"))
             os.replace(os.path.join(bd, "子线-采购实付核账.html"), os.path.join(bd, "_retired", "子线-采购实付核账.html"))
             g.append(build() == {})
             # 撞名时 web 名带仓名前缀 ⇒ 名单里用 web 名
-            pa, pc = os.path.join(bd, "电商-基建.html"), os.path.join(bd, "单开-清磁盘.html")
-            W("单开-清磁盘.html", _set_parent_decl(G5, "电商-基建.html", None))
+            pa, pc = os.path.join(bd, "示例-基建.html"), os.path.join(bd, "单开-清磁盘.html")
+            W("单开-清磁盘.html", _set_parent_decl(G5, "示例-基建.html", None))
             ent = {"file": "单开-清磁盘.html", "title": "单开·清磁盘", "row": ""}
             ss = _child_session_status("单开-清磁盘.html", _session_registry(), _child_counts(G5)[0])
             if ss: ent["session"] = ss
-            g.append(_children_web([pa, pc], {pa: "p__电商-基建.html", pc: "单开-清磁盘.html"})
-                     == {"p__电商-基建.html": [ent]})
+            g.append(_children_web([pa, pc], {pa: "p__示例-基建.html", pc: "单开-清磁盘.html"})
+                     == {"p__示例-基建.html": [ent]})
         finally:
             back()
             shutil.rmtree(d, ignore_errors=True)
@@ -24092,7 +24092,7 @@ console.log(JSON.stringify([a.n===1 && a.why==='群里有新回复要重判 1 �
         if not node:
             return all(g), g + ["没有 node,行为那一半没跑"]
         js = (r"""
-var HTTP = true, ANS_PAGE = '电商-基建.html', ANS = {}, ANS_OWN = {}, ANS_P = {}, PROJ_IDS = {}, PROJ_ROWS = {}, PROJ_SIG = null, ANS_CARDS = [], ANS_JUST = null, ANS_LINK = {}, ANS_CHAIN = Promise.resolve(), LINK_OTHER = '其他';
+var HTTP = true, ANS_PAGE = '示例-基建.html', ANS = {}, ANS_OWN = {}, ANS_P = {}, PROJ_IDS = {}, PROJ_ROWS = {}, PROJ_SIG = null, ANS_CARDS = [], ANS_JUST = null, ANS_LINK = {}, ANS_CHAIN = Promise.resolve(), LINK_OTHER = '其他';
 var DRAFT_KEY = 'status-board-ans-draft:' + ANS_PAGE, DRAFT_LEFT = {}, FS_CUT = 96;
 var OPEN_ST = { 'waiting-you': 1, doing: 1, blocked: 1, todo: 1, watch: 1 };
 var LS = {}, localStorage = { getItem: function (k) { return Object.prototype.hasOwnProperty.call(LS, k) ? LS[k] : null; }, setItem: function (k, v) { LS[k] = String(v); }, removeItem: function (k) { delete LS[k]; } };
@@ -24138,8 +24138,8 @@ var ticks = async function () { for (var i = 0; i < 8; i++) await tick(); };
   IDX = { '别的线.html': [{ file: '子线-x.html', title: '子线·x', row: '' }] }; URLS = []; await projLoad(true); await ticks(); out.c1 = URLS.slice();
   PROJ_SIG = null; IDX = {}; URLS = []; await projLoad(true); await ticks(); out.c2 = URLS.slice();
   PROJ_SIG = null; IDX = null; URLS = []; await projLoad(true); await ticks(); out.c3 = URLS.slice();
-  PROJ_SIG = null; IDX = { '电商-基建.html': [{ file: '子线-采购实付核账.html', title: '子线·采购实付核账', row: 'k2' }, { file: '../x.html', title: '坏' },
-                                             { file: '电商-基建.html', title: '自己' }, { file: '子线-y.html', title: 5 }] };
+  PROJ_SIG = null; IDX = { '示例-基建.html': [{ file: '子线-采购实付核账.html', title: '子线·采购实付核账', row: 'k2' }, { file: '../x.html', title: '坏' },
+                                             { file: '示例-基建.html', title: '自己' }, { file: '子线-y.html', title: 5 }] };
   URLS = []; APPLIED = []; await projLoad(true); await ticks(); out.c4 = URLS.slice(); out.ap = APPLIED.slice();
   URLS = []; await projLoad(false); await ticks(); out.c5 = URLS.length; out.h1 = HINTS;
   IDX = {}; URLS = []; await projLoad(false); await ticks(); out.c6 = URLS.length; out.h2 = HINTS;
@@ -24175,19 +24175,19 @@ var ticks = async function () { for (var i = 0; i < 8; i++) await tick(); };
   var btn = pcd.kids[0], t0 = btn.textContent; btn.on.click();
   out.ack = [t0, btn.textContent, LS['status-board-board:' + encodeURIComponent('子线-采购实付核账') + ':ack'] || null, Object.keys(LS).length, !!pcd.cls.acked];
   PROJ_IDS = { 'ask-c1': '子线-采购实付核账.html' }; ANS_OWN = {}; ANS_P = {}; ANS = {};
-  MAPS = { '电商-基建.html': { own1: { choice: 'o', ts: 't' } } };
-  ansAdopt(MAPS['电商-基建.html']);
+  MAPS = { '示例-基建.html': { own1: { choice: 'o', ts: 't' } } };
+  ansAdopt(MAPS['示例-基建.html']);
   var rec = { cd: mkEl('article'), id: 'ask-c1', q: 'Q?', opts: [], note: { value: '写了' }, pick: 'A', sent: null, skip: null, subSig: null, keepSig: null, page: '子线-采购实付核账.html', lq: '' };
   var own = { cd: mkEl('article'), id: 'own2', q: 'O?', opts: [], note: { value: '' }, pick: 'B', sent: null, skip: null, subSig: null, keepSig: null, lq: '' };
   ANS_CARDS = [rec, own];
   LS = {}; LS['status-board-ans-draft:子线-采购实付核账.html'] = JSON.stringify({ 'ask-c1': { note: '写了', q: 'Q?', t: Date.now() } });
   POSTS = []; ansSave(rec, true); await ticks();
-  out.save = [POSTS.length, POSTS[0] && POSTS[0].page, POSTS[0] && POSTS[0].id, !!(MAPS['子线-采购实付核账.html'] || {})['ask-c1'], !!MAPS['电商-基建.html']['ask-c1'],
+  out.save = [POSTS.length, POSTS[0] && POSTS[0].page, POSTS[0] && POSTS[0].id, !!(MAPS['子线-采购实付核账.html'] || {})['ask-c1'], !!MAPS['示例-基建.html']['ask-c1'],
               (ANS['ask-c1'] || {}).choice, !!ANS.own1, LS['status-board-ans-draft:子线-采购实付核账.html'] === undefined];
-  POSTS = []; ansSave(own, true); await ticks(); out.own = [POSTS[0] && POSTS[0].page, !!MAPS['电商-基建.html'].own2, (ANS['ask-c1'] || {}).choice];
+  POSTS = []; ansSave(own, true); await ticks(); out.own = [POSTS[0] && POSTS[0].page, !!MAPS['示例-基建.html'].own2, (ANS['ask-c1'] || {}).choice];
   POSTS = []; projSubmitPages(); await ticks(); out.sub2 = POSTS.map(function (p) { return [p.page, p.submit]; }); out.subd = (ANS['ask-c1'] || {}).sub;
   POSTS = []; ansUndo(rec); await ticks(); out.undo = [POSTS[0] && POSTS[0].page, !!(POSTS[0] && POSTS[0].clear), 'ask-c1' in ANS, !!ANS.own2];
-  out.dk = [draftKey(), draftKey('电商-基建.html'), draftKey('子线-采购实付核账.html')];
+  out.dk = [draftKey(), draftKey('示例-基建.html'), draftKey('子线-采购实付核账.html')];
   console.log(JSON.stringify(out));
 })();
 """)
@@ -24207,9 +24207,9 @@ var ticks = async function () { for (var i = 0; i < 8; i++) await tick(); };
                 "sub": ["子线·采购实付核账:等你定 1 件 · 两页报告已交,在核运费那一半;", "", ""], "mv": [5, 9, 5, 3],
                 "tag": [["来自 子线·采购实付核账", True]], "tag0": 0,
                 "ack": ["○ 标为已看过", "✓ 已看过 · 点开", '{"ask-a":1}', 1, True],
-                "save": [1, cf, "ask-c1", True, False, "A", True, True], "own": ["电商-基建.html", True, "A"],
+                "save": [1, cf, "ask-c1", True, False, "A", True, True], "own": ["示例-基建.html", True, "A"],
                 "sub2": [[cf, ["ask-c1"]]], "subd": "S", "undo": [cf, True, False, True],
-                "dk": ["status-board-ans-draft:电商-基建.html", "status-board-ans-draft:电商-基建.html", "status-board-ans-draft:" + cf]}
+                "dk": ["status-board-ans-draft:示例-基建.html", "status-board-ans-draft:示例-基建.html", "status-board-ans-draft:" + cf]}
         bad = [k for k in want if got.get(k) != want[k]]
         g.append(not bad)
         return all(g), g + ([] if not bad else [(k, got.get(k), want[k]) for k in bad] + [r.stderr[-300:]])
@@ -24223,9 +24223,9 @@ var ticks = async function () { for (var i = 0; i < 8; i++) await tick(); };
         try:
             bd = os.path.join(d, "r", ".claude", "boards")
             os.makedirs(bd)
-            par, other = os.path.join(bd, "电商-基建.html"), os.path.join(bd, "别的线.html")
+            par, other = os.path.join(bd, "示例-基建.html"), os.path.join(bd, "别的线.html")
             ch, ch2, ch3 = os.path.join(bd, "子线-采购实付核账.html"), os.path.join(bd, "子线-指别处.html"), os.path.join(bd, "子线-无声明.html")
-            for p_, s_ in ((par, _P5), (other, _P5), (ch, _set_parent_decl(_P5, "电商-基建.html", "k2")),
+            for p_, s_ in ((par, _P5), (other, _P5), (ch, _set_parent_decl(_P5, "示例-基建.html", "k2")),
                            (ch2, _set_parent_decl(_P5, "别的线.html", None)), (ch3, _P5)):
                 io.open(p_, "w", encoding="utf-8").write(s_)
 
@@ -24235,7 +24235,7 @@ var ticks = async function () { for (var i = 0; i < 8; i++) await tick(); };
                 k = _pj_cap(lambda: cmd_recheck(argparse.Namespace(all=False, path=path, json=False, quiet=False)))
                 return r[1], k[1]
             base = run(par, [par])
-            g.append(base[0] == _rows_listing(_P5, "电商-基建.html") + "\n" and base[1].strip() != "")
+            g.append(base[0] == _rows_listing(_P5, "示例-基建.html") + "\n" and base[1].strip() != "")
             g.append(run(par, [par, other, ch2, ch3]) == base)                         # 子板都不指向它 ⇒ 逐字相同
             tail = _children_lines(par, boards=[par, other, ch, ch2, ch3])[0] + "\n"
             withk = run(par, [par, other, ch, ch2, ch3])
@@ -24259,16 +24259,16 @@ var ticks = async function () { for (var i = 0; i < 8; i++) await tick(); };
             bd = os.path.join(d, "r", ".claude", "boards")
             os.makedirs(bd)
             ch, nd = os.path.join(bd, "子线-采购实付核账.html"), os.path.join(bd, "子线-无声明.html")
-            io.open(ch, "w", encoding="utf-8").write(_set_parent_decl(_P5, "电商-基建.html", "k2"))
+            io.open(ch, "w", encoding="utf-8").write(_set_parent_decl(_P5, "示例-基建.html", "k2"))
             io.open(nd, "w", encoding="utf-8").write(_P5)
             L1, L0 = _ask_link_line(ch), _ask_link_line(nd)
-            g.append(L1.endswith("/%E7%94%B5%E5%95%86-%E5%9F%BA%E5%BB%BA.html#proj-ask-aaaa1111") and BP.origin() in L1)
+            g.append(L1.endswith("/%E7%A4%BA%E4%BE%8B-%E5%9F%BA%E5%BB%BA.html#proj-ask-aaaa1111") and BP.origin() in L1)
             g.append(L0.endswith("/%E5%AD%90%E7%BA%BF-%E6%97%A0%E5%A3%B0%E6%98%8E.html") and "回复里别只说「板上那张」" in L0)
             now = 2000000000
-            g.append(_pane_parent_msg("电商-基建.html", {"电商-基建.html": now - 30}, now) is None)
-            g.append(_pane_parent_msg("电商-基建.html", {"电商-基建.html": now - 600, "子线-采购实付核账.html": now}, now)
+            g.append(_pane_parent_msg("示例-基建.html", {"示例-基建.html": now - 30}, now) is None)
+            g.append(_pane_parent_msg("示例-基建.html", {"示例-基建.html": now - 600, "子线-采购实付核账.html": now}, now)
                      == "  👉 主线的板没开着,他暂时看不到这张卡。")
-            g.append(_pane_parent_msg("电商-基建.html", {}, now) == "  👉 主线的板没开着,他暂时看不到这张卡。")
+            g.append(_pane_parent_msg("示例-基建.html", {}, now) == "  👉 主线的板没开着,他暂时看不到这张卡。")
             hm = os.path.join(d, "home")
             sd = os.path.join(hm, _SELFTEST_HOOK_STATE_DIR, "board-server")
             os.makedirs(sd)
@@ -24277,9 +24277,9 @@ var ticks = async function () { for (var i = 0; i < 8; i++) await tick(); };
             original_config = BP._CACHE
             BP._CACHE = dict(BP._load(), state_dir=os.path.dirname(sd))
             try:
-                json.dump({"电商-基建.html": time.time() - 10}, open(lf, "w"))
+                json.dump({"示例-基建.html": time.time() - 10}, open(lf, "w"))
                 t1 = _pj_cap(lambda: _pane_tail(ch))[1]
-                json.dump({"电商-基建.html": time.time() - 900, "子线-采购实付核账.html": time.time()}, open(lf, "w"))
+                json.dump({"示例-基建.html": time.time() - 900, "子线-采购实付核账.html": time.time()}, open(lf, "w"))
                 t2 = _pj_cap(lambda: _pane_tail(ch))[1]
             finally:
                 BP._CACHE = original_config
@@ -24296,7 +24296,7 @@ var ticks = async function () { for (var i = 0; i < 8; i++) await tick(); };
             if node and hk:
                 web = os.path.join(hm, ".claude", "boards-web")
                 os.makedirs(web)
-                io.open(os.path.join(web, "子线-采购实付核账.html"), "w", encoding="utf-8").write(_set_parent_decl(_P5, "电商-基建.html", "k2"))
+                io.open(os.path.join(web, "子线-采购实付核账.html"), "w", encoding="utf-8").write(_set_parent_decl(_P5, "示例-基建.html", "k2"))
                 io.open(os.path.join(web, "子线-无声明.html"), "w", encoding="utf-8").write(_P5)
                 json.dump({}, open(lf, "w"))
                 json.dump({}, open(os.path.join(sd, "pane-fetch.json"), "w"))
@@ -24310,7 +24310,7 @@ var ticks = async function () { for (var i = 0; i < 8; i++) await tick(); };
                     return r.stdout, (ls or [""])[-1]
                 o1, l1 = runh("子线-采购实付核账.html")
                 o2, l2 = runh("子线-无声明.html")
-                g.append(o1 == "" and "verdict=silent(child-of=电商-基建.html)" in l1)
+                g.append(o1 == "" and "verdict=silent(child-of=示例-基建.html)" in l1)
                 g.append(o2.strip() != "" and "child-of" not in l2)
             else:
                 g.append(bool(hk) or "找不到钩子")
@@ -24327,9 +24327,9 @@ var ticks = async function () { for (var i = 0; i < 8; i++) await tick(); };
         # ⭐ 1110 子线投影 ⑤:他在父板上答了投影卡(答案记在子板名下)⇒ 子线开着叫子线;不在叫父板主人并写明是谁的卡;
         #   常驻线代写过子板(登记成写入者)也不抢在子线前面;一条回答只转一次
         import tempfile as _tf
-        C_, P_ = "子线-采购实付核账.html", "电商-基建.html"
+        C_, P_ = "子线-采购实付核账.html", "示例-基建.html"
         L = {"S": ("s", "t", "idle"), "M": ("m", "t", "idle"), "X": ("x", "t", "idle")}
-        T = {"S": "子线·采购实付核账", "M": "电商-基建 v2.8", "X": "别的线 v1.0"}
+        T = {"S": "子线·采购实付核账", "M": "示例-基建 v2.8", "X": "别的线 v1.0"}
         W = [{"board": P_, "sid": "M", "ts": 10}, {"board": C_, "sid": "M", "ts": 50}, {"board": C_, "sid": "S", "ts": 20}]
         L2 = {k: v for k, v in L.items() if k != "S"}
         g = [_wake_pick_child(C_, P_, {}, W, L, T) == ("S", "child"),                     # 子线在 ⇒ 叫子线(常驻线更晚写过子板也不抢)
@@ -24360,7 +24360,7 @@ var ticks = async function () { for (var i = 0; i < 8; i++) await tick(); };
                           open(os.path.join(sd, "%d.json" % pid), "w"))
                 json.dump({"peerToken": "tok-" + sid}, open(os.path.join(sd, "%d.k.key" % pid), "w"))
             sess(os.getpid(), "S", "子线·采购实付核账")
-            sess(os.getppid(), "M", "电商-基建 v2.8")
+            sess(os.getppid(), "M", "示例-基建 v2.8")
             hs = os.path.join(d, "st", "board-stop-hook")
             os.makedirs(hs)
             io.open(os.path.join(hs, "writes.jsonl"), "w", encoding="utf-8").write("\n".join(json.dumps(e, ensure_ascii=False) for e in W) + "\n")
@@ -24410,11 +24410,11 @@ var ticks = async function () { for (var i = 0; i < 8; i++) await tick(); };
         # ⭐ 1110 面板归属 · 子线守卫:子线写派它的线的板 ⇒ 不按本会话面板判(退回老判法,不催它 navigate);写自己的板、普通线照新判法;_pane_tail 真接上了
         S = lambda t: {"title": t}
         pt = inspect.getsource(_pane_tail)
-        g = [_pane_mark_for("/x/电商-基建.html", "abcdef0123", S("子线·采购实付核账")) == "",
+        g = [_pane_mark_for("/x/示例-基建.html", "abcdef0123", S("子线·采购实付核账")) == "",
              _pane_mark_for("/x/子线-采购实付核账.html", "abcdef0123", S("子线·采购实付核账")) == "abcdef0123",
-             _pane_mark_for("/x/电商-基建.html", "abcdef0123", S("电商-基建 v2.8")) == "abcdef0123",
-             _pane_mark_for("/x/电商-基建.html", "", S("子线·采购实付核账")) == "",
-             _pane_mark_for("/x/电商-基建.html", "abcdef0123", None) == "abcdef0123",
+             _pane_mark_for("/x/示例-基建.html", "abcdef0123", S("示例-基建 v2.8")) == "abcdef0123",
+             _pane_mark_for("/x/示例-基建.html", "", S("子线·采购实付核账")) == "",
+             _pane_mark_for("/x/示例-基建.html", "abcdef0123", None) == "abcdef0123",
              "mark = _pane_mark_for(p, mark, _session_ident() if mark else None)" in pt
              and pt.find("_pane_mark_for(p, mark") < pt.find("pane-fetch.json")]
         return all(g), g
@@ -24710,15 +24710,15 @@ console.log(JSON.stringify(out));
         return all(g), g
 
     def _c_retired_own1113():
-        # ⭐ 1113 FDE-总控报:retire 清掉 state.json 里指向这块板的 own;钩子那一侧 isRetiredBoard 认去向页
+        # ⭐ 1113 客户项目甲-总控报:retire 清掉 state.json 里指向这块板的 own;钩子那一侧 isRetiredBoard 认去向页
         import tempfile as _tf
         d = _tf.mkdtemp(prefix="zz-retown-")
         sp = os.path.join(d, "state.json")
-        json.dump({"a::/x": {"own": "客户甲-FDE.html", "since": 1}, "a::/y": {"own": "FDE-总控.html"}, "b::/z": {"own": "客户甲-FDE.html"}, "c": 3},
+        json.dump({"a::/x": {"own": "客户甲-客户项目甲.html", "since": 1}, "a::/y": {"own": "客户项目甲-总控.html"}, "b::/z": {"own": "客户甲-客户项目甲.html"}, "c": 3},
                   open(sp, "w", encoding="utf-8"))
-        n = _retired_forget_own("客户甲-FDE.html", sp)
+        n = _retired_forget_own("客户甲-客户项目甲.html", sp)
         st = json.load(open(sp, encoding="utf-8"))
-        g = [n == 2, st["a::/x"]["own"] is None, st["b::/z"]["own"] is None, st["a::/y"]["own"] == "FDE-总控.html", st["a::/x"]["since"] == 1, st["c"] == 3,
+        g = [n == 2, st["a::/x"]["own"] is None, st["b::/z"]["own"] is None, st["a::/y"]["own"] == "客户项目甲-总控.html", st["a::/x"]["since"] == 1, st["c"] == 3,
              _retired_forget_own("x.html", os.path.join(d, "没有.json")) == 0,
              "_retired_forget_own(name)" in inspect.getsource(cmd_retire)]
         # 钩子那一侧:去向页认作退场、正常板不认、读不到不认(node 真跑 own-board.js)
@@ -24898,19 +24898,19 @@ console.log(JSON.stringify(out));
         try:
             os.makedirs(os.path.join(d, ".claude"))
             open(os.path.join(d, ".git"), "w").write("gitdir: x")
-            hs = {"own1": "子线-采购.html", "par1": "电商-基建.html"}
+            hs = {"own1": "子线-采购.html", "par1": "示例-基建.html"}
             lj = os.path.join(d, ".claude", "launch.json")
             urls = lambda: [c["url"].split("//")[1].split(".")[0] for c in json.load(open(lj, encoding="utf-8"))["configurations"]]
-            sub_s, reg_s = dict(title="子线·采购"), dict(title="电商-基建 v2.8")
+            sub_s, reg_s = dict(title="子线·采购"), dict(title="示例-基建 v2.8")
             W = lambda fn, ss: _write_launch("/x/" + fn, cwd=d, hosts=hs, quiet=True, record=False, sess=ss)
             W("子线-采购.html", sub_s)
             a = urls()
-            r = W("电商-基建.html", sub_s)
+            r = W("示例-基建.html", sub_s)
             b = urls()
-            W("电商-基建.html", reg_s)
+            W("示例-基建.html", reg_s)
             c = urls()
             os.remove(lj)
-            W("电商-基建.html", None)
+            W("示例-基建.html", None)
             e = urls()
         finally:
             shutil.rmtree(d, ignore_errors=True)
@@ -24922,15 +24922,15 @@ console.log(JSON.stringify(out));
         # ⭐ 1109 子线:要他处理的事只能挂自己的板;新旧名字都认;挂卡后印能点的链接
         S = lambda t: dict(title=t)
         P = lambda n: "/x/.claude/boards/%s.html" % n
-        g = [_subline_board_problem(P("电商-基建"), S("子线·采购实付核账")) is not None,
-             "子线-采购实付核账" in _subline_board_problem(P("电商-基建"), S("子线·采购实付核账")),
+        g = [_subline_board_problem(P("示例-基建"), S("子线·采购实付核账")) is not None,
+             "子线-采购实付核账" in _subline_board_problem(P("示例-基建"), S("子线·采购实付核账")),
              _subline_board_problem(P("子线-采购实付核账"), S("子线·采购实付核账")) is None,
              _subline_board_problem(P("子线-别的事"), S("子线·采购实付核账")) is not None,
-             _subline_board_problem(P("电商-基建"), S("单开#r1109-ebe9 采购实付核账")) is not None,
+             _subline_board_problem(P("示例-基建"), S("单开#r1109-ebe9 采购实付核账")) is not None,
              _subline_board_problem(P("单开-采购实付核账"), S("单开#r1109-ebe9 采购实付核账")) is None,
              _subline_board_problem(P("子线-采购实付核账"), S("单开#r1109-ebe9 采购实付核账")) is None,
-             _subline_board_problem(P("电商-基建"), S("电商-基建 v2.8")) is None,
-             _subline_board_problem(P("电商-基建"), {}) is None, _subline_board_problem(P("电商-基建"), None) is None,
+             _subline_board_problem(P("示例-基建"), S("示例-基建 v2.8")) is None,
+             _subline_board_problem(P("示例-基建"), {}) is None, _subline_board_problem(P("示例-基建"), None) is None,
              _oneoff_verdict("子线-试收.html", [dict(title="子线·试收", archived=True, last=1)], 0, 0)[0] == "retire",
              _oneoff_verdict("单开-试收.html", [dict(title="子线·试收", archived=True, last=1)], 0, 0)[0] == "retire",
              # 1117 #a7c3:标题带「(等谁)」/「·要你进来」尾巴照样对得上板;尾巴以外不一样的仍对不上(不做模糊匹配)
@@ -24941,11 +24941,11 @@ console.log(JSON.stringify(out));
              _oneoff_verdict("子线-试收.html", [dict(title="子线·试收别的(等同事甲回复)", archived=False, last=1)], 0, 0)[0] == "nobody",
              _oneoff_verdict("子线-试收.html", [dict(title="子线·试收(第二轮)", archived=False, last=1)], 0, 0)[0] == "nobody",
              _subline_board_problem(P("子线-采购实付核账"), S("子线·采购实付核账(等同事甲回退货验货方案)")) is None,
-             _title_norm("状态板 v2.2") == _title_norm("状态板") and _title_tail_cut("电商-基建 v3.0") == "电商-基建 v3.0",
+             _title_norm("状态板 v2.2") == _title_norm("状态板") and _title_tail_cut("示例-基建 v3.0") == "示例-基建 v3.0",
              "/%E5%AD%90%E7%BA%BF-x.html" in _ask_link_line("/a/子线-x.html"),
              "_subline_board_problem(p, _session_ident())" in inspect.getsource(cmd_ask),
              "print(_ask_link_line(p))" in inspect.getsource(cmd_ask),
-             "派它的线答得了" in _subline_board_problem(P("电商-基建"), S("子线·采购实付核账")),
+             "派它的线答得了" in _subline_board_problem(P("示例-基建"), S("子线·采购实付核账")),
              "_subline_board_problem(p, _session_ident())" in inspect.getsource(cmd_row),
              "if a.you in ROW_YOU_MINE:" in inspect.getsource(cmd_row)]
         return all(g), g
@@ -24960,12 +24960,12 @@ console.log(JSON.stringify(out));
         T = datetime.date(2026, 11, 9)
         E = datetime.date(2026, 11, 20)
         F = lambda why="11-20 定时再核", **k: dict(dict(why=why, eta=E, open=True, st="watch", you="wait"), **k)
-        H = lambda f, t: _self_check_hint(f, "电商-投流达人", t, today=T)
-        other = [dict(text="叫醒电商-基建", cron=True, fire=None)]
+        H = lambda f, t: _self_check_hint(f, "示例-投流达人", t, today=T)
+        other = [dict(text="叫醒示例-基建", cron=True, fire=None)]
         h = [H(F(), other) is not None and "定时" in H(F(), other), H(F(), []) is not None,
-             H(F(), [dict(text="叫醒 电商-投流达人 核", cron=False, fire=E)]) is None,
+             H(F(), [dict(text="叫醒 示例-投流达人 核", cron=False, fire=E)]) is None,
              H(F(), [dict(text="叫醒投流达人", cron=True, fire=None)]) is None,
-             H(F(), [dict(text="电商-投流达人", cron=False, fire=datetime.date(2026, 11, 21))]) is not None,
+             H(F(), [dict(text="示例-投流达人", cron=False, fire=datetime.date(2026, 11, 21))]) is not None,
              H(F(), None) is None, H(F(why="在写第二节"), []) is None, H(F(eta=None), []) is None, H(F(eta=datetime.date(2026, 11, 1)), []) is None,
              H(F(open=False), []) is None, H(F(you="decide"), []) is None,
              H(F(why="到时我来核"), []) is not None, H(F(why="11-30 再看"), []) is not None, H(F(why="11-14 起按你说的"), []) is None]
@@ -24984,14 +24984,14 @@ console.log(JSON.stringify(out));
             shutil.rmtree(d, ignore_errors=True)
         W = _P5.replace('<span class="why">写到 <span class="x">一半</span></span>', '<span class="why">11-30 定时再核</span>').replace(
             'data-status="doing" data-ack="k2"', 'data-status="doing" data-eta="%s" data-ack="k2"' % (datetime.date.today() + datetime.timedelta(days=10)).strftime("%m-%d"))
-        w0 = _row_write_hints(W, "k2", path="/x/电商-投流达人.html", tasks=[])
+        w0 = _row_write_hints(W, "k2", path="/x/示例-投流达人.html", tasks=[])
         w2 = _row_write_hints(W, "k2", tasks=[])
         wire = [any("定时" in x for x in w0), not any("查不到" in x for x in w2), "_row_write_hints(out, a.ack, path=p)" in inspect.getsource(cmd_row)]
         g = g1 + h + st + wire
         return all(g), g
 
     def _c_hint1029():
-        # ⭐ 1029 电商-基建 v2.4:做到一半没写还差什么 / 范围改大埋在现状里 ⇒ 写行时提醒;写了还差 / 有分数 / 做完的行 / 标题已是新范围 ⇒ 不提
+        # ⭐ 1029 示例-基建 v2.4:做到一半没写还差什么 / 范围改大埋在现状里 ⇒ 写行时提醒;写了还差 / 有分数 / 做完的行 / 标题已是新范围 ⇒ 不提
         W = lambda w: _P5.replace('<span class="why">写到 <span class="x">一半</span></span>', '<span class="why">%s</span>' % w)
         h1 = _row_write_hints(W("表上新列已合并,上店工具也合并了。"), "k2")
         h2 = _row_write_hints(W("表上新列已合并;还差:给同事甲写规则(10-30)"), "k2")
@@ -25040,7 +25040,7 @@ console.log(JSON.stringify(out));
         return all(g), g
 
     def _c_chk1028():
-        # ⭐ 1028 电商-选品:什么都没改的 row 不算核过 · --checked 要写核了什么 · 核的那一刻 / 列没核过的行时亮出会过时的说法 · 每天的验收结果可单开做完行
+        # ⭐ 1028 示例-选品:什么都没改的 row 不算核过 · --checked 要写核了什么 · 核的那一刻 / 列没核过的行时亮出会过时的说法 · 每天的验收结果可单开做完行
         p1 = _checked_problem("没变") is not None and _checked_problem("ok") is not None and _checked_problem("核过。") is not None
         p2 = _checked_problem("#3347 还开着、基建 Codex 还在改") is None
         v1 = _row_volatile("#3347 过检查中、基建的 Codex 正在改;某商品 第三轮 18:31 开跑")
@@ -25064,7 +25064,7 @@ console.log(JSON.stringify(out));
         return all(g), g
 
     def _c_selfdo1028():
-        # ⭐ 1028 电商-选品:他说「我直接问掉」⇒ 不让直接收卡;--followup 指「要你的」里另一张卡 / --no-followup 写理由 / --done 放行;他没这么说照常
+        # ⭐ 1028 示例-选品:他说「我直接问掉」⇒ 不让直接收卡;--followup 指「要你的」里另一张卡 / --no-followup 写理由 / --done 放行;他没这么说照常
         A = lambda **k: argparse.Namespace(**dict(dict(ack="ask-aaaa1111", res="好", why=None, done=False, followup=None, no_followup=None), **k))
         ans = {"ask-aaaa1111": {"choice": "", "note": "我已经在问供应商了,还不如我直接问掉好了"}}
         e1 = _answer_selfdo_problem(_P5, A(), ans)
@@ -25082,7 +25082,7 @@ console.log(JSON.stringify(out));
               dict(open=True, you="wait", wait_for="平台审核结果", txt_at="2026-10-27T12:00", ack="w2"),
               dict(open=True, you="wait", wait_for="平台审核结果", txt_at="2026-10-24T12:00", ack="w3")]
         ws = [f["ack"] for f, _d in _wait_stale_rows(fl, now=now)]
-        # 1029 电商-选品:他没选选项、补充在追问 / 讨论 ⇒ 同样要续卡或理由;--done 不放行;选了选项 / 反问「好吧?」/ 只是吩咐 ⇒ 照常
+        # 1029 示例-选品:他没选选项、补充在追问 / 讨论 ⇒ 同样要续卡或理由;--done 不放行;选了选项 / 反问「好吧?」/ 只是吩咐 ⇒ 照常
         dq = {"ask-aaaa1111": {"choice": "其他(我自己写)", "note": "先拿几个 case 试、调研、算收益和成本"}}
         d1 = _answer_selfdo_problem(_P5, A(), dq)
         d2 = _answer_selfdo_problem(_P5, A(done=True), dq)
@@ -25100,7 +25100,7 @@ console.log(JSON.stringify(out));
         return all(g), g
 
     def _c_rot1028c():
-        # ⭐ 1028 电商-选品 v2.8 第二批:做完改回在做 ⇒ 总结拿掉;「在等同事乙组找货」标在做 ⇒ 写行提醒;相对日期那句只在写成功后印
+        # ⭐ 1028 示例-选品 v2.8 第二批:做完改回在做 ⇒ 总结拿掉;「在等同事乙组找货」标在做 ⇒ 写行提醒;相对日期那句只在写成功后印
         o1, _n1 = _row_apply(_P5, "k3", say="某店乙 两条还没做", status="doing", eta="10-30")
         pd = _P5.replace('data-status="done" data-ack="k3"', 'data-status="done" data-sum="已过审在售,全部上架" data-ack="k3"')
         o2, n2 = _row_apply(pd, "k3", say="某店乙 两条还没做", status="doing", eta="10-30")
@@ -25114,11 +25114,11 @@ console.log(JSON.stringify(out));
         return all(g), g
 
     def _c_rot1028d():
-        # ⭐ 1028 电商-投流达人:主线一句一天没变就提醒 · 写着交给别线的在做行 ⇒ 写行提醒 · 盯着的行写着在等 ⇒ 提醒 · 排队区没刷新判定行自己说
+        # ⭐ 1028 示例-投流达人:主线一句一天没变就提醒 · 写着交给别线的在做行 ⇒ 写行提醒 · 盯着的行写着在等 ⇒ 提醒 · 排队区没刷新判定行自己说
         mb = MAIN_BEGIN + '<article class="card" data-ack="main-2128"><div class="crow" data-status="doing" data-why-fp="abc" data-why-at="%s"></div></article>' + MAIN_END
         st1 = _main_stale_warn(mb % "2026-10-26T10:00", now=datetime.date(2026, 10, 28))
         st0 = _main_stale_warn(mb % "2026-10-28T10:00", now=datetime.date(2026, 10, 28))
-        ph = _P5.replace('<span class="why">写到 <span class="x">一半</span></span>', '<span class="why">老表要电商-基建去删,我这边等它回。</span>')
+        ph = _P5.replace('<span class="why">写到 <span class="x">一半</span></span>', '<span class="why">老表要示例-基建去删,我这边等它回。</span>')
         h1 = _row_write_hints(ph, "k2")
         pw = _P5.replace('data-status="doing" data-ack="k2"', 'data-status="watch" data-ack="k2"').replace(
             '<span class="why">写到 <span class="x">一半</span></span>', '<span class="why">等同事乙寄样。</span>')
@@ -25128,7 +25128,7 @@ console.log(JSON.stringify(out));
         return all(g), g
 
     def _c_rot1028e():
-        # ⭐ 1028 电商-基建 v2.2 + AI Harness:等的话里日期只是预计 ⇒ 照报 · 在做只等日子 ⇒ 写行提醒 · 「要你的」0 件时板顶 / 没做完的行说「等你审 / 要你的只剩」⇒ 矛盾
+        # ⭐ 1028 示例-基建 v2.2 + AI Harness:等的话里日期只是预计 ⇒ 照报 · 在做只等日子 ⇒ 写行提醒 · 「要你的」0 件时板顶 / 没做完的行说「等你审 / 要你的只剩」⇒ 矛盾
         now = datetime.datetime(2026, 10, 28, 17, 0)
         F = [dict(ack="f392", open=True, you="wait", wait_for="选品补齐卡包、指环的对标链接(10-30)+ 取价模块", txt_at="2026-10-26T22:38"),
              dict(ack="tm", open=True, you="wait", wait_for="等到 10-29 16:04 定时任务关全店", txt_at="2026-10-22T16:00"),
@@ -25137,7 +25137,7 @@ console.log(JSON.stringify(out));
         ws = sorted(f["ack"] for f, _d in _wait_stale_rows(F, now=now))
         pd = _P5.replace('<span class="why">写到 <span class="x">一半</span></span>', '<span class="why">等 11-03 的额度数据再判。</span>')
         hd = _row_write_hints(pd, "k2")
-        top = ('<div class="northstar"><span class="lab">大方向</span><p><b>电商共用工具</b></p></div>'
+        top = ('<div class="northstar"><span class="lab">大方向</span><p><b>示例业务共用工具</b></p></div>'
                '<p class="say">10-14 傍晚:「要你的」只剩:跟进 同事子 那笔违规费的话等你审。</p>')
         c1 = _contradiction_head_claims(top + _P5)
         c2 = _contradiction_head_claims('<div class="northstar"><p>眼下没有等你拍的;方案在它板上卡 ask-79995691 等你拍。</p></div>' + _P5)
@@ -25306,23 +25306,23 @@ console.log(JSON.stringify(out));
     for _grp8, _desc8, _fn8 in (
             ("after", "⭐ row --after:行上写 data-after=\"<前面那行>\",别的一个字不动;可以和 --say / --status / --eta 一起给", _c_after_set),
             ("yours", "⭐ 只读 yours:「要你的」里的卡(手写 + 机器,占位卡不算;卡里链到的行带出来)+ 标着要他拍 / 动手的没做完行(做完的、nudge / wait 不算);不是板 ⇒ 空", _c_yours),
-            ("head", "⛔ 板顶有主线卡时 head 必须处理第四样:--main \"现在到哪了\"(写回 .queue.json 那一条,不存在就加进 next)或 --main-same;两样都没给 / 都给 / 空的 / 那句本来是空的却说没变 ⇒ 报;没有主线卡不要求(1013 电商-投流:主线那句是上两棒写的)", _c_head_main),
-            ("row", "⛔ row --say 的新文字说「等你 / 还差你 / 你点头」,而这一行没标着要他、没有卡、这次也没给 --you ⇒ 报错不写、三选一;有卡 / 已标 / --you wait / 做完 / 引号里 / 否定句不报(1013 电商-投流:写进行里 ≠ 摆到他面前)", _c_say_wait),
-            ("row", "⛔ 标着要他拍板(decide)的没做完行,「要你的」里没有卡链到它 ⇒ lint 报错并给出 ask --row 的命令;有卡 / 做完 / 改成 do 不报(1012 电商-选品:小卡只有半句话,他每次要专门去问)", _c_decide_card),
+            ("head", "⛔ 板顶有主线卡时 head 必须处理第四样:--main \"现在到哪了\"(写回 .queue.json 那一条,不存在就加进 next)或 --main-same;两样都没给 / 都给 / 空的 / 那句本来是空的却说没变 ⇒ 报;没有主线卡不要求(1013 示例-投流:主线那句是上两棒写的)", _c_head_main),
+            ("row", "⛔ row --say 的新文字说「等你 / 还差你 / 你点头」,而这一行没标着要他、没有卡、这次也没给 --you ⇒ 报错不写、三选一;有卡 / 已标 / --you wait / 做完 / 引号里 / 否定句不报(1013 示例-投流:写进行里 ≠ 摆到他面前)", _c_say_wait),
+            ("row", "⛔ 标着要他拍板(decide)的没做完行,「要你的」里没有卡链到它 ⇒ lint 报错并给出 ask --row 的命令;有卡 / 做完 / 改成 do 不报(1012 示例-选品:小卡只有半句话,他每次要专门去问)", _c_decide_card),
             ("after", "⛔ --after 指向不存在的行 / 自己 / 已做完的行、会成环(直接、间接)、这一行已做完或这次标做完、和 --no-after 同给 ⇒ 报错不写;合法的链照写", _c_after_bad),
             ("after", "⭐ --no-after 拿掉(拿掉后没有预计日 ⇒ 拒);标成做完时 data-after 一并拿掉", _c_after_no),
             ("after", "⭐ 带 data-after 的没做完行不报「缺预计哪天」(不带的照报;预计日写错格式的照报;「为什么没做完」照旧必填)", _c_after_eta),
             ("after", "⭐⭐ lint:前面那件做完了 / 那一行不在板上了,这一件还标着排在它后面 ⇒ 报错(两条出路带可照抄的命令);"
-                      "⛔ 前面没做完 / 这一行标着要他拍或动手 / 手写卡链着这一行 / 这一行自己做完了 ⇒ 不报;机器卡里的链接不算(负责人 10-08 电商-基建)", _c_after_lint),
+                      "⛔ 前面没做完 / 这一行标着要他拍或动手 / 手写卡链着这一行 / 这一行自己做完了 ⇒ 不报;机器卡里的链接不算(负责人 10-08 示例-基建)", _c_after_lint),
             ("after", "⭐ 指纹:data-after 进行指纹(加 / 改都算动过),没写它的行指纹与加它之前逐字相同(⛔ 不许全机每行都变一次);"
                       "连跑两次第二次不动;整板指纹、卡指纹都把它当作者写的内容", _c_after_fp),
             ("answer", "⛔ answer:卡对应着一行(#row- 链接 / 卡号 / --row)、没给 --done 也没给 --why(或只给了空白)⇒ 报错不写,"
                        "印出那一行现在的现状和三条出路(1008:不再拿他的回答盖行的现状)", _c_ans_need_why),
-            ("row", "⛔ row:行上标着要他(decide / do / nudge / stuck),改了现状或状态却没说还要不要他 ⇒ 报错不写;给了 --no-you / 原样再给 --you / 只改预计日 / 行上没标 ⇒ 放行(1009 电商-投流:旧的「要你拍」留在「要你的」里,lint 全绿)", _c_row_strict_you),
-            ("answer", "⛔ answer --done:命令行上不点名 --row ⇒ 报错(摆出那一行的标题和现状,说清它是「整行做完」不是「卡处理完」);点名了才标;已做完的行不许再被盖结论(1008 电商-基建:一张「重写」的卡把没做完的行标完成并搬进了留档)", _c_ans_done_confirm),
+            ("row", "⛔ row:行上标着要他(decide / do / nudge / stuck),改了现状或状态却没说还要不要他 ⇒ 报错不写;给了 --no-you / 原样再给 --you / 只改预计日 / 行上没标 ⇒ 放行(1009 示例-投流:旧的「要你拍」留在「要你的」里,lint 全绿)", _c_row_strict_you),
+            ("answer", "⛔ answer --done:命令行上不点名 --row ⇒ 报错(摆出那一行的标题和现状,说清它是「整行做完」不是「卡处理完」);点名了才标;已做完的行不许再被盖结论(1008 示例-基建:一张「重写」的卡把没做完的行标完成并搬进了留档)", _c_ans_done_confirm),
             ("answer", "⭐ answer 四种放行情况(没有对应行 / --no-row / --done / 给了 --why)的输出与改之前逐字相同", _c_ans_same),
             ("answers", "⭐ 1109 #a93c:交过的卡不计入「要你的」区头件数并写明已交(负责人:我不是已经回复了,为什么还挂着)", _c_anshead1109),
-            ("answers", "⭐ 1110 子线写派它的线的板不登记:那块板的回答不叫到子线头上(11-10 12:24 采购子线写了电商-基建的板)", _c_subwrite1110),
+            ("answers", "⭐ 1110 子线写派它的线的板不登记:那块板的回答不叫到子线头上(11-10 12:24 采购子线写了示例-基建的板)", _c_subwrite1110),
             ("answers", "⭐ 1110 子线投影 ① 声明父板:落在子板 wrap 上、sync 不丢;parent --set/--clear;父板不合格拒;new --parent", _c_proj1110_decl),
             ("answers", "⭐ 1113 子线停着 ① 三种行判据及正反例", _cs_rows),
             ("answers", "⭐ 1113 子线停着 ② 归档与不在", _cs_sessions),
@@ -25338,7 +25338,7 @@ console.log(JSON.stringify(out));
             ("touch", "⭐⭐ 1109 子线按钮(#d7a2):先写自己的板再写父线的板,▶ 还是自己的;普通线、自愈不受影响", _c_launch_sub1109),
             ("ask", "⭐⭐ 1109 子线(负责人:他让我去打开状态板,但我根本不知道在哪里打开):子线把要他处理的事挂到别的板 ⇒ 拒,教建 子线-X;自己的板放行;新旧名字都认;普通线不查;挂卡印能点的链接;retire --oneoffs 也收 子线-", _c_sub1109),
             ("row", "⭐⭐ 1109 投流转:写行时「你去 / 请你 / 需要你 / 你和 X 谈」没标要他就拦;写了到日子再核却查不到这条线那天的定时 ⇒ 提醒(周期任务或当天一次性任务且提到线名才算有;只信最后写的那份任务表)", _c_rot1109),
-            ("row", "⭐ 1029 电商-基建:做到一半没写还差什么 ⇒ 写行时提醒(只提醒不拦);范围改大那条 1115 撤了、不再提醒", _c_hint1029),
+            ("row", "⭐ 1029 示例-基建:做到一半没写还差什么 ⇒ 写行时提醒(只提醒不拦);范围改大那条 1115 撤了、不再提醒", _c_hint1029),
             ("answer", "⭐ 1104 选品:--why 漏了原现状里的货号 ⇒ 拒并摆出原文、给三条可照抄的命令;--why-add 原文留着接在后面;--why-replace 放行并印被换掉的原文;--done 报错给可照抄的命令", _c_whydrop1104),
             ("copies", "⭐ 1104 Harness:点名了板的命令只报这块板(同名 / -留档)的「同名副本没动」,别线的不印;--all / 没点名照旧全报;自愈照旧全机走", _c_copyfocus1104),
             ("recheck", "⭐ 1105 AI平台事故:大方向 3 天没核且之后有行动 / 主线卡已关 ⇒ lint 报错 + 进名单;现在那句 3 天没变、queue 超 48 小时 ⇒ 进名单;暂停 / 没有没做完的行 / 只等日期的不报;gh 没查成要出声且不缓存", _c_headstale1105),
@@ -25356,7 +25356,7 @@ console.log(JSON.stringify(out));
             ("answers", "⭐ 1105 回答记录带当时的建议项 sug:板卡第一个 pick / 「我的建议」/ 手写卡 / 方案页 data-sug;都没有不写", _c_sug1105),
             ("answers", "⭐ 1105 交完提示说清它会自己接手、不用再说一句(板上卡 + 右下按钮 + 方案页按钮;方案页两处文字要一致,判「发过没」靠它)", _c_subhint1105),
             ("recheck", "⭐ 1104 要核名单:今天到期 / 过期 / 卡着·没开工·在做 3 天没核;核过 = 改字或 --checked 晚的那个,touch 不算;球在他那边、watch 没到期、刚改过字的不列;等外面那条同一取法;首屏同一口径", _c_recheck1104),
-            ("retire", "⭐ 1113 退场的板钩子不再追(FDE-总控报):retire 清掉 state.json 里指着它的 own;钩子认板跳过 8777 上的「已退场」去向页", _c_retired_own1113),
+            ("retire", "⭐ 1113 退场的板钩子不再追(客户项目甲-总控报):retire 清掉 state.json 里指着它的 own;钩子认板跳过 8777 上的「已退场」去向页", _c_retired_own1113),
             ("chat", "1120 chat-watch 假 ioreg / pmset:合盖且用电池整轮跳过，只记一行", _chat_watch_battery_test),
             ("chat", "⭐ 1113 群消息摘录打码(#e4c8):同事在群里贴的 App Key / Secret / token 不原样写进板和日志;飞书 id、订单号不动", _c_chatsec1113),
             ("chat", "⭐ 1104 登记群带关键词:只认含关键词的消息、不带照旧都算;--chat-kw 没盯群 ⇒ 拒;--no-chat 一并拿掉", _c_chatkw1104),
@@ -25364,11 +25364,11 @@ console.log(JSON.stringify(out));
             ("row", "⭐ 1029 选品转负责人三处:方案页没题的右下角能直接回复 · 从卡进方案页回来回到那张卡 · 答过的卡不挪到最后", _c_review1029),
             ("row", "⭐ 1028 规则验收:新板模板不带示例行 · ask 连方案页没说哪道题 ⇒ 写之前拒(--deep-q none 放行)", _c_drill1028),
             ("row", "⭐ 1028 负责人拍 token 效率:row 的教学话(做完了要不要挂卡 / 记成刚动过)一个会话只印一次;没会话号照印", _c_once1028),
-            ("row", "⭐ 1028 电商-基建 v2.2 + AI Harness:等的话里日期只是预计照报 · 在做只等日子写行提醒 · 「要你的」0 件时板顶说「等你审 / 要你的只剩」算矛盾", _c_rot1028e),
-            ("row", "⭐ 1028 电商-投流达人:主线一句一天没变提醒 · 交给别线的在做行 / 盯着却在等的行写行提醒 · 排队区没刷新判定行说出来", _c_rot1028d),
-            ("row", "⭐ 1028 电商-选品 v2.8 第二批:做完改回在做拿掉旧总结 · 现状写「在等」却标在做 ⇒ 写行提醒 · 被拒时 stdout 不印「相对日期已换」", _c_rot1028c),
-            ("answer", "⭐ 1028 电商-选品 v2.8:他说「这一步我来」不让直接收卡(要 --followup 新卡 / --no-followup 理由 / --done)· 1029:他没选选项在追问 / 讨论同样要续卡 · 等本机别的线的行一天没变就提醒现查", _c_selfdo1028),
-            ("row", "⭐ 1028 电商-选品:什么都没改的 row 不算核过、--checked 写核了什么、亮出会过时的说法、每天的验收结果可单开做完行", _c_chk1028),
+            ("row", "⭐ 1028 示例-基建 v2.2 + AI Harness:等的话里日期只是预计照报 · 在做只等日子写行提醒 · 「要你的」0 件时板顶说「等你审 / 要你的只剩」算矛盾", _c_rot1028e),
+            ("row", "⭐ 1028 示例-投流达人:主线一句一天没变提醒 · 交给别线的在做行 / 盯着却在等的行写行提醒 · 排队区没刷新判定行说出来", _c_rot1028d),
+            ("row", "⭐ 1028 示例-选品 v2.8 第二批:做完改回在做拿掉旧总结 · 现状写「在等」却标在做 ⇒ 写行提醒 · 被拒时 stdout 不印「相对日期已换」", _c_rot1028c),
+            ("answer", "⭐ 1028 示例-选品 v2.8:他说「这一步我来」不让直接收卡(要 --followup 新卡 / --no-followup 理由 / --done)· 1029:他没选选项在追问 / 讨论同样要续卡 · 等本机别的线的行一天没变就提醒现查", _c_selfdo1028),
+            ("row", "⭐ 1028 示例-选品:什么都没改的 row 不算核过、--checked 写核了什么、亮出会过时的说法、每天的验收结果可单开做完行", _c_chk1028),
             ("row", "⭐ 1028 Harness 板腐烂:新行像旧行提醒 · 「要你的」0 件时没做完的行写「挂进要你的」算矛盾 · 字里等另一件做完提醒用 --after", _c_rot1028),
             ("answer", "⭐ 1027 选品板腐烂:改成在做清旧「在等」· ask --row 标要你拍 / --no-row 收卡改回 · 主线「现在」3 天没变提醒 · --why 印新旧第一句 · --no-row 列同货号的行", _c_rot1027),
             ("rownew", "⭐ row --new:生成合契约的一行(标题 + 当天日期 + 现状),插在「你交代的」第一个露在外面的行容器开头,别的一个字不动;"
@@ -25646,7 +25646,7 @@ console.log(JSON.stringify(out));
             ("answers", "⭐ 方案页的题:没有 copied ⇒ 列;有 copied ⇒ 不列;注释里的入口、不在 /proposals/ 下的入口、这块板没挂的方案页、没挂入口的板 ⇒ 都不列", _c7_pages),
             ("answers", "⭐ answers 印的内容:卡在前方案页在后,标题 / 选项 / 补充全文 / 时间 / 下一步都在;没有待消化的只印一行「没有待处理的回答」", _c7_report),
             ("answers", "⭐⭐ 1026 写完才交:点「交给这条线」= 交;没点的只点选项 1 分钟 / 写了字 10 分钟没再改才算交;交了又改 = 又算在写;老记录算交了。草稿不印内容、只印一句「他还在写」,lint 不为它报「答了没收」", _c7_draft),
-            ("answers", "⭐⭐ 1027 他点了卡上的「记下」⇒ answers / 钩子列给 AI 看(标明还没点交),但不叫醒、这块板 hold 住;自动存的半截字照旧藏;记下后又改又是草稿(电商-基建转)", _c7_keep1027),
+            ("answers", "⭐⭐ 1027 他点了卡上的「记下」⇒ answers / 钩子列给 AI 看(标明还没点交),但不叫醒、这块板 hold 住;自动存的半截字照旧藏;记下后又改又是草稿(示例-基建转)", _c7_keep1027),
             ("answers", "⭐⭐ 1027 负责人选 A:那条线正在跑(status=busy)不叫、同板 60 秒内刚写入先不叫(连着交的并成一条);叫醒消息直接带原文、送到即记看过", _c7_wakeA1027),
             ("answers", "⭐ 1027 叫醒没送到 ⇒ 不记叫过、过 5 分钟再试(AI Harness v2.8 审计:原来没送到也记 woken,同一份回答再不叫)", _c7_wakefail1027),
             ("answers", "⭐⭐ 1026 晚 他在对话里叫看板 ⇒ answers --take-drafts 把还没交的记成交了(读进来后又改的不动);草稿那句给出这条命令;叫醒消息不写「他没在对话里说」、写「最后改于」", _c7_take1026),
@@ -26253,7 +26253,7 @@ console.log(JSON.stringify(out));
         return bool(m and int(m.group(1)) >= 64 and "resource.setrlimit(resource.RLIMIT_NOFILE" in src), (m.group(1) if m else None)
 
     def _c8_img_save():
-        # 1022(电商-选品转,负责人:「你这两个证据图我根本没有办法保存啊……我右键只有复制啊」):伺服给每个 html 挂存图脚本,
+        # 1022(示例-选品转,负责人:「你这两个证据图我根本没有办法保存啊……我右键只有复制啊」):伺服给每个 html 挂存图脚本,
         #   POST /_save-image 只收 data:image 或本伺服目录下的图片,只写 ~/Downloads、不覆盖。这里钉接线;真跑(8791 临时伺服 + 浏览器真点)见 bb381ad 之后那次提交说明
         src = open(os.path.join(os.path.dirname(os.path.abspath(__file__)), "boards-server.py"), encoding="utf-8").read()
         need = ('"/_img-save.js"', 'self._html_with_saver()', '"/_save-image"', 'os.path.realpath(ROOT) + os.sep',
@@ -26362,8 +26362,8 @@ console.log(JSON.stringify(out));
             ("skill", "⭐⭐ 正本机改了就推团队仓(负责人 10-20 要触发式):自检绿 ⇒ 推;再跑 ⇒ 已是这一版;自检红 ⇒ 不推、工作目录还原;同事机 / 环境变量关掉 ⇒ 不推", _c8_skill_publish),
             ("skill", "⭐⭐ 同事机每天查一次,落后自动装:换脚本和装过的 hook(没装的不装)、当天不再查;自检红 ⇒ 退回原样;装不上 ⇒ 原样;版本一样 / 正本机 ⇒ 不动", _c8_skill_autoupdate),
             ("answers", "⭐ 他在回复里贴的图(标记〔图:文件名〕)⇒ answers 列出本机完整路径给 AI 用 Read 看;找不到的标出来;文件名带 ../ 的不认(1026 负责人:板上回复要能 Ctrl+V 贴图)", _c8_ans_img),
-            ("lint", "⭐ 等外面的行(data-you=wait)文字 3 天没变 ⇒ 警告去现查(按 data-txt-at,只改日期不算);等日子 / 定时任务、做完的、球在他的、没时间记录的 ⇒ 不报;只警告不藏不关(1026 电商-基建转负责人:「宁肯多放也不要少放」)", _c8_wait_stale),
-            ("rename", "⭐ rename 真跑:同一个 inode 改名(worktree / 8777 硬链跟着换名)、标题大字页脚改、正文提到旧名 / 方案页 / 名字以旧名结尾的别的板不动、旧网址留跳转页(不是板)、答案 / 已读 / 面板 / 认板 / ▶ 跟过去、旧路径和旧线名说新路径;新名已有板 / 方案页 ⇒ 拒且不动(1026 电商-投流线改名)", _c8_rename),
+            ("lint", "⭐ 等外面的行(data-you=wait)文字 3 天没变 ⇒ 警告去现查(按 data-txt-at,只改日期不算);等日子 / 定时任务、做完的、球在他的、没时间记录的 ⇒ 不报;只警告不藏不关(1026 示例-基建转负责人:「宁肯多放也不要少放」)", _c8_wait_stale),
+            ("rename", "⭐ rename 真跑:同一个 inode 改名(worktree / 8777 硬链跟着换名)、标题大字页脚改、正文提到旧名 / 方案页 / 名字以旧名结尾的别的板不动、旧网址留跳转页(不是板)、答案 / 已读 / 面板 / 认板 / ▶ 跟过去、旧路径和旧线名说新路径;新名已有板 / 方案页 ⇒ 拒且不动(1026 示例-投流线改名)", _c8_rename),
             ("retire", "⭐ retire --scan 的分法:板 3 天内有人写 / 对得上没归档、3 天内动过的会话 ⇒ 在用;会话都旧了 ⇒ 建议退场;对不上 ⇒ 先确认是谁的;没做完的写出来", _c8_retire_classify),
             ("lint", "⭐ 板保鲜 hook 数的「连续几轮没动」只看最近还在动的那条会话记录,⛔ 死会话的大数不算(1020 晚 AI平台误报);坏记录 / 没人认领 ⇒ 不报", _c8_fresh_miss),
             ("adopt", "⭐⭐ .queue.json 的副本:内容是正本出现过的某一版 ⇒ 旧快照、自动接回(哪怕拷贝时间更新);正本没出现过又更新 ⇒ 交给人;不比正本新 ⇒ 接回(1020 晚 投流 adopt 了 4 次)", _c8_derived_pristine),
@@ -26626,7 +26626,7 @@ console.log(JSON.stringify(out));
     ok = [x[2] for x in _hm] == [] and sum(_hk.values()) == 2   # 1113 夜:不再扫正文日子;两行照样都不搬(不信 120 天前的 first、又没别的日期)
     fails += (not ok)
     cases.append((ok, "prune", "⭐ Handoff 那行原样:伺服端 first 被旧解析回填成 364 天前也不搬(不信 120 天前的 first;行里提到近日子)", "moves=%s kept=%s" % ([x[2] for x in _hm], sorted(_hk))))
-    # 1113 夜(电商-选品 #d4b8):正文里顺口带了将来 / 最近的日子的老行照搬;最近改过字的不搬
+    # 1113 夜(示例-选品 #d4b8):正文里顺口带了将来 / 最近的日子的老行照搬;最近改过字的不搬
     _DB = ('<div class="zone"><h2>你交代的</h2><span class="n">n</span></div><article class="card"><div class="body"><div class="checks">'
            + _pr("talk", title="某商品 秒杀那件", extra=" 做完了。12-06 再报秒杀时一起关掉;下一轮 %s" % (_PT + _dt.timedelta(days=1)).strftime("%m-%d"))
            + _pr("fresh", title="刚改过字的老行") + _pr("redone", title="早做完、最近又改过字")
@@ -26637,7 +26637,7 @@ console.log(JSON.stringify(out));
     _dm, _dk = _prune_plan(_DB, _DS, _PN, _PT)
     ok = sorted(x[2] for x in _dm) == ["redone", "talk"] and _dk.get("还不到 7 天") == 1
     fails += (not ok)
-    cases.append((ok, "prune", "⭐ 1113 电商-选品 #d4b8:做完的老行正文里顺口带了日子(「12-06 再报」「下一轮 11-14」)照样搬;没有伺服端记录、最近 7 天改过字的不搬", "moves=%s kept=%s" % ([x[2] for x in _dm], sorted(_dk))))
+    cases.append((ok, "prune", "⭐ 1113 示例-选品 #d4b8:做完的老行正文里顺口带了日子(「12-06 再报」「下一轮 11-14」)照样搬;没有伺服端记录、最近 7 天改过字的不搬", "moves=%s kept=%s" % ([x[2] for x in _dm], sorted(_dk))))
     # 0916 unprune:误搬的行搬回板上,留档页计数与板上链接一起改
     _UB = ('<div class="zone"><h2>你交代的</h2><span class="n">n</span></div><article class="card"><div class="body"><div class="checks">'
            + _pr("keep") + '<p class="lede" data-archive-link><b>2 件</b></p>'
@@ -26747,7 +26747,7 @@ console.log(JSON.stringify(out));
     _swl = _SZ % (STALE_BEGIN + '\n<article class="card" data-ack="stale-generated"><div class="checks"><div class="crow" data-status="doing" data-ack="s9" data-eta="09-01"><span class="txt"><b>旧卡里的行</b><span class="why">x</span></span></div></div></article>\n' + STALE_END)
     ok = "STALE:BEGIN" in _swl and _yours_zone_rows(_swl, today=_T)["total"] == 4; fails += (not ok)
     cases.append((ok, "yours", "⭐ 旧提醒卡(touch 撤之前)里的行不算「你交代的」的行(机器块被蒙掉)", "total=%s" % _yours_zone_rows(_swl, today=_T)["total"]))
-    # ⭐⭐ 0928 负责人 bad case(电商-基建 v1.3 转):「你交代的」里要你拍的行不在「要你的」里。y77 照真样本的形状:
+    # ⭐⭐ 0928 负责人 bad case(示例-基建 v1.3 转):「你交代的」里要你拍的行不在「要你的」里。y77 照真样本的形状:
     #   blocked + data-you=decide + .act,没过预计多久、没挂满 3 天;「要你的」0 件、只有占位卡。
     _RY = ('<div class="wrap"><div class="zone"><h2>要你的</h2><span class="n">0 件</span></div>' + _YOURS_EMPTY_CARD
            + '<div class="zone"><h2>你交代的</h2><span class="n">5 件</span></div><article class="card" data-ack="v"><div class="body"><div class="checks">'
@@ -26784,8 +26784,8 @@ console.log(JSON.stringify(out));
     _rpq = sorted(f["ack"] for f in _rowyou_pick(_RY_Q, today=_T))
     ok = _rpq == ["r2", "r5"]
     fails += (not ok)
-    cases.append((ok, "touch", "⭐ 行上的 data-ref 卡号已被「卡在你身上」那张指着 ⇒ 不重复列;没被指着的卡号(999)照列(0928 电商-基建 #2036 实例)", "pick=%s" % _rpq))
-    # 1001 电商-选品 v1.2 报:`board.py row … --status blocked --you decide` 之后「要你的」里只有「等你的行」那张机器卡(区头 1 件),
+    cases.append((ok, "touch", "⭐ 行上的 data-ref 卡号已被「卡在你身上」那张指着 ⇒ 不重复列;没被指着的卡号(999)照列(0928 示例-基建 #2036 实例)", "pick=%s" % _rpq))
+    # 1001 示例-选品 v1.2 报:`board.py row … --status blocked --you decide` 之后「要你的」里只有「等你的行」那张机器卡(区头 1 件),
     #   lint 报「计数是 0,但卡里还写着在等你」,命中的是机器卡自己的标题。_ra 正是这个形状(只有机器卡;r2 那行还写着「等你看方案」)。
     #   ⚠ 每条「不该报」都带同夹具的对照(不收范围时确实会命中),免得夹具本身命不中、用例空转。包在 try 里:改坏时只红这一条。
     def _c7_machine_only():
@@ -26848,7 +26848,7 @@ console.log(JSON.stringify(out));
         return ("_contradiction_gate(s, _pend)" in ls and "errors.append(_contradiction_msg(" in ls and "_contradiction_hits(" not in ls), ""
 
     for _desc7, _fn7 in (
-            ("⛔不该报:「要你的」里只有「等你的行」那张机器卡(区头 1 件)—— 机器卡自己的标题、它列着的行都不算「计数是 0 却写着在等你」(1001 电商-选品报)", _c7_machine_only),
+            ("⛔不该报:「要你的」里只有「等你的行」那张机器卡(区头 1 件)—— 机器卡自己的标题、它列着的行都不算「计数是 0 却写着在等你」(1001 示例-选品报)", _c7_machine_only),
             ("⭐ 必报(同夹具阳性对照):没标要他的行里写着「等你测完」⇒ 有那张机器卡也照报(0914 那个漏还守着)", _c7_unmarked_bites),
             ("⭐ 必报:文件里还没有那张机器卡(没被 touch 写进去)⇒ 标着要他的行照扫、按「计数是 0」报", _c7_no_card_in_file),
             ("⛔不该报:标着要他的行超过 12 件,机器卡只写「还有 N 件」的那几行也算已经在「要你的」里", _c7_overflow),
@@ -27826,7 +27826,7 @@ console.log(JSON.stringify(out));
              "watch.push(it); return; }" in code and "watchHot.map(function (it) { return line(it, it.chip" in code
              and "watchCalm.forEach(function (it) { wl.appendChild(line(it, it.chip" in code
              and "nWatch++; return; }" not in code),
-            # 1110 负责人(电商-基建板上问「为什么有这么多事情？25 个在推进的，10 个卡着的」;卡 ask-fdb2486e / 方案页 board-rot-plan-1110 题 doing-count 16:28 选「行,照图改」)
+            # 1110 负责人(示例-基建板上问「为什么有这么多事情？25 个在推进的，10 个卡着的」;卡 ask-fdb2486e / 方案页 board-rot-plan-1110 题 doing-count 16:28 选「行,照图改」)
             ("1110 首屏在推进的:块头只数此刻真在动的和盯的日子到了的;定了日子、到时再看的收成块底一行,点开才列,开着只记 30 分钟",
              "var watchHot = watch.filter(function (it) { return it.hot; }), watchCalm = watch.filter(function (it) { return !it.hot; });" in code
              and "var b4 = block('doing', doing.length + watchHot.length, '在推进的', watchHot.length ? '此刻真在动的,和盯的日子到了的' : '此刻真在动的'," in code
@@ -27837,7 +27837,7 @@ console.log(JSON.stringify(out));
              and "wf.appendChild(wh); wf.appendChild(wl); b4.appendChild(wf);" in code
              and "doing.length + watch.length" not in code
              and ".fsx-wfold-l{display:none}\n.fsx-wfold-open .fsx-wfold-l{display:block}" in css),
-            # 1021 晚(电商-投流转负责人 16:2x:「这种事情为什么会定在10月28号做?……不是今天就应该解决的吗」)
+            # 1021 晚(示例-投流转负责人 16:2x:「这种事情为什么会定在10月28号做?……不是今天就应该解决的吗」)
             ("⛔ 长期看着的写「盯到 X」,不写「定在 X 做」(读起来像排到那天才动手)", "'盯到 ' + f.er" in code and "定在" not in code and "' 做'" not in code),
             ("1113 待验收:首屏保留在推进,不画做完", "[[b1, b3], [b4]]" in code and "[b2, b4]" not in code),   # 1114 第 3 步:验收块并进 b1
             # 1020 负责人:「跳转到下方以后…那个字还是收起的,我还要再点一次展开」「标题…应该先写结论,再写我当时的原话」
@@ -27859,7 +27859,7 @@ console.log(JSON.stringify(out));
         return not bad, ("对不上:" + "、".join(bad)) if bad else ""
 
     def _cd_prop():
-        # ⭐ 1014 负责人(经电商-选品):「我点进完整方案里回复了以后，我在那个状态板里面还是显示我需要回复…这肯定是有问题的」。kit 跑不了 ⇒ 钉形状:
+        # ⭐ 1014 负责人(经示例-选品):「我点进完整方案里回复了以后，我在那个状态板里面还是显示我需要回复…这肯定是有问题的」。kit 跑不了 ⇒ 钉形状:
         css = _kit.get("kit.css", "")
         i0 = _kit_js.find("\n  function ansPropFetch() {")
         fn = _kit_js[i0:_kit_js.find("\n  function initAnswers() {", i0)] if i0 >= 0 else ""
@@ -27884,7 +27884,7 @@ console.log(JSON.stringify(out));
         i2 = _kit_js.find("\n  function hideDupLede() {")
         hd = _kit_js[i2:_kit_js.find("\n  function tameAll() {", i2)] if i2 >= 0 else ""
         ta = _kit_js[_kit_js.find("\n  function tameAll() {"):]
-        w8 = "清理:① 删插件和它开会话时的后台同步,每个会话常驻约 43 MB,摘要还在花你的额度;② 关掉两个从没用过的连接器;③ 删电商仓里 0 次调用的插件和 24 条残留登记;④ 把记忆卡提交备份"
+        w8 = "清理:① 删插件和它开会话时的后台同步,每个会话常驻约 43 MB,摘要还在花你的额度;② 关掉两个从没用过的连接器;③ 删示例业务仓里 0 次调用的插件和 24 条残留登记;④ 把记忆卡提交备份"
         p8, pshort = _why_fold_preview(w8), _why_fold_preview("短")
         p1 = _why_fold_preview("当时定好等新加坡迁完再定放哪台。" + "后面还有字" * 30)
         p2 = _why_fold_preview("第②条已经改了。" + "后面还有字" * 30)      # 只有一个圈号 ⇒ 不当清单
@@ -28087,7 +28087,7 @@ console.log(JSON.stringify(out));
         return all(g), g
 
     def _cd_planq1027():
-        # ⭐ 1027(电商-投流达人 v1.9 转):① 方案页多题、板上的卡只连一题 ⇒ 卡上列出这一页全部题目和答没答(伺服 /_plan-qs 读题);
+        # ⭐ 1027(示例-投流达人 v1.9 转):① 方案页多题、板上的卡只连一题 ⇒ 卡上列出这一页全部题目和答没答(伺服 /_plan-qs 读题);
         #   连一题的卡,同页别的题答了没交也记进 ANS_PROP_PEND,右下角一起交;② 方案页右下「✍ 写回答」浮框,边看边写(伺服注入 /_plan-note.js)
         try:
             srv = io.open(os.path.join(os.path.dirname(os.path.abspath(__file__)), "boards-server.py"), encoding="utf-8").read()
@@ -28356,13 +28356,13 @@ console.log(JSON.stringify(out));
     def _cd_wait1110_self():
         # ⭐ 1110 晚(选品 #e5a2):「在等」写的是自己 —— 纯函数、cmd_row 真跑拒写、行上现存的提醒、eta-wait-stated 不记
         pos = ["等本线出方案页,不等别人", "方案页这周出,不等别人", "等我做完第二节", "不等任何人", "等自己排期", "本线先出方案", "没在等谁", "我自己写完再说"]
-        neg = ["同事甲回分工", "电商-基建 回 #7a3d", "同事丙、同事庚各自登录看后回话", "等他自己登录看后回话", "他说「不等别人」再定", "等我们的供应商报价",
+        neg = ["同事甲回分工", "示例-基建 回 #7a3d", "同事丙、同事庚各自登录看后回话", "等他自己登录看后回话", "他说「不等别人」再定", "等我们的供应商报价",
                "核心脚本连续两周没有大改", "11-26 满 30 天", ""]
         g = [[x for x in pos if (_wait_for_self(x) or ("", ""))[0] != "self"] == [],
              [x for x in neg if _wait_for_self(x)] == [],
-             _wait_for_self("电商-选品出方案页", "电商-选品") == ("name", "电商-选品"),
-             _wait_for_self("电商-选品的子线回话", "电商-选品") is None and _wait_for_self("电商-选品 子线核完", "电商-选品") is None,
-             _wait_for_self("电商-选品出方案页", None) is None and _wait_for_self("子线-采购出报告", "子线-采购") is None,
+             _wait_for_self("示例-选品出方案页", "示例-选品") == ("name", "示例-选品"),
+             _wait_for_self("示例-选品的子线回话", "示例-选品") is None and _wait_for_self("示例-选品 子线核完", "示例-选品") is None,
+             _wait_for_self("示例-选品出方案页", None) is None and _wait_for_self("子线-采购出报告", "子线-采购") is None,
              _wait_for_self_problem("同事甲回分工") is None and "现在就该做" in (_wait_for_self_problem("等本线出方案页,不等别人", "/x/b.html", "k") or "")]
         msg = _wait_for_self_problem("等本线出方案页,不等别人", "/x/b.html", "k") or ""
         g.append("--status doing" in msg and "--ack k" in msg and "改预计日" not in msg and "--eta" not in msg)
@@ -28375,13 +28375,13 @@ console.log(JSON.stringify(out));
         # 行上现存的写自己 / 本板线名:那条提醒(wait-for-self)1115 撤了 ⇒ 不提醒,也不叠「没写在等什么」;等别人的不提醒
         H = lambda extra, path=None: _row_write_hints(_w10_bd([("todo", "k", extra, "甲", "方案页还没出")]), "k", path=path, tasks=[], today=_W10T)
         h1 = H(' data-eta="11-14" data-wait-for="等本线出方案页,不等别人"')
-        h2 = H(' data-eta="11-14" data-wait-for="电商-选品出方案页"', "/x/电商-选品.html")
-        h3 = H(' data-eta="11-14" data-wait-for="同事甲回分工"', "/x/电商-选品.html")
-        h4 = H(' data-eta="11-14" data-wait-for="电商-选品出方案页"')
+        h2 = H(' data-eta="11-14" data-wait-for="示例-选品出方案页"', "/x/示例-选品.html")
+        h3 = H(' data-eta="11-14" data-wait-for="同事甲回分工"', "/x/示例-选品.html")
+        h4 = H(' data-eta="11-14" data-wait-for="示例-选品出方案页"')
         g += [h1 == [], h2 == [], h3 == [], h4 == [],
               _row_hint_state(_w10_bd([("todo", "k", ' data-eta="12-30" data-wait-for="等我做完"', "甲", "乙")]), "k", today=_W10T)[1] == [],
-              _row_hint_state(_w10_bd([("todo", "k", ' data-eta="12-30" data-wait-for="电商-选品出方案"', "甲", "乙")]), "k", today=_W10T, board="电商-选品")[1] == [],
-              _row_hint_state(_w10_bd([("todo", "k", ' data-eta="12-30" data-wait-for="同事甲回分工"', "甲", "乙")]), "k", today=_W10T, board="电商-选品")[1] == [],
+              _row_hint_state(_w10_bd([("todo", "k", ' data-eta="12-30" data-wait-for="示例-选品出方案"', "甲", "乙")]), "k", today=_W10T, board="示例-选品")[1] == [],
+              _row_hint_state(_w10_bd([("todo", "k", ' data-eta="12-30" data-wait-for="同事甲回分工"', "甲", "乙")]), "k", today=_W10T, board="示例-选品")[1] == [],
               "_wsp = _wait_for_self_problem(a.wait_for, path=p, ack=a.ack)" in inspect.getsource(cmd_row)]
         return all(g), "got=%s" % [i for i, x in enumerate(g) if not x]
 
@@ -28811,8 +28811,8 @@ console.log(JSON.stringify({lines:lines,doing:rows(db).map(l=>l.children[0].text
         fe = _l19_f({"data-status": "blocked", "data-you": "wait", "data-wait-for": "同事甲回", "data-eta": "11-30", "data-wait-since": "2026-11-12T10:00"})
         de = _chase_due(fe, _L19T)
         f1["title"] = "过期的那件"
-        tx = _chase_text("电商-基建", [("/x/电商-基建.html", f1, d1[1])], "ab12") if d1 else ""
-        tm = _chase_text("电商-基建", [("/x/电商-基建.html", f1, d1[1]), ("/x/电商-基建.html", fe, de[1])], "ab12") if (d1 and de) else ""
+        tx = _chase_text("示例-基建", [("/x/示例-基建.html", f1, d1[1])], "ab12") if d1 else ""
+        tm = _chase_text("示例-基建", [("/x/示例-基建.html", f1, d1[1]), ("/x/示例-基建.html", fe, de[1])], "ab12") if (d1 and de) else ""
         g = [bool(d1) and d1[0] == "late" and d1[1].startswith(LATE_WHY_HEAD) and "10 天" in d1[1], d2 is None, d3 is None,
              bool(de) and de[0] == "ext",
              "--review" in tx and "--wait-for" in tx and "--why" in tx and "问我" not in tx and "过了预计还没做完" in tx and "等外部 / 等日子的到点了" not in tx
@@ -28876,10 +28876,10 @@ console.log(JSON.stringify({lines:lines,doing:rows(db).map(l=>l.children[0].text
 
     def _you_idle_text_test():
         from shlex import quote
-        path = "/x/电商-基建.html"
+        path = "/x/示例-基建.html"
         f = _you_idle_fact(_you_idle_board(' data-you-since="2026-11-18T10:00"'))
         d = _chase_due(f, _L19T, datetime.datetime(2026, 11, 20, 10))
-        txt = _chase_text("电商-基建", [(path, f, d[1])], "ab12") if d else ""
+        txt = _chase_text("示例-基建", [(path, f, d[1])], "ab12") if d else ""
         checks = ["【到点该追】" in txt, "二选一" in txt, "物流索赔" in txt,
                   ('ask %s --row k --q "哪件事 + 要他干什么"' % quote(path)) in txt,
                   ('row %s --ack k --you wait --wait-for "等谁 / 等什么"' % quote(path)) in txt,
@@ -28979,7 +28979,7 @@ var ROWS=[ROW('todo','L1',{'data-eta':'11-17','data-chase-due':'2026-11-19','dat
   ROW('todo','L3',{'data-eta':'11-17','data-chase-due':'2026-11-20'},'今天才叫'),
   ROW('blocked','W',{'data-you':'wait','data-wait-for':'同事乙寄样','data-wait-since':'2026-11-13T09:00','data-chase-due':'2026-11-18'},'等样品')];
 var wrap=new E('div'),zq=new E('div'),zy=new E('div'),led=new E('details'),summary=new E('summary');zq.parentNode=wrap;zy.parentNode=wrap;led.querySelector=function(k){return k==='summary'?summary:null};var body=new E('body');
-var document={title:'电商-基建 状态板 v2.3',body:body,createElement:(t)=>new E(t),querySelectorAll:(q)=>q==='.crow[data-status]'?ROWS:[],getElementById:(id)=>id==='zone-要你的'?zq:id==='zone-你交代的'?zy:id==='fsx-ledger'?led:null};
+var document={title:'示例-基建 状态板 v2.3',body:body,createElement:(t)=>new E(t),querySelectorAll:(q)=>q==='.crow[data-status]'?ROWS:[],getElementById:(id)=>id==='zone-要你的'?zq:id==='zone-你交代的'?zy:id==='fsx-ledger'?led:null};
 var YOURS_ORDER=[], ANS_CARDS=[];function isYoursPlaceholder(){return false}function boardPaused(){return null}function projTag(x){return x}function jumpToRow(){}
 function rowFacts(r){var st=r.getAttribute('data-status');return {st:st,open:true,you:r.getAttribute('data-you')||(st==='blocked'?null:'wait'),waitFor:r.getAttribute('data-wait-for')||'',after:'',late:3,eta:null,er:r.getAttribute('data-eta')||'',why:{textContent:'现状写了好几百字'},act:null};}
 function rowMovedAt(){return {t:null,src:null}} function projMv(r,mv){return mv} function rowCheckedAt(){return {t:new Date(2026,10,10).getTime()}} function movedLabel(){return ''} function fsFirst(x){return x?x.textContent:''}
@@ -29008,7 +29008,7 @@ console.log(JSON.stringify({lines:rows(wb).map(function(l){return {t:l.children[
             return False, 'node: %s / %s' % (e, r.stderr[-300:] if 'r' in locals() else '')
         L = {x["t"]: x for x in d["lines"]}
         red = lambda x: "fsx-m-red" in x["cls"]
-        g = ["过期没动" in L and L["过期没动"]["m"] == "卡在 电商-基建 · 过了预计 3 天" and red(L["过期没动"]) and L["过期没动"]["n"] == 2,
+        g = ["过期没动" in L and L["过期没动"]["m"] == "卡在 示例-基建 · 过了预计 3 天" and red(L["过期没动"]) and L["过期没动"]["n"] == 2,
              "改了字" not in L or "过了预计" not in L["改了字"]["m"],
              "今天才叫" in L and "过了预计" not in L["今天才叫"]["m"],
              "等样品" in L and L["等样品"]["m"].startswith("等了 7 天没人追"),
@@ -29859,7 +29859,7 @@ console.log(JSON.stringify(o));
             shutil.rmtree(d, ignore_errors=True)
 
     def _sweepB1115():
-        # ⭐ 1115 大扫除 B 堆 + FDE #c41e(负责人 11-15):逐条核;退场 / state / kit 清理全在临时目录里真跑,⛔ 不碰真板、真 state、真 _kit、真废纸篓
+        # ⭐ 1115 大扫除 B 堆 + 客户项目甲 #c41e(负责人 11-15):逐条核;退场 / state / kit 清理全在临时目录里真跑,⛔ 不碰真板、真 state、真 _kit、真废纸篓
         import tempfile as _tfs, contextlib as _cls
         g = {}
         fut = (datetime.date.today() + datetime.timedelta(days=5)).strftime("%m-%d")
@@ -29890,7 +29890,7 @@ console.log(JSON.stringify(o));
         sm = inspect.getsource(main) + inspect.getsource(_board_parser)
         g["sw-tier 撤净"] = ("--tier" not in sm and "--basis" not in sm and "--tell" not in sm and "_tier_emit" not in globals() and "tier" not in RULES
                             and "board-tier.log" not in "".join(v[1] for v in RULES.values()))
-        # FDE #c41e:单行 2–4 条 --got;--todo;指别处 / 指代做法拒
+        # 客户项目甲 #c41e:单行 2–4 条 --got;--todo;指别处 / 指代做法拒
         m3 = _w10_cmd(bd, review=True, q=Q, got=["5 个品两店都在卖", "主图换成白底", "价格设了上限"], todo=["去后台点一下上架", "周五前回我改不改价"])
         c3 = card(m3[2])
         g["多条 got 上卡"] = m3[0] != "exit" and c3.count("accept-got-more") == 2 and "主图换成白底" in c3 and "价格设了上限" in c3
@@ -30389,21 +30389,21 @@ console.log(JSON.stringify({during: during, all: saves.map(function (x) { return
             box = os.path.join(d, "box")
             os.makedirs(box)
             t0 = time.mktime((2026, 11, 16, 10, 0, 0, 0, 0, -1))
-            msgs = [dict(id="a", at=str(int(t0 * 1000)), **{"from": "电商-基建 v3.0"}, tag="回执#ab12", text="发给 zz-线:#ab12 修好了"),
-                    dict(id="b", at=str(int(t0 * 1000)), **{"from": "电商-基建 v3.0"}, tag="回执#cd35", text="发给 zz-线:#cd35 好了"),
+            msgs = [dict(id="a", at=str(int(t0 * 1000)), **{"from": "示例-基建 v3.0"}, tag="回执#ab12", text="发给 zz-线:#ab12 修好了"),
+                    dict(id="b", at=str(int(t0 * 1000)), **{"from": "示例-基建 v3.0"}, tag="回执#cd35", text="发给 zz-线:#cd35 好了"),
                     dict(id="c", at=str(int(t0 * 1000)), **{"from": "AI Harness v3.3"}, tag="回执", text="【回执#ef56】发给 zz-线:好了"),
                     dict(id="e", at=str(int(t0 * 1000)), **{"from": "示例项目-总控 v6.1"}, tag="回执", text="发给 zz-线:好了"),
-                    dict(id="f", at=str(int((t0 - 40 * 86400) * 1000)), **{"from": "电商-选品 v3.5"}, tag="回执#9a9a", text="很久以前"),
-                    dict(id="g", at=str(int(t0 * 1000)), **{"from": "电商-基建 v3.0"}, tag="知会", text="知会:回执#aa11 那件我知道了")]
+                    dict(id="f", at=str(int((t0 - 40 * 86400) * 1000)), **{"from": "示例-选品 v3.5"}, tag="回执#9a9a", text="很久以前"),
+                    dict(id="g", at=str(int(t0 * 1000)), **{"from": "示例-基建 v3.0"}, tag="知会", text="知会:回执#aa11 那件我知道了")]
             io.open(os.path.join(box, "zz-线.jsonl"), "w", encoding="utf-8").write("\n".join(json.dumps(m, ensure_ascii=False) for m in msgs) + "\n")
-            io.open(os.path.join(box, "电商-基建.jsonl"), "w").write("")
+            io.open(os.path.join(box, "示例-基建.jsonl"), "w").write("")
             io.open(os.path.join(box, "AI Harness.jsonl"), "w").write("")
-            io.open(os.path.join(box, "电商-总控.jsonl"), "w").write("")       # 全机好几条线都叫「总控」⇒ 只写「总控」认不出是哪条
+            io.open(os.path.join(box, "示例-总控.jsonl"), "w").write("")       # 全机好几条线都叫「总控」⇒ 只写「总控」认不出是哪条
             old = ' data-txt-at="2026-11-15T09:00"'
             bd = _w10_bd([("blocked", "a", old + ' data-you="wait" data-wait-for="等基建回执#ab12"', "等基建修", "等它回"),
                           ("blocked", "b", old + ' data-you="wait" data-wait-for="等基建 #cd34"', "编号不对", "等"),
                           ("watch", "c", ' data-txt-at="2026-11-16T11:00" data-wait-for="等 AI Harness #ef56"', "回执比核过早", "等"),
-                          ("blocked", "w", old + ' data-you="wait" data-wait-for="等电商-基建把表修好"', "只写线名", "等"),
+                          ("blocked", "w", old + ' data-you="wait" data-wait-for="等示例-基建把表修好"', "只写线名", "等"),
                           ("blocked", "w2", old + ' data-you="wait" data-wait-for="等总控回话"', "只写总控", "等"),
                           ("blocked", "w3", old + ' data-you="wait" data-wait-for="等基建把表修好"', "只写尾名", "等"),
                           ("done", "z", old + ' data-wait-for="#ab12"', "做完的", "好了"),
@@ -30412,11 +30412,11 @@ console.log(JSON.stringify({during: during, all: saves.map(function (x) { return
                           ("blocked", "q", old + ' data-you="wait" data-wait-for="#aa11"', "知会不算回执", "等")], "")
             ws = _rot1116_warns(os.path.join(d, "zz.html"), bd, now=t0 + 3600, inbox_dir=box, lines=["zz-线"], find=lambda k: None, sched_dir=d)
             W = lambda frag: [w for w in ws if frag in w]
-            g["同号回执到了 ⇒ 那句话原样(线名 + 时间)"] = any(("你等的回执 #ab12 已到(电商-基建 11-16 10:00),这一轮核了改行" in w and "(a)" in w) for w in ws)
+            g["同号回执到了 ⇒ 那句话原样(线名 + 时间)"] = any(("你等的回执 #ab12 已到(示例-基建 11-16 10:00),这一轮核了改行" in w and "(a)" in w) for w in ws)
             g["现状里写的编号也算"] = any("你等的回执 #ab12 已到" in w and "(v)" in w for w in ws)
             g["编号对不上不猜"] = not W("(b)")
             g["核过之后才到的才算(回执早于改字不报)"] = not W("(c)")
-            g["只写线名 ⇒ 弱一档那句"] = any("(w)" in w and "电商-基建 在你等它之后发来过回执(11-16 10:00),核一下" in w for w in ws)
+            g["只写线名 ⇒ 弱一档那句"] = any("(w)" in w and "示例-基建 在你等它之后发来过回执(11-16 10:00),核一下" in w for w in ws)
             g["线名尾巴唯一才认(基建认、总控不认)"] = bool(W("(w3)")) and not W("(w2)")
             g["做完的行不报"] = not W("(z)")
             g["两周前的回执不算"] = not W("(o)")
@@ -30424,7 +30424,7 @@ console.log(JSON.stringify({during: during, all: saves.map(function (x) { return
             g["报的条数刚好 4"] = len([w for w in ws if "回执" in w]) == 4
             g["回执编号也从正文认(tag 只写回执)"] = [r["code"] for r in _rot_receipts(["zz-线"], box, t0 + 3600) if r["line"] == "AI Harness"] == ["ef56"]
             g["接进 lint(提醒级)"] = "warns.extend(_rot1116_warns(path, s))" in inspect.getsource(lint)
-            g["认线:标题 / 文件名对得上信箱才算"] = _rot_board_lines(os.path.join(d, "电商-基建.html"), "<title>电商-基建 状态板</title>", box) == ["电商-基建"]
+            g["认线:标题 / 文件名对得上信箱才算"] = _rot_board_lines(os.path.join(d, "示例-基建.html"), "<title>示例-基建 状态板</title>", box) == ["示例-基建"]
         finally:
             shutil.rmtree(d, ignore_errors=True)
         bad = [k for k, v in g.items() if not v]
@@ -30442,11 +30442,11 @@ console.log(JSON.stringify({during: during, all: saves.map(function (x) { return
                       ("watch", "w4", ' data-wait-for="等 r1101-dddd"', "找不到的", "等"),
                       ("done", "w5", ' data-wait-for="等 r1110-aaaa"', "自己做完了", "好了")], "")
         facts = _yours_zone_rows(bd)["facts"]
-        ws = _rot_waitdone_warns(facts, find=lambda k: ("电商-选品.html", "done") if k == "r1109-cccc" else None)
+        ws = _rot_waitdone_warns(facts, find=lambda k: ("示例-选品.html", "done") if k == "r1109-cccc" else None)
         W = lambda frag, L=None: [w for w in (ws if L is None else L) if frag in w]
         g["同板做完 ⇒ 那句话"] = any("(w1) 写着在等 r1110-aaaa,可那一行(这块板上)已经做完了 —— 这一轮接着做" in w for w in ws)
         g["同板没做完不报"] = not W("(w2)")
-        g["全机找到做完 ⇒ 报出哪块板"] = any("(w3)" in w and "(电商-选品.html)已经做完了" in w for w in ws)
+        g["全机找到做完 ⇒ 报出哪块板"] = any("(w3)" in w and "(示例-选品.html)已经做完了" in w for w in ws)
         g["找不到不报、自己做完的行不报"] = not W("(w4)") and not W("(w5)")
         d = _tfw.mkdtemp(prefix="zz-rot1116f-")
         try:
@@ -30866,11 +30866,11 @@ console.log(JSON.stringify({head:head,main:main,fold:fold,clicked:clicked,doing:
         bad = [k for k, v in g.items() if not v]
         return not bad, "坏了:%s dd=%s py=%s" % (bad, json.dumps(dd, ensure_ascii=False)[:900], pyobs)
 
-    # ⭐ 1120 卡着按在等谁合成一行 —— 共用:真板只读抽来的 data-wait-for 样例(11-20 电商-基建 / 总控等板)和该取出的名字
+    # ⭐ 1120 卡着按在等谁合成一行 —— 共用:真板只读抽来的 data-wait-for 样例(11-20 示例-基建 / 总控等板)和该取出的名字
     _SG1120_WHO = [("同事甲：回店铺后台登录方式", "同事甲"), ("同事乙回清单", "同事乙"), ("同事甲发第一份 1688 每周账单", "同事甲"),
                    ("同事甲查他电脑上的每晚同步任务", "同事甲"), ("同事甲上线公开合作补漏 PR #9", "同事甲"), ("同事丙在后台工具里补登 某店丁 卖家后台", "同事丙"),
-                   ("同事甲补登后台工具 某店甲", "同事甲"), ("等选品下一次 某店甲 上店收尾", "选品"), ("等电商-基建核毛利页补评价支出", "电商-基建"),
-                   ("电商-选品线：某商品 换链接后重上", "电商-选品"), ("电商-选品：修导出工具导出 401", "电商-选品"), ("等 Codex 根因修复 PR", "Codex"),
+                   ("同事甲补登后台工具 某店甲", "同事甲"), ("等选品下一次 某店甲 上店收尾", "选品"), ("等示例-基建核毛利页补评价支出", "示例-基建"),
+                   ("示例-选品线：某商品 换链接后重上", "示例-选品"), ("示例-选品：修导出工具导出 401", "示例-选品"), ("等 Codex 根因修复 PR", "Codex"),
                    ("同事乙:11 个品给结果", "同事乙"), ("香港同步后看真页面", "香港同步"), ("同事甲回 某店戊 30 个名额的问题", "同事甲"),
                    ("日子:11-27 黑五订单出带货款的结算单", ""), ("用户重新进入第三方授权页面并验证授权", ""),
                    ("你在「眼镜相关继续搁置,还是现在恢复」那张卡上的回答", ""), ("PR #4496 自动检查；选品线回那 776 行是谁写的", ""),
@@ -31742,7 +31742,7 @@ console.log(JSON.stringify({num:h.children[0].textContent,head:h.children[1].chi
         import tempfile as _tfb
         d = _tfb.mkdtemp(prefix="zz-b7d1-")
         P = {k: os.path.join(d, k) for k in ("msg.txt", "empty.txt", "big.txt", "huge.txt", "bad.txt", "noread.txt")}
-        io.open(P["msg.txt"], "w", encoding="utf-8").write("【电商-基建 · AI 代发】\n第二行 <b>&\n")
+        io.open(P["msg.txt"], "w", encoding="utf-8").write("【示例-基建 · AI 代发】\n第二行 <b>&\n")
         io.open(P["empty.txt"], "w", encoding="utf-8").write(" \n\n")
         io.open(P["big.txt"], "w", encoding="utf-8").write("字" * (ASK_TEXT_FILE_MAX + 1))
         io.open(P["huge.txt"], "w", encoding="utf-8").write("x" * (ASK_TEXT_FILE_MAX * 4 + 1))
@@ -31772,7 +31772,7 @@ console.log(JSON.stringify({num:h.children[0].textContent,head:h.children[1].chi
             rel = os.path.relpath(msg, os.path.expanduser("~"))
             g["~/ 开头也认"] = _path_arg_kind("~/" + rel) == ("bare", os.path.expanduser("~/" + rel))
             g["裸路径不存在 / 是目录 / 句子 ⇒ 不算"] = all(_path_arg_kind(x) is None for x in ("/zz-nowhere/x.txt", P["dir"], msg + " 里写了", "看 " + msg, "/"))
-            g["读内容、去掉末尾换行(同 $(cat))"] = _text_at_read("@" + msg) == ("【电商-基建 · AI 代发】\n第二行 <b>&", None, msg)
+            g["读内容、去掉末尾换行(同 $(cat))"] = _text_at_read("@" + msg) == ("【示例-基建 · AI 代发】\n第二行 <b>&", None, msg)
             g["不是 @文件 原样"] = _text_at_read("@张三 你看一下") == ("@张三 你看一下", None, None)
             e = lambda v: _text_at_read(v)[1] or ""
             g["空文件拒"] = "是空的" in e("@" + P["empty.txt"])
@@ -31923,7 +31923,7 @@ console.log(JSON.stringify({num:h.children[0].textContent,head:h.children[1].chi
         b5 = _w10_cmd(bd, review=True, q=Q, got=["上面那张卡已收"], see=SEE)
         b6 = _w10_cmd(bd, review=True, q=Q, got=["五张都换了"], see=SEE)
         b8 = _w10_cmd(bd, review=True, small=True, q=None, got=["本行的旧文件清掉了"], see="看不出变化:只是清旧文件,和你无关")
-        b7 = _w10_cmd(bd, say="在等电商-选品线点卡", wait_for="等电商-选品线收 ask-1234abcd")
+        b7 = _w10_cmd(bd, say="在等示例-选品线点卡", wait_for="等示例-选品线收 ask-1234abcd")
         q1 = _j17_ask(bd, why="接着 ask-87980d38 那件,你定一下")
         q2 = _j17_ask(bd, how="批了就重上该行的卡")
         try:
@@ -32557,7 +32557,7 @@ console.log(JSON.stringify({ages:ages,fl:fl,nogo:nogo,chip:chips.kids.map(functi
             ("done", "r1120-6009", ' data-sum="看过了回答: 为什么有退款"', "看退款答案", ""),
             ("done", "r1120-6010", ' data-sum="都通过: 两处都核好了"', "核对账单", "")], "")
         with tempfile.TemporaryDirectory(prefix="zz-cover1120-") as d:
-            p = os.path.join(d, "电商-基建.html")
+            p = os.path.join(d, "示例-基建.html")
             duplicate = os.path.join(d, "衍生板.html")
             with open(p, "w", encoding="utf-8") as fh:
                 fh.write(remote)
@@ -32567,26 +32567,26 @@ console.log(JSON.stringify({ages:ages,fl:fl,nogo:nogo,chip:chips.kids.map(functi
             with patch.dict(globals(), {"all_boards": lambda: boards}):
                 def run(ref):
                     return _w10_cmd(bd, covered_by=ref, sum="发票和账单都已经对上")
-                qualified = run("电商-基建.html:r1120-6006")
+                qualified = run("示例-基建.html:r1120-6006")
                 unique = run("r1120-6006")
-                pending = run("电商-基建.html:r1120-6007")
+                pending = run("示例-基建.html:r1120-6007")
                 wrong_prefix = run("r1120-6008")
                 answered = run("r1120-6009")
                 approved = run("r1120-6010")
                 boards.append(duplicate)
                 ambiguous = run("r1120-6006")
-                resolved = run("电商-基建.html:r1120-6006")
+                resolved = run("示例-基建.html:r1120-6006")
 
         def accepted(result, word):
             return result[0] == 0 and _w10f(result[2])["st"] == "done" and word in result[2]
 
-        g = [accepted(qualified, "「电商-基建」板上的「对发票」"),
-             accepted(unique, "「电商-基建」板上的「对发票」"),
+        g = [accepted(qualified, "「示例-基建」板上的「对发票」"),
+             accepted(unique, "「示例-基建」板上的「对发票」"),
              pending[0] == "exit" and "只对了第一批" in pending[1] and _w10f(pending[2])["st"] == "doing",
              wrong_prefix[0] == "exit" and "已经处理，看过了回答" in wrong_prefix[1],
              accepted(answered, "你已看过"), accepted(approved, "你已验收通过"),
              ambiguous[0] == "exit" and "2 行使用这个行号" in ambiguous[1],
-             accepted(resolved, "「电商-基建」板上的「对发票」")]
+             accepted(resolved, "「示例-基建」板上的「对发票」")]
         return all(g), "板名 / 裸号 / 未完 / 前缀 / 回答 / 都通过 / 重号 / 指明板:%s" % g
 
     def _ask1117_cover():
@@ -33361,7 +33361,7 @@ console.log(JSON.stringify(CASES.map(function (c) { return projStall(DOC(c.rows.
             'q指代': dict(q='这样可以了吗,通过吗?', got=['5 个品两店都在卖']),
             'q超长': dict(q='甲' * 51, got=['5 个品两店都在卖']),
             'got缺': dict(q=Q),
-            'got多': dict(q=Q, got=['一', '二', '三', '四', '五']),      # 1115 FDE #c41e:单行最多 4 条
+            'got多': dict(q=Q, got=['一', '二', '三', '四', '五']),      # 1115 客户项目甲 #c41e:单行最多 4 条
             'got超长': dict(q=Q, got=['乙' * 41]),
             'got批量少': dict(ack='k,k2', q=Q, got=['只给一条']),
             '板首页': dict(q=Q, got=['5 个品两店都在卖'], url='http://127.0.0.1:8777/zz-wait1110.html', check='看首屏第三行写着已上线'),
@@ -33650,19 +33650,19 @@ console.log(JSON.stringify({out:out,visited:visited.length===1&&visited[0]===car
                  "qel.parentNode.insertBefore(cimgs, qel.nextSibling)" in kj,
                  "brief.classList.add('accept-brief')" in kj and "addSec('做到哪'" in kj and "addSec('看什么', ol2)" in kj and '.accept-brief{' in css and '.accept-brief-sec ol{' in css,
                  "whyEl.style.display = 'none'" in kj,
-                 # 1113 夜(电商-基建【急】,语音转文字时往上拖被拽回框):框原位出屏就钉底、回屏 / 失焦放回;所有卡的框都接上
+                 # 1113 夜(示例-基建【急】,语音转文字时往上拖被拽回框):框原位出屏就钉底、回屏 / 失焦放回;所有卡的框都接上
                  "ansDockWire(rec, box);" in kj and "var away = r.bottom > vh || r.top < 0;" in kj
                  and "window.addEventListener('scroll', sync, { passive: true });" in kj and '.ans-box.ans-dock{position:fixed;bottom:0' in css,
-                 # 1113 晚(电商-基建【急】):验收卡 图紧挨选项和框、图高按屏高封顶、图立即加载
+                 # 1113 晚(示例-基建【急】):验收卡 图紧挨选项和框、图高按屏高封顶、图立即加载
                  "[cd.querySelector('.accept-brief'), cd.querySelector('.accept-open-link'), cd.querySelector('.cimgs')].forEach" in kj
                  and 'calc(100vh - 300px)' in css and "i.loading = 'eager'" in kj,
-                 # 1113 晚(电商-选品 #a4e9):图片地址当前页弹大图层,⛔ 不本页跳到图片;伺服注入的 /_ans-img.js 有弹层、贴图缩略图也用它
+                 # 1113 晚(示例-选品 #a4e9):图片地址当前页弹大图层,⛔ 不本页跳到图片;伺服注入的 /_ans-img.js 有弹层、贴图缩略图也用它
                  "if (isImg(u))" in kj and "window.__qLightbox(u.href" in kj
                  and kj.index("if (isImg(u))") < kj.index("location.href = u.href;")
                  and 'window.__qLightbox=function' in io.open(os.path.join(os.path.dirname(os.path.abspath(__file__)), 'boards-server.py'), encoding='utf-8').read()
                  and "window.open(i.src" not in io.open(os.path.join(os.path.dirname(os.path.abspath(__file__)), 'boards-server.py'), encoding='utf-8').read()]
             # 1113 夜 #e4f1:做到哪 去重 + 只露第一句;副标题和问题一样就藏;--review 现状超长提示
-            _fa = kj.index('  function acceptPlain('); _fb = kj.index('  // 1113 夜负责人(经电商-基建【急】)')
+            _fa = kj.index('  function acceptPlain('); _fb = kj.index('  // 1113 夜负责人(经示例-基建【急】)')
             _jsd = ("var document={createElement:function(t){return {tag:t,children:[],textContent:'',className:'',appendChild:function(c){this.children.push(c)}}}};\n"
                     + kj[_fa:_fb] +
                     "var a=acceptDoingNode('已改好。平台补贴算进成交额了。货款写「含平台补贴」10,9xx 美元。货款写「含平台补贴」10,9xx 美元','打开出单页 → 货款写「含平台补贴」10,9xx 美元','毛利 做好了,验收通过吗?');\n"
@@ -34320,19 +34320,19 @@ console.log(JSON.stringify([rows.length===2, !!r1&&r1.tagName==='A'&&!r1.cls.inc
             ("⭐ 1113 待验收 首屏不再画最近做完和知会;板顶复制栏与知道了仍不出现", _cd_done1020),
             ("⭐ 1110 help 认子命令名:`help answer / rows` 直接印那条子命令的参数并指到相关主题,`help plan` 指到 plan.py;认不出的照旧报错并说去哪看(近 7 天 14 次猜错)", _cd_help1110),
             ("⭐ 1110 lint 日志:touch 顺手的和单跑的 lint 都记一行(板、几条错、归一化的键),绿的也记;同一类错不同卡得到同一个键;临时目录的测试板不记", _cd_lintlog1110),
-            ("⭐ 1110 腐烂坏例子(电商三条线报的):在做却是别的线在动 / 在做却写着到某天再看 / 没开工排到以后没写在等什么(1115 起拒写)/ 做完的行里有将来的日子 / 新开的行和没做完的行同一个编号 / 核的那一刻引用的 PR 已合,只提醒不拦并记日志", _cd_rot1110),
+            ("⭐ 1110 腐烂坏例子(示例业务三条线报的):在做却是别的线在动 / 在做却写着到某天再看 / 没开工排到以后没写在等什么(1115 起拒写)/ 做完的行里有将来的日子 / 新开的行和没做完的行同一个编号 / 核的那一刻引用的 PR 已合,只提醒不拦并记日志", _cd_rot1110),
             ("⭐ 1110 往后拖 ①(1115 sw-eta 升拒写):预计日晚于今天、没写在等什么从 todo 扩到 doing / watch;写了 --wait-for / 日子本身是这件事的一部分 / watch 写明盯什么 / 要他的 / 排在后面的不提醒;日志带状态(写了等待不再另记,1117 删)", _cd_wait1110_eta),
             ("⭐ 1110 往后拖 ②:--wait-for 放开到 todo / doing / watch(cmd_row 真跑):落 data-wait-for 不落 data-you、不再提醒(eta-wait-stated 1117 删);blocked 改在做不带回旧的在等;lint 不再把作者写的在等当遗留", _cd_wait1110_waitfor),
             ("⭐ 1110 往后拖 自己等自己(选品 #e5a2):--wait-for 明写等本线 / 不等别人 ⇒ 拒写且板不变;行上现存的写自己 / 本板线名不提醒(1115 撤)、不记 eta-wait-stated;等别人、子线、引号里的不算", _cd_wait1110_self),
             ("⭐ 1110 往后拖 ④:在做的行写着「MM-DD 再开工 / 给排期 / 开始做」(那天在以后)⇒ 并进「到某天再看」那条并加「doing 行要写此刻谁在做」;已开工 / 开工了 / 那天已过 / watch 不算", _cd_wait1110_start),
             ("⭐ 1110 往后拖 ⑤:在做超 24 小时的报错,第一条出路是现在去做、做一步写一步,第二条是写明在等谁或挂卡问他,只等日子的标 watch 排最后且要写明在等什么;没有「改预计日 / 改成 watch」", _cd_wait1110_stale),
             ("⭐ 1110 往后拖 ⑥:row --checked 核在做的行、现状超 24 小时没变 ⇒ 提醒「核过仍对不等于有人在做」(23 小时不报、25 小时报;球在他那边 / 刚改过字 / 没在做的不报;cmd_row 真跑并记日志)", _cd_wait1110_checked),
-            ("⭐ 1113 进行中证据认 Codex 运行目录(电商-选品报):写 state_dir/codex-runs/<日期-时间-名字> 算证据;光写「Codex 在跑」不算;原来认的链接 / 子代理照认",
+            ("⭐ 1113 进行中证据认 Codex 运行目录(示例-选品报):写 state_dir/codex-runs/<日期-时间-名字> 算证据;光写「Codex 在跑」不算;原来认的链接 / 子代理照认",
              lambda: (lambda g: (all(g), "got=%s" % g))([_running_evidence("Codex 在跑 ~/.status-board/codex-runs/20261113-141456-brief_review"),
                                                           not _running_evidence("Codex 在跑"), not _running_evidence("codex-runs 里"),
                                                           _running_evidence("https://github.com/x/pull/1"), _running_evidence("子代理在跑")])),
             ("⭐ 1113 待验收 事名不截半截括号:去掉括号来由、超长加省略号",
-             lambda: (lambda g: (all(g), "got=%s" % g))([_accept_title("做完了要你点「通过」才算了结,板上加「待你验收」(你 11-13 14:0x 在电商-基建线说的)") == "做完了要你点「通过」才算了结,板上加「待你验收」",
+             lambda: (lambda g: (all(g), "got=%s" % g))([_accept_title("做完了要你点「通过」才算了结,板上加「待你验收」(你 11-13 14:0x 在示例-基建线说的)") == "做完了要你点「通过」才算了结,板上加「待你验收」",
                                                           _accept_title("短事名") == "短事名", _accept_title("一" * 40).endswith("…") and len(_accept_title("一" * 40)) == 31,
                                                           _accept_title("(整句都在括号里)") == "(整句都在括号里)"])),
             ("⭐ 1113 待验收 认不出主人线时退回叫醒那套认法取线名(AI Harness 实测知会静默没投)",
@@ -34349,7 +34349,7 @@ console.log(JSON.stringify([rows.length===2, !!r1&&r1.tagName==='A'&&!r1.cls.inc
              lambda: (lambda k: (lambda g: (all(g), "got=%s" % g))(["closest('a[target=\"_blank\"]')" in k, "w = window.open(u.href, '_blank')" in k,
                  "if (w) { try { w.opener = null; } catch (e) {} return; }\n    location.href = u.href;" in k, "window.scrollTo({ top: 0" in k, "open-self-toast" in k and ".open-self-toast{" in _kit.get("kit.css", ""),
                  "document.addEventListener('click', openLink, true);" in k]))(_kit_js)),
-            ("⭐ 1113 负责人第一次真点(AI Harness 报):验收卡点通过即单独交、伺服先收不被同板草稿压住;只写补充没选记成不通过;外部网址交伺服用默认浏览器开(电商-基建 #a7f3,只认本机页面发来的 http/https)",
+            ("⭐ 1113 负责人第一次真点(AI Harness 报):验收卡点通过即单独交、伺服先收不被同板草稿压住;只写补充没选记成不通过;外部网址交伺服用默认浏览器开(示例-基建 #a7f3,只认本机页面发来的 http/https)",
              lambda: (lambda k, srv, wl: (lambda g: (all(g), "got=%s" % g))([
                  "if (acc) submit = true;" in k and "var acc = ansIsAccept(rec);" in k,   # 1114 第 2 步:点通过即交改由 ansSave 带 sub(行为见「1114 第 2 步验收答题合一」)
                  "rec.pick = '不通过'; ansPaintOpts(rec);" in k,
@@ -34388,7 +34388,7 @@ console.log(JSON.stringify([rows.length===2, !!r1&&r1.tagName==='A'&&!r1.cls.inc
             ("1120 ② 合并理由拒绝 --drop 并给命令", _drop1120_redirect),
             ("1120 ③④ 多行停做卡先讲原因，收卡保留次行原文，支持逐行现状", _batch1120_card_and_answer),
             ("1120 ⑥ 每周替你申请可收卡，真自己去问仍需续卡", _selfdo1120_delegated),
-            ("⭐ 1113 待验收 ⑨ 一批行一张验收卡(电商-选品 #d4b8:他点一次全过 / 不通过一起回去)", _review1113_batch),
+            ("⭐ 1113 待验收 ⑨ 一批行一张验收卡(示例-选品 #d4b8:他点一次全过 / 不通过一起回去)", _review1113_batch),
             ("⭐ 1114 验收卡新写法:--q 必填原样当标题(件数 / 指代 / 超 50 字拒)· --got 一件一行「交代 → 现在」(条数 / 超长拒)· --check 只在有入口时出 · --url 指板首页拒、可省 · 不出「我的建议」· data-accept-fmt=2 走 kit 新分支、老卡不动;拒写板一字不变", _acceptfmt1114),
             ("⭐ 1114 所有卡同一写法:ask 标题 ≤50 字、指代 / 件数开头拒(与验收卡共用一个判断)· --why 超 %d 字拒 · --how ≤%d 条每条 ≤%d 字 · --rec 同第一个选项不出「我的建议」· AI 才懂的词只提醒 + 记,写入照常;带 --deep 没 --how 1115 起拒写;拒写板一字不变" % (ASK_WHY_MAX, ASK_HOW_MAX, ASK_HOW_ITEM_MAX), _askfmt1114),
             ("⭐ 1114 批量验收卡上第二行起不再被报「标着要他拍板却没有卡」(lint 与 kit 都认 data-accept-rows)", _batchlint1114),
@@ -34482,7 +34482,7 @@ console.log(JSON.stringify([rows.length===2, !!r1&&r1.tagName==='A'&&!r1.cls.inc
             ("⭐ 1115 大扫除 D5:钩子贴的 answers 里验收卡的单纯通过不列(机器约 90 秒内收);带补充 / 超 15 分钟 / 收卡关了照列", _sweepD1115_answers),
             ("⭐ 1117 抢收:lint「他答了,板还挂着」与 answers 同一判断 —— 回答卡 / 验收卡纯通过、没补充、不满 WAKE_FRESH_S 不报(机器会收);超时 / 带补充 / 不是验收卡 / 收卡关了照报", _race1117_lint),
             ("⭐ 1115 大扫除 C10:会话清单读不全 / 读空(桌面版重启时)⇒ 判不了,本轮不投「认不出主人」,一天记一行;靠得住了照报", _sweepC1115_unsure),
-            ("⭐ 1115 大扫除 B 堆 + FDE #c41e:往后排没写在等什么拒写 · --deep 无 --how 拒写 · 六条提醒与三档删净 · 单行多 --got / --todo / 指别处拒 · --drop 卡同意不做自动收 · retire 预演 · kit / state 清理(临时目录真跑)", _sweepB1115),
+            ("⭐ 1115 大扫除 B 堆 + 客户项目甲 #c41e:往后排没写在等什么拒写 · --deep 无 --how 拒写 · 六条提醒与三档删净 · 单行多 --got / --todo / 指别处拒 · --drop 卡同意不做自动收 · retire 预演 · kit / state 清理(临时目录真跑)", _sweepB1115),
             ("⭐ 1114 第 3 步回归 跳卡对位:点首屏一行 / 台账行,滚的路上上面变高或卡被重排、停住后才变高,最后都落在目标顶;他自己滚了就不拽回;新跳撤旧跳(node 真跑 scrollPin,平滑滚动落点起步时算死)", _pin1114),
             ("⭐ 1114 第 3 步首屏合一:首屏只有「要你做的」一块,验收件行首带「待验收」、普通件不带,按 YOURS_ORDER 混排(挂的时间平手普通在前),点一行跳到那张卡,块头数 = 条数、区头件数仍只在 ansZoneHead,两边都没有只出一句空态(node 真跑 orderYours → paintFirstScreen → 点击)", _hero1114),
             ("1123 空白图：透明 PNG 拒写且板和媒体不动", lambda: _c23_blank_write(True)),
@@ -34539,7 +34539,7 @@ console.log(JSON.stringify([rows.length===2, !!r1&&r1.tagName==='A'&&!r1.cls.inc
     fails += (not ok)
     cases.append((ok, "yours-order", "⭐⭐ kit 现画「等你的行」与 board.py `_rowyou_pick` 同一规则:三类与标签 · 过期卡排除 · 排序名次 0 · 机器卡编号 · 卡的写法(0928 负责人 bad case)",
                   ("对不上:" + "、".join(_ry_bad)) if _ry_bad else ""))
-    # ⭐ 0928(电商-基建转负责人「完全没有办法读」):表格第一列一整段话时 kit 放开换行 —— 钉住函数、调用、样式三样,缺一样就回到撑出卡外
+    # ⭐ 0928(示例-基建转负责人「完全没有办法读」):表格第一列一整段话时 kit 放开换行 —— 钉住函数、调用、样式三样,缺一样就回到撑出卡外
     _kit_css = _kit.get("kit.css", "")
     _tw_bad = [k for k, v in (("函数", "function wrapLongFirstCells()" in _kit_js and ".length > 16) td.classList.add('td-wrap');" in _kit_js),
                               ("调用", "\n  wrapLongFirstCells();" in _kit_js),
@@ -35475,7 +35475,7 @@ console.log(JSON.stringify([rows.length===2, !!r1&&r1.tagName==='A'&&!r1.cls.inc
             _wr["③清旧页·表完整"] = (_pub() == _names and sorted(_hj.values()) == _names
                                      and os.path.isfile(os.path.join(_web, "index.html"))
                                      and all(os.path.samefile(os.path.join(_bdw, n), os.path.join(_web, n)) for n in _names))
-            # ③b 1122 FDE-总控 #b4e2:这一轮扫板漏了 b(扫目录出错)⇒ web 根里 b 还连着源文件,不许当「不再对应任何板」删掉
+            # ③b 1122 客户项目甲-总控 #b4e2:这一轮扫板漏了 b(扫目录出错)⇒ web 根里 b 还连着源文件,不许当「不再对应任何板」删掉
             io.open(_old, "w").write("x")
             _bi.build_webroot([_bi.read_board(p) for p in _bi.find_boards() if not p.endswith("/b.html")], int(time.time()))
             _wr["③b漏扫的板不删·没源的照删"] = ("b.html" in _pub() and os.path.samefile(os.path.join(_bdw, "b.html"), os.path.join(_web, "b.html"))
@@ -35894,7 +35894,7 @@ console.log(JSON.stringify([rows.length===2, !!r1&&r1.tagName==='A'&&!r1.cls.inc
                                        and "什么都没写" in _o32 and _rc33 == "exit" and _same33 and "--act 里写着网址" in _o33
                                        and _rc34 == 0 and _U32 in _b34 and "写着网址" in _e35 and "写着网址" not in _e36
                                        and _open_row_url_problem([("--say", "等 CI 跑完再看")]) is None)
-            # 1023 晚 电商-基建:登记的对方群里别人说了新的 ⇒ 行上亮红、lint 报错;row 重判 ⇒ 拿掉。chat-watch 拉不到 ⇒ 板不动
+            # 1023 晚 示例-基建:登记的对方群里别人说了新的 ⇒ 行上亮红、lint 报错;row 重判 ⇒ 拿掉。chat-watch 拉不到 ⇒ 板不动
             _C40 = "oc_" + "0" * 31 + "1"
             _wr7(_b7, _src7)
             _rc40, _o40 = _run7(cmd_row, _ns_row(chat="VIP 群"))
@@ -36234,7 +36234,7 @@ console.log(JSON.stringify([rows.length===2, !!r1&&r1.tagName==='A'&&!r1.cls.inc
         BP._CACHE = _keep7
     for _k7, _grp7, _desc7 in (
             ("lint_hit", "answers", "⭐⭐ lint 真的会报「他答了,板还挂着」:答案文件里有记录、卡还在板上(报错里带可照抄的 answer 命令)"),
-            ("answers_mark_ids", "answers", "1113 --mark 列题:写题号只标那几题、标完逐题列出题干和他选了什么、没标的也列、错题号什么都不标(电商-选品 #3b90);验收通过的知会标题不截出半截括号"),
+            ("answers_mark_ids", "answers", "1113 --mark 列题:写题号只标那几题、标完逐题列出题干和他选了什么、没标的也列、错题号什么都不标(示例-选品 #3b90);验收通过的知会标题不截出半截括号"),
             ("lint_quiet", "answers", "⛔ lint 不报:连答案目录都没有 / 记录在、卡已经不在板上"),
             ("lint_bad", "answers", "⛔ 答案文件是坏 JSON / 不是字典 ⇒ lint 不报、不崩(当成没有记录)"),
             ("load_bad", "answers", "⛔ 读答案:坏 JSON / 不是字典 / 没有文件 ⇒ 都是空、不抛;判定自己抛了异常 ⇒ lint 照常跑完(这道闸不许把 lint 弄崩)"),
@@ -36276,7 +36276,7 @@ console.log(JSON.stringify([rows.length===2, !!r1&&r1.tagName==='A'&&!r1.cls.inc
         fails += (not ok)
         cases.append((ok, _grp7, _desc7, "got=%s%s" % (_z7.get(_k7), (" · 炸了=%s" % _z7["炸了"]) if "炸了" in _z7 else "")))
 
-    # ── 1007:板顶三样(那句现状可选)—— `head` 命令 + touch 时拿板顶棒次对本会话(电商-选品 v1.5:几十次 row / touch 全绿,板顶还是上一棒的)。
+    # ── 1007:板顶三样(那句现状可选)—— `head` 命令 + touch 时拿板顶棒次对本会话(示例-选品 v1.5:几十次 row / touch 全绿,板顶还是上一棒的)。
     #   ⛔ 不读真的会话注册表:进程内的用例把 `_session_ident` 整个换掉 / 直接传 sess;子进程的用例 HOME 指到临时目录,注册表是现造的。
     _HK = ('<title>zz-head 状态板</title>\n<div class="wrap">\n<header class="head">\n'
            '<div class="eyebrow"><span class="dot"></span>workline: none · main:1<span>·</span>第 <b>v1.4</b> 棒 · 10-01 从 v1.3 接 · 09-04 开线</div>\n'
@@ -36520,7 +36520,7 @@ console.log(JSON.stringify([rows.length===2, !!r1&&r1.tagName==='A'&&!r1.cls.inc
             _hz["mine"] = _mi == [True, True, False, True, False, True, False, False]
             # 读「我是谁」:现造的注册表(同一会话两份副本:归档的那份更新、没归档的那份才算数)
             _rg9 = os.path.join(_dh, "reg")
-            for _acct, _ttl, _arch, _mt in (("a1", "电商-选品 v1.4", True, 2000), ("a2", "电商-选品 v1.5", False, 1000)):
+            for _acct, _ttl, _arch, _mt in (("a1", "示例-选品 v1.4", True, 2000), ("a2", "示例-选品 v1.5", False, 1000)):
                 os.makedirs(os.path.join(_rg9, _acct, "o"))
                 _rf9 = os.path.join(_rg9, _acct, "o", "local_zz.json")
                 io.open(_rf9, "w", encoding="utf-8").write(json.dumps({"title": _ttl, "isArchived": _arch}, ensure_ascii=False))
@@ -36530,7 +36530,7 @@ console.log(JSON.stringify([rows.length===2, !!r1&&r1.tagName==='A'&&!r1.cls.inc
             _id = [_session_ident(reg_root=_rg9, sid="local_zz"), _session_ident(reg_root=_rg9, sid="local_nov"),
                    _session_ident(reg_root=_rg9, sid="local_bad"), _session_ident(reg_root=_rg9, sid="local_none"),
                    _session_ident(reg_root=_rg9, sid=""), _session_ident(reg_root=_rg9, sid="../x")]
-            _hz["ident"] = bool((_id[0]["state"], _id[0]["ver"], _id[0]["base"], _id[0]["title"]) == ("ok", "v1.5", "电商-选品", "电商-选品 v1.5")
+            _hz["ident"] = bool((_id[0]["state"], _id[0]["ver"], _id[0]["base"], _id[0]["title"]) == ("ok", "v1.5", "示例-选品", "示例-选品 v1.5")
                                 and [x["state"] for x in _id[1:]] == ["nover", "noreg", "noreg", "noenv", "noenv"])
 
             _srt = io.open(_hb, encoding="utf-8").read()
@@ -37435,7 +37435,7 @@ console.log(JSON.stringify([rows.length===2, !!r1&&r1.tagName==='A'&&!r1.cls.inc
             checks1123.append(case("#44 盖戳后旧卡和旧标记回来了，复核当场清掉",
                 restored[0] == 0 and machine_id not in restored[2] and "已清掉卡和行标记" in restored[3]
                 and "盘点结果正在归档" in restored[2] and machine_id not in (_answers_raw(page) or {}), restored))
-            # 1125 电商-基建复现：同行两张动手卡，上一张只写补充。
+            # 1125 示例-基建复现：同行两张动手卡，上一张只写补充。
             before_onecard_tests = len(checks1123)
             import shlex
             row = "r1120-16b6"
@@ -38035,14 +38035,14 @@ def _board_parser():
     p_new = sub.add_parser("new", help="生成一块带标准外壳的空板")
     p_new.add_argument("name", help="<项目>-<线名>,如 示例项目-IOS")
     p_new.add_argument("--repo", default=os.getcwd(), help="仓根(默认当前目录)")
-    p_new.add_argument("--parent", default=None, help="1110 子线投影:子线 / 单开板声明派它的那条线的板(如 电商-基建.html);卡和一句进度投影到那块板上")
+    p_new.add_argument("--parent", default=None, help="1110 子线投影:子线 / 单开板声明派它的那条线的板(如 示例-基建.html);卡和一句进度投影到那块板上")
     p_new.add_argument("--parent-row", dest="parent_row", default=None, help="父板上对应的那一行(data-ack);给了 ⇒ 那一行首屏下面放一句子线的进度")
     p_pau = sub.add_parser("pause", help="1115 给板标暂停(他说这条线 / 项目暂停了):到点该追不叫、首屏折成一句;那条线改任何一行的字自动回来")
     p_pau.add_argument("path", help="板文件")
     p_pau.add_argument("--off", action="store_true", help="摘掉暂停标记")
     p_par = sub.add_parser("parent", help="1110 子线投影:给子线 / 单开板声明 / 改 / 清掉父板(派它的那条线的板)")
     p_par.add_argument("path", help="子板文件")
-    p_par.add_argument("--set", dest="set_parent", default=None, help="父板文件名(如 电商-基建.html)")
+    p_par.add_argument("--set", dest="set_parent", default=None, help="父板文件名(如 示例-基建.html)")
     p_par.add_argument("--row", default=None, help="父板上对应的那一行(data-ack)")
     p_par.add_argument("--clear", action="store_true", help="清掉父板声明(卡不再投影)")
     p_par.add_argument("--no-touch", dest="no_touch", action="store_true", help="只改声明,不 touch")
@@ -38324,7 +38324,7 @@ def _board_parser():
     p_ret.add_argument("--dry-run", action="store_true", help="只列,不动:和 --oneoffs 一起列会收哪些;和 <板> --to 一起印会挪哪些文件(1115)")
     p_ren = sub.add_parser("rename", help="⭐ 线改名 ⇒ 板跟着改名(1026):行 / 卡 / 留档原样、硬链不断、8777 旧网址留跳转、答案 / 已读 / ▶ 跟过去")
     p_ren.add_argument("path", help="板文件")
-    p_ren.add_argument("--to", required=True, help="新线名(例:电商-投流达人)")
+    p_ren.add_argument("--to", required=True, help="新线名(例:示例-投流达人)")
     p_adopt = sub.add_parser("adopt", help="把 worktree 里被 Edit / Write 拆出来的副本收回正本(#4854)")
     p_adopt.add_argument("path", help="worktree 里那份副本")
     p_adopt.add_argument("--discard", action="store_true", help="副本里的改动不要了,只把它挂回正本")
@@ -38572,7 +38572,7 @@ def main():
                         open(p, "w", encoding="utf-8").write(_t_st)
                         print("  ⏰ 「要你的」里的过期提醒卡已撤掉(1119 起不再出;过了预计、球在你这边的行走「到点该追」叫醒本线,次日没处理他首屏标红)")
                         t = _t_st
-                # ⭐⭐ 0928(电商-基建 v1.3 转负责人 bad case):「你交代的」里标着要他拍 / 动手 / 去催的行,一行不落列进「要你的」
+                # ⭐⭐ 0928(示例-基建 v1.3 转负责人 bad case):「你交代的」里标着要他拍 / 动手 / 去催的行,一行不落列进「要你的」
                 _t_ry = _rowyou_apply(t)[0]
                 if _t_ry != t:
                     if _div_balance(_t_ry) != _div_balance(t):
@@ -38650,7 +38650,7 @@ def main():
                 # 0916:▶ 按钮的登记跟「内容有没有变」**本来就无关**,而这个 die 挡在它前面 ——
                 #      规则正本要求「动板后连跑两次 touch」⇒ 越守规矩,登记越只剩第一遍的机会。
                 _write_launch(p)
-                # 1009(电商-投流报):row / ask / answer 已经顺手 touch 过,同一条命令里再跑 touch ⇒ 每次都印下面那句「⛔ 一模一样」,
+                # 1009(示例-投流报):row / ask / answer 已经顺手 touch 过,同一条命令里再跑 touch ⇒ 每次都印下面那句「⛔ 一模一样」,
                 #   各线已经习惯性忽略它,真有问题时会一起漏掉。⇒ 上一次盖戳就在两分钟内:这是「刚盖过」,说一句、正常结束。
                 _g_prev = re.search(r'data-gen="(\d+)"', t)
                 if _g_prev and 0 <= time.time() - int(_g_prev.group(1)) <= 120:
@@ -38701,7 +38701,7 @@ def main():
                 _early, _warns = _early_warn_split(_warns, open(p, encoding="utf-8").read())
                 for _l in _early:
                     print(_l)
-            # 1028 电商-投流达人:gh 拉标签失败 ⇒ queue 拒绝生成、排队区 / 主线停在旧内容,判定照写 PASS,只在前面打一行 ⇒ 判定行自己说出来(退出码不变:网络一时不通别把每次改板都报失败)
+            # 1028 示例-投流达人:gh 拉标签失败 ⇒ queue 拒绝生成、排队区 / 主线停在旧内容,判定照写 PASS,只在前面打一行 ⇒ 判定行自己说出来(退出码不变:网络一时不通别把每次改板都报失败)
             print("%s  %s(touch 已顺手 lint,不用再单开一轮)" % (("✓ PASS" if _q_ok else "⚠ PASS(排队区 / 主线这一轮没刷新:gh 没拉到,那几段可能是旧的;gh 好了再 touch)")
                                                            if not _errs else "✗ FAIL", os.path.basename(p)))
             for _e in _errs:

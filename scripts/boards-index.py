@@ -40,7 +40,7 @@ def _is_board_file(p):
     try:
         s = open(p, encoding="utf-8", errors="ignore").read()
     except OSError:
-        # ⛔ 1122(FDE-总控 #b4e2):读不到原来回 False ⇒ 板被当成方案页、web 根里的板页被清掉(8777 404,不出声)。
+        # ⛔ 1122(客户项目甲-总控 #b4e2):读不到原来回 False ⇒ 板被当成方案页、web 根里的板页被清掉(8777 404,不出声)。
         #   和 board.py 的 _is_board_file 同一判法:读不到当板(宁可多挂)。
         return True
     body = re.sub(r"<script\b.*?</script>|<style\b.*?</style>|<!--.*?-->", " ", s, flags=re.S)
@@ -550,7 +550,7 @@ def build_webroot(boards, now):
         if fn.endswith(".html") and fn not in _keep:
             _wp = os.path.join(WEBROOT, fn)
             try:
-                # ⛔⛔ 1122(FDE-总控 #b4e2,负责人截图「右侧面板看不到 FDE-总控 板」):这一轮扫板漏了它(那时 ~/Desktop/FDE 读目录报
+                # ⛔⛔ 1122(客户项目甲-总控 #b4e2,负责人截图「右侧面板看不到 客户项目甲-总控 板」):这一轮扫板漏了它(那时 ~/Desktop/客户项目甲 读目录报
                 #   Errno 4),这里就把 web 根里它的硬链当「不再对应任何板」删了 ⇒ 8777 404、源文件链接数变 1,全程不出声。
                 #   ⇒ 还连着别的硬链(= 某处真有一份源文件)的页一律不删,说出来;板真撤了 / 改名了,源那份已不在,链接数是 1,照删。
                 if os.stat(_wp).st_nlink > 1:

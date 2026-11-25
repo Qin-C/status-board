@@ -4,7 +4,7 @@
 const fs = require('fs'), os = require('os'), path = require('path'), cp = require('child_process');
 const BOARD_PY = path.join(os.homedir(), '.claude', 'scripts', 'board.py');
 
-// ⭐ 1113(FDE-总控报):`board.py retire` 把板挪进 _retired/,8777 上原地留一页「已退场 → 去向」;state.json 里学到的 own 不会自己变。
+// ⭐ 1113(客户项目甲-总控报):`board.py retire` 把板挪进 _retired/,8777 上原地留一页「已退场 → 去向」;state.json 里学到的 own 不会自己变。
 //   ⇒ 认板时跳过退场的板:8777 上那份是去向页(<title>…(已退场)</title>,board.py _retired_page 写的)⇒ 是退场的。读不到 ⇒ 当没退场(不误杀)。
 //   board-pane-check / board-answers-inject / ask-not-on-board / board-freshness-check 都从这里取同一个判断。
 const WEB_DIR = process.env.OWN_BOARD_WEB_DIR || path.join(os.homedir(), '.claude', 'boards-web');
@@ -27,7 +27,7 @@ function ownBoard(sid, cwd) {
   }
   if (!own) return '';
   let file = path.isAbsolute(own) ? own : '';
-  if (!file) {   // 只记了文件名 ⇒ 按会话目录问 board.py 规范落点(电商板在仓里,不在 ~/.claude/boards)
+  if (!file) {   // 只记了文件名 ⇒ 按会话目录问 board.py 规范落点(示例业务板在仓里,不在 ~/.claude/boards)
     try { file = cp.execFileSync('python3', [BOARD_PY, 'path', path.basename(own).replace(/\.html$/, '')], { cwd, encoding: 'utf8', timeout: 5000, stdio: ['ignore', 'pipe', 'ignore'] }).trim().split('\n').pop(); } catch {}
   }
   if (!file || !fs.existsSync(file)) file = path.join(os.homedir(), '.claude', 'boards', path.basename(own));

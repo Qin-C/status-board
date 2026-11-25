@@ -26,7 +26,7 @@
  *   · 不做 prompt 挂点「按回复关键词猜漏挂卡」(已撤)—— 98 次抽 30:3 真、19 误、8 被无视(出处:d28742ef 10-27,卡 ask-00ee6e10;review-1027/nudge-hooks/report.md 结论「撤」)
  *   · 不做 pretool 认不出卡就一律拦 —— 21 次 8 真 13 误,误的多是「卡已在、只差卡号」;改成认得出就代填卡号放行(出处:d28742ef 10-27)
  *   · 不做「群号识别只在正则前缀里补 do / then」(1117)—— `--chat-id $c`(for 循环、同命令里 C=oc_…)照样代不进去,heredoc 正文里写脚本的那串字
- *     照样误认(11-14 FDE 线写 fde-sync.sh 那次,误报了 oc_a9451f…);改成按命令位置走一遍(shell-commands.js 的 shellCommands),7 天回放多认 3 条、少 1 条误认
+ *     照样误认(11-14 客户项目甲 线写 fde-sync.sh 那次,误报了 oc_a9451f…);改成按命令位置走一遍(shell-commands.js 的 shellCommands),7 天回放多认 3 条、少 1 条误认
  */
 const fs = require('fs'), os = require('os'), path = require('path');
 const HOME = os.homedir();
@@ -74,7 +74,7 @@ function recentCard(board, mins, now) {
   }
   return false;
 }
-// ⭐ 1022(电商-基建 v1.9 转,负责人截图:「我明明在状态板上都已经回答掉了,为什么还会弹出这种问题啊?」):
+// ⭐ 1022(示例-基建 v1.9 转,负责人截图:「我明明在状态板上都已经回答掉了,为什么还会弹出这种问题啊?」):
 //   收尾框问了一句、同时挂了卡;他在板上答了、那条线也收了卡,可之后几轮都是被后台通知 / 钩子叫醒的,没再调收尾框 ⇒ 桌面版的提问框一直挂着旧问题。
 //   规则写着「收卡时同时清提问框」,靠自觉没守住。⇒ 收尾框带 ask 时记下「问的是哪张卡」;不带 ask 的收尾框 = 提问框清掉了 ⇒ 删记录。
 //   收尾时(Stop)那张卡已经不在「要你的」里、或伺服端已有他的回答,而记录还在 ⇒ 拦一次:先调收尾框把提问框清掉。每一问只拦一次。
@@ -136,7 +136,7 @@ function candidates(text, zt) {
 function rec(sid) { return path.join(DIR, String(sid).replace(/[^\w-]/g, '') + '.json'); }
 function log(l) { try { fs.mkdirSync(path.dirname(LOG), { recursive: true }); fs.appendFileSync(LOG, new Date().toISOString() + ' ' + l + '\n'); } catch (_) {} }
 
-// ⭐ 1023 晚(电商-基建转负责人:「我这个事情我要还要回复那个示例群成员,这事情怎么就直接被淹没掉了?也没放在状态板上」):
+// ⭐ 1023 晚(示例-基建转负责人:「我这个事情我要还要回复那个示例群成员,这事情怎么就直接被淹没掉了?也没放在状态板上」):
 //   板上的行可以登记对方群(`board.py row --chat oc_…`),群里别人再说话那一行就亮红(board.py chat-watch,本机每 10 分钟)——
 //   但得先有人登记。⇒ 收尾时看这一轮(转录尾 400KB)Bash 里跑过的 `lark-cli im … --chat-id oc_…`:板上哪儿都没出现这个群
 //   ⇒ 记下,他下一次发话时提示一次(每个群每个会话只提一次;跟哪件事都无关的群,模型判了不动就行)。零 token、不拦。
@@ -228,7 +228,7 @@ function onPrompt(input) {
   try { fs.unlinkSync(rec(sid)); } catch (_) {}                      // 1027 撤:按关键词猜漏挂卡不再贴(撤之前记下的旧疑句一起清掉)
 }
 
-// ⭐ 1020 晚(电商-基建 v1.9 转来,负责人:「你现在要我在对话里确认的事情为什么不在状态板上?你这状态板为什么又腐烂了?」):
+// ⭐ 1020 晚(示例-基建 v1.9 转来,负责人:「你现在要我在对话里确认的事情为什么不在状态板上?你这状态板为什么又腐烂了?」):
 //   收尾框(mcp__ccd_turn__wrap_up)的 ask 字段 = 正式要他拍板 / 动手 —— 不用像扫回复那样猜,一出现就是要他做事 ⇒ 调用前核一次:
 //   本线板「要你的」里找不到对应的卡(字面重合不到三成五,也没写 ask-xxxxxxxx 卡号)⇒ 拒这次调用,先挂卡;本会话还没板 ⇒ 先建板。
 //   挂了卡、只是说法不同 ⇒ 在 ask 里带上卡号(ask-xxxxxxxx)就放行。PreToolUse 挂点:matcher = mcp__ccd_turn__wrap_up,命令带 pretool。

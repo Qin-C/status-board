@@ -1,6 +1,6 @@
 ---
 title: 样例·内容是编的｜逐品选是否涨价
-line: 电商·选品
+line: 示例业务·选品
 date: 2026-11-25
 status: 提议中
 pick_question: 哪些商品申请涨价？

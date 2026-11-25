@@ -272,7 +272,7 @@ details[open]>summary::before{content:"▾ "}
 details table{width:100%;border-collapse:collapse;font-size:14px}
 details td{padding:7px 10px;border-bottom:1px solid var(--line);vertical-align:top}
 details td:first-child{white-space:nowrap;width:1%;font-variant-numeric:tabular-nums}
-/* 0928(电商-基建转负责人「完全没有办法读」):第一列是「短标签」列才不换行;作者在第一列放了一整段话 ⇒ kit 给它加 td-wrap,
+/* 0928(示例-基建转负责人「完全没有办法读」):第一列是「短标签」列才不换行;作者在第一列放了一整段话 ⇒ kit 给它加 td-wrap,
    放开换行、占三分之一宽 —— 不然整行被撑出卡外、其余列被挤没。放在上面几条之后,同权重时它赢 */
 .card td.td-wrap,.body td.td-wrap,details td.td-wrap{white-space:normal;width:34%;min-width:8em}
 .grp{font-size:13px;font-weight:700;color:var(--dim);padding-top:14px!important;letter-spacing:.04em}
@@ -1040,7 +1040,7 @@ a.accept-open-link{color:#7a5ad8;border-color:#d9cff7;background:#f6f3ff}
 /* 1114 验收卡新写法(data-accept-fmt="2"):「你交代的 → 现在」一件一行不折叠;入口按钮旁一句看什么 */
 .accept-got{display:flex;flex-direction:column;gap:4px;margin:6px 0 8px;padding:10px 14px;border-radius:8px;background:#f6f3ff;border:1px solid #e4dcfa;font-size:14px;line-height:1.55}
 .accept-got-i{display:block}
-.accept-small{margin-top:8px}   /* 1116 小修卡整块(电商-基建 #a5b9、AI Harness #5e21:漏定义,挂卡即 lint 红)*/
+.accept-small{margin-top:8px}   /* 1116 小修卡整块(示例-基建 #a5b9、AI Harness #5e21:漏定义,挂卡即 lint 红)*/
 .accept-small-tip{margin:4px 0 0;color:#6b6b80;font-size:13px}   /* 1116 小修卡 */
 .accept-small-i{position:relative;padding:4px 64px 4px 0;border-bottom:1px dashed #e4dcfa}
 .accept-small-i:last-child{border-bottom:none}
@@ -1059,7 +1059,7 @@ a.accept-got-t:hover{text-decoration:underline}
 .accept-entry .accept-open-link{margin:0}
 .accept-entry .deep{margin:0}
 .accept-check{font-size:13px;color:var(--ink-2)}
-/* 1115 FDE #c41e:单行验收的第 2–4 条结果 · 「还要你做」一块;sw-drop:「为什么不做」一块 */
+/* 1115 客户项目甲 #c41e:单行验收的第 2–4 条结果 · 「还要你做」一块;sw-drop:「为什么不做」一块 */
 .accept-got-more .accept-got-a{margin-left:0}
 .accept-todo{margin:0 0 8px;padding:8px 14px;border-radius:8px;background:#fff8e8;border:1px solid #f1dfb2;font-size:13.5px;line-height:1.55}
 .accept-todo b{display:block;color:#9a6a00;font-weight:600;font-size:12px;margin-bottom:2px}

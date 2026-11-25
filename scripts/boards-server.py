@@ -232,7 +232,7 @@ class Handler(http.server.SimpleHTTPRequestHandler):
             out["submitted"] = n_sub                       # 1028:交了几题,调用方可以核「交的 = 发的」
         return self._send_bytes(200, json.dumps(out, ensure_ascii=False).encode("utf-8"))
 
-    # ⭐ 1022(电商-选品 v2.2 转,负责人 15:55:「你这两个证据图我根本没有办法保存啊……我右键只有复制啊」):
+    # ⭐ 1022(示例-选品 v2.2 转,负责人 15:55:「你这两个证据图我根本没有办法保存啊……我右键只有复制啊」):
     #   publish 出来的页面图是 base64 内嵌的,桌面版内置浏览器右键没有「另存为」,下载也不一定走得通;他要把图传到 示例平台 后台申诉。
     #   ⇒ 伺服发出的每个 HTML 末尾挂一小段脚本:鼠标停在图上,右上角浮出「⬇ 存到下载」(全页只有一个浮动按钮,
     #     几千张缩略图的页也不加一堆 DOM);点了由伺服把图写进 ~/Downloads(不靠浏览器的下载)。磁盘上的页面一个字不动。
@@ -302,7 +302,7 @@ class Handler(http.server.SimpleHTTPRequestHandler):
     #   `board.py answers` 读到标记就列出图片在本机的完整路径,AI 用 Read 打开看。图只在本机,不传任何外部服务。
     ANS_IMG_JS = (
         "(function(){if(window.__qai)return;window.__qai=1;var RE=/〔图:([\\w.-]+)〕/g;"
-        # 1113 晚负责人(经电商-选品 #a4e9):图点开回不去 ⇒ 每一页同一个当前页大图层(状态板 kit 的链接兜底、卡上的图、贴图缩略图都用它)
+        # 1113 晚负责人(经示例-选品 #a4e9):图点开回不去 ⇒ 每一页同一个当前页大图层(状态板 kit 的链接兜底、卡上的图、贴图缩略图都用它)
         "window.__qLightbox=function(src,alt){var o=document.createElement('div');o.className='q-lightbox';o.setAttribute('role','dialog');o.setAttribute('style','position:fixed;top:0;left:0;right:0;bottom:0;z-index:2147483000;background:rgba(15,18,24,.9);display:flex;align-items:center;justify-content:center;overflow:auto;cursor:zoom-out;padding:44px 16px 40px;box-sizing:border-box');var im=document.createElement('img');im.src=src;im.alt=alt||'';var fit='max-width:100%;max-height:100%;object-fit:contain;cursor:zoom-in;border-radius:6px;background:#fff;box-shadow:0 8px 40px rgba(0,0,0,.5);margin:auto';im.setAttribute('style',fit);var full=false;var x=document.createElement('button');x.type='button';x.textContent='× 关闭';x.className='q-lightbox-x';x.setAttribute('style','position:fixed;top:10px;right:12px;padding:6px 14px;border-radius:999px;border:1px solid rgba(255,255,255,.5);background:rgba(255,255,255,.12);color:#fff;font:600 14px/18px -apple-system,sans-serif;cursor:pointer');var h=document.createElement('div');h.textContent='点图看原尺寸 · 点空白处或按 Esc 关闭';h.setAttribute('style','position:fixed;bottom:10px;left:0;right:0;text-align:center;color:#fff;opacity:.85;font:13px -apple-system,sans-serif;pointer-events:none');function kd(e){if(e.key==='Escape'){e.preventDefault();e.stopPropagation();close();}}function close(){document.removeEventListener('keydown',kd,true);if(o.parentNode)o.parentNode.removeChild(o);}im.addEventListener('click',function(e){e.stopPropagation();full=!full;im.setAttribute('style',full?'max-width:none;max-height:none;cursor:zoom-out;border-radius:6px;background:#fff;margin:auto':fit);o.style.alignItems=full?'flex-start':'center';o.style.justifyContent=full?'flex-start':'center';});o.addEventListener('click',close);x.addEventListener('click',function(e){e.stopPropagation();close();});document.addEventListener('keydown',kd,true);o.appendChild(im);o.appendChild(x);o.appendChild(h);document.body.appendChild(o);return o;};"
         "function strip(ta){var s=ta.__qs;if(!s){s=document.createElement('div');s.className='q-ans-imgs';"
         "s.setAttribute('style','display:flex;flex-wrap:wrap;gap:6px;margin:6px 0');ta.parentNode.insertBefore(s,ta.nextSibling);ta.__qs=s;}return s;}"
@@ -334,7 +334,7 @@ class Handler(http.server.SimpleHTTPRequestHandler):
         "document.addEventListener('input',function(e){if(e.target&&e.target.tagName==='TEXTAREA')paint(e.target);},true);"
         "function scan(){document.querySelectorAll('textarea').forEach(paint);}scan();setInterval(scan,1500);})();"
     )
-    # ⭐ 1026 晚(电商-选品 v2.6 转,负责人 21:5x):「我在方案板里面我已经写完了，但没有那个按钮，就说就是彻底要交给你，
+    # ⭐ 1026 晚(示例-选品 v2.6 转,负责人 21:5x):「我在方案板里面我已经写完了，但没有那个按钮，就说就是彻底要交给你，
     #   所以它会一直显示还在写没交，但实际上我这边根本就没有提交按钮。」—— 0db1ef7「写完才交」只给板上的回复框加了按钮,
     #   方案页只按停手时间算交(写了字 10 分钟),而 answers 让他点的「交给这条线」在方案页上不存在。
     #   ⇒ 方案页右下(「都定了」「生成回复」旁边)加「交给这条线」:先失焦让 plan.js 把手上的字存下,再把这页答过的题记成交了。
@@ -381,7 +381,7 @@ class Handler(http.server.SimpleHTTPRequestHandler):
         "var o=d.querySelector('input[type=radio][data-other]');if(o){o.checked=true;pk[d.id]=1;}},true);"
         "load();})();"
     )
-    # ⭐ 1027(电商-投流达人 v1.9 转,负责人原话:「我必须得翻到下面的问题页才能开写回复……我回复可能是基于整个方案去回复的」):
+    # ⭐ 1027(示例-投流达人 v1.9 转,负责人原话:「我必须得翻到下面的问题页才能开写回复……我回复可能是基于整个方案去回复的」):
     #   方案页的回复框只长在页底每道题里 ⇒ 他边看正文边写,得先翻到底、再翻回来看。
     #   ⇒ 右下「交给这条线」旁边加「✍ 写回答」:点开一个浮在右下角的框(页面照常滚),上面选「答哪一题」,默认「整份方案(总的补充)」。
     #     选某一题 ⇒ 字直接写进那一题的补充框(触发 plan.js 原有的自动存,两边是同一份);选整份方案 ⇒ 记成这一页一条 id=_overall 的回答。
@@ -664,7 +664,7 @@ if(d){var t=d.querySelector('h3');if(t&&t.nextSibling)d.insertBefore(el,t.nextSi
         return super().do_GET()
 
     def _open_external(self, json):
-        """⭐ 1113 负责人(经电商-基建 #a7f3):外部网站(主站 example.invalid 等)在 App 内置面板里打开卡很久、加载不出来 ⇒
+        """⭐ 1113 负责人(经示例-基建 #a7f3):外部网站(主站 example.invalid 等)在 App 内置面板里打开卡很久、加载不出来 ⇒
         板上点外部链接时,kit 发 POST /_open,这里用系统默认浏览器(他的是 ego)打开。
         只认本机页面发来的(Origin / Referer 是 127.0.0.1 / localhost / *.localhost),只认 http / https,别的一律拒。"""
         import subprocess

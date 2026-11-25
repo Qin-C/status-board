@@ -179,7 +179,7 @@ _BAREURL = re.compile(r"https?://[^\s)）」』]+")
 _SAFE_URL = re.compile(r"^(https?:|mailto:|#|/|\.|[^:]*$)", re.I)
 
 
-# 依据: 11-13 电商-基建满屏 base64 实例
+# 依据: 11-13 示例-基建满屏 base64 实例
 _VISIBLE_BASE64 = re.compile(r"[A-Za-z0-9+/=]{200,}")
 # 依据: 11-13 方案页仅允许不含脚本的常见图片 data URI。
 _IMAGE_DATA = re.compile(r"data:image/(?:png|jpeg|gif|webp);base64,([A-Za-z0-9+/]+={0,2})", re.I)
